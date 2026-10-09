@@ -32,7 +32,8 @@ Tick items as they are done. Keep lessons in NOTES.md.
   - [x] CODE_2 renderer -> src/view.c + view.h (25 functions, 23 byte-exact; 01ba and 1d81 differ only in the parked `mov ax,X; mov bx,ax` switch selector, 2 bytes each). Compare: `tools/build.sh && python3 -I tools/cmpobj.py run/build/VIEW.OBJ orig/MM3.EXE 5230 5`; per-function asm diff `tools/fndiff.py run/build/VIEW.OBJ 5230 OOOO`
   - [x] CODE_4 scene.c -> src/scene.c + scene.h (14 functions, 14/14 byte-exact incl. the 6.5 KB tile scan 0b35 that Ghidra cannot decompile). Compare: `python3 -I tools/cmpobj.py run/build/SCENE.OBJ orig/MM3.EXE b660 9`
   - [x] CODE_3 events.c -> src/events.c + events.h (13 functions, 12/13 byte-exact; the 7 KB script interpreter 05d8 differs only by one 47-byte tail merge BCC performs in our build but not in the original; BCC's -O tail-merge pass was reverse-engineered and simulated (NOTES.md), no source spelling found that reproduces the original's merge history — parked). Compare: `python3 -I tools/cmpobj.py run/build/EVENTS.OBJ orig/MM3.EXE 9030 8`; per-function `python3 -I tools/fndiff.py run/build/EVENTS.OBJ 9030 OOOO`
-  - [ ] Next: CODE_8 mazeio.c, CODE_1 main.c, then overlays (results/modules.tsv)
+  - [x] CODE_8 mazeio.c -> src/mazeio.c + mazeio.h (29 functions, 29/29 byte-exact: clock strings, key/mouse input loop 03aa, roster + save-slot file I/O). Compare: `python3 -I tools/cmpobj.py run/build/MAZEIO.OBJ orig/MM3.EXE 15110 7`; per-function `python3 -I tools/fndiff.py run/build/MAZEIO.OBJ 15110 OOOO`
+  - [ ] Next: CODE_1 main.c, then overlays (results/modules.tsv)
   - [ ] Parked: events.c 05d8 tail merge (47 bytes); view.c 01ba/1d81 switch selector (2 bytes each)
 - [ ] Track progress: scripts/progress.py reporting matched bytes / total
 - [ ] Link everything with original segment order; compare full EXE (header, relocs, overlay) == orig/MM3.EXE

@@ -107,6 +107,16 @@
 - `if (x != K) goto A; goto B;` vs `if (x == K) goto B; goto A;` flip jz/jnz; copy the original condition polarity.
 - Tail merging (-O) is aggressive and *non-local* — see "BCC 2.0 -O tail merge, reverse-engineered" below for the actual algorithm.
 
+## BCC 2.0 codegen, learned on the input/file module (mazeio.c)
+- Byte tests: u8 tested alone or with `!` -> `mov al; mov ah,0; or ax,ax`; `char` tested plain -> `cmp byte,0`; `char` with `!` -> `mov al; cbw; or ax,ax`; a u8 as a later `&&` operand -> `cmp byte`. `if (!u8) return 0;` + loop + `return 0;` gives `or ax,ax; jnz; jmp Lret0` with the two returns merged.
+- `x - 8` -> `add ax,0xfff8`; a `sub ax,N` in front of a switch is case-range normalisation: write `switch (x) { case 8: ... case 15: }`, not `switch (x - 8)`.
+- `(h -= 12) == 0` reuses the sub flags (no `or ax,ax`). `++g % 4 + 1` on a u8 -> `mov al; inc al; mov [g],al; mov ah,0; ... idiv`. `g = g + n` on a char -> `mov al; add al,n; mov`.
+- Two `if (A) return i - 1; if (B) return i - 1;` tail-merge into `jng L; jmp Lcopy`; `if (A || B) return i - 1;` does not. `>= 0x95` not `> 0x94` (BCC does not rewrite constants).
+- Sparse-switch *table* is sorted by value, but case *bodies* are emitted in source order; the no-match path jumps to the code after the switch. Reorder case bodies (and end them with `continue`/`break`/`return` as the original does) until the body layout matches; a `default: return k;` emits an extra `jmp` stub versus `}` followed by `return k;`.
+- Far-pointer args from near data: `push ds; mov ax,off; push ax` means the parameter is `far *`. Pointer-compare against a global array `g_c522 == g_03e4` -> `cmp word [0xc522],0x3e4`.
+- A string literal containing hex escapes followed by hex digits must be split: `"\13" "000"`.
+- Ghidra MCP: decompile with GET `localhost:8091/decompile_function?address=2511:0007` (POST forms are rejected). `DAT_3145_X` -> `g_(X+0x8d60)`.
+
 ## BCC 2.0 -O tail merge, reverse-engineered (BCC.EXE overlay ovr_0dc3)
 - Finding it: run BCC twice in DOSBox-X (GDB stub `gdbserver=true`, QMP `debug-break-on-exec`), snapshot DS at the
   first `open("t9.c")` with and without `-O`, diff → flag byte DS:1703 (-O0/1/2 table at image 0xf9ee; `-O` == `-O1`,
