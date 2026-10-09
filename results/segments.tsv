@@ -1,0 +1,49 @@
+block	start	size	prologues	retf	retn	asm_hints	strings
+CODE_0	1000:0000	19427	146	145	101	rep movs:15 out:27 in:202 int10:9 int21:56 cli:84 sti:74 mov es/ds:18	%s %s %02d %02d:%02d:%02d %4d | COMSPEC | .$$$ |          !!!!!                   | COMPAQ | (null) | print scanf : floating point formats not linked
+CODE_1	14be:0003	1613	3	4	10	out:4 in:11 int21:6 int33:1 cli:7 sti:3 mov es/ds:2	timer.drv | logy5.raw | control.raw | copy.bin | mouse.icn | mm3theme.m
+CODE_2	1523:0000	15880	25	25	0	out:11 in:142 cli:64 sti:9	
+CODE_3	1903:0008	9777	13	19	19	out:76 in:79 cli:36 sti:9	The Arena | Entering | Leaving | What's the Password?
+CODE_4	1b66:0009	11678	14	16	5	out:21 in:149 cli:6 sti:114	
+CODE_5	1e40:0007	8183	1	1	6	out:11 in:91 cli:3 sti:19	
+CODE_6	203f:000e	8434	2	2	0	out:5 in:14 cli:13 sti:24	
+CODE_7	224f:0000	11303	9	37	9	rep movs:2 out:4 in:15 int10:4 int21:38 cli:5 sti:2 mov es/ds:6	
+CODE_8	2511:0007	6054	29	31	1	out:2 in:106 cli:14 sti:10	%02d | %02u:%02u:%02u | maze.nam | maze.chr | maze.pty | out0.spl | out1.spl | out2.spl | out3.spl | maze%02u.dat
+CODE_9	268b:000d	225	1	12	1	in:1	
+CODE_10	2699:000e	4706	14	14	56	rep movs:3 out:8 in:22 int21:19 cli:8 sti:6 mov es/ds:37	
+CODE_11	27c0:0000	272	0	0	0		
+CODE_12	27d1:0000	32	0	0	0		
+CODE_13	27d3:0000	16	0	0	0		
+CODE_14	27d4:0000	16	0	0	0		
+CODE_15	27d5:0000	80	0	0	0		
+CODE_16	27da:0000	384	0	0	0	out:1	
+CODE_17	27f2:0000	176	0	0	0	sti:1	
+CODE_18	27fd:0000	48	0	0	0		
+CODE_19	2800:0000	96	0	0	0		
+CODE_20	2806:0000	96	0	0	0		
+CODE_21	280c:0000	160	0	0	0	out:1 cli:1	
+CODE_22	2816:0000	176	0	0	0	in:1	
+CODE_23	2821:0000	144	0	0	0		
+CODE_24	282a:0000	112	0	0	0		
+CODE_25	2831:0000	128	0	0	0	cli:1 sti:1	
+CODE_26	2839:0000	160	0	0	0		
+CODE_27	2843:0000	480	0	0	1	in:1 sti:1	
+CODE_28	2861:0000	96	0	0	0		
+CODE_29	2867:0000	128	0	1	0		
+CODE_30	286f:0000	36144	0	5	9	out:14 in:10 cli:10 sti:6	
+CODE_31	3142:0000	32	0	0	0		
+CODE_32	3144:0000	16	0	0	0		
+CODE_33	3145:0000	25584	0	0	0		
+CODE_34	3784:0000	128	0	0	0		
+OVR_17f2	408f:0000	8291	27	26	9	out:125 in:57 int10:3 cli:8 sti:4	C:\> | del boss.$$$ | pow%d.icn | combat.icn | mm3.cc | Alert! | mm3theme.m | itit0.vga | itit1.vga | itit2.vga
+OVR_17fd	4296:0000	8953	2	1	1	out:516 in:10 cli:4 sti:2	cyber.m | outh.raw | outa.vga | outb.vga | outc.vga | outd.vga | inh.raw | ina.vga | inb.vga | inc.vga
+OVR_1800	44c6:0000	8424	12	17	7	out:19 in:142 cli:22 sti:13	POOLG | confirm2.icn
+OVR_1806	46d5:0000	5988	11	13	0	out:8 in:43 cli:12 sti:19	UnAble | Paid | Left | Which Map (1-64) - Current = %u | Maze %d is not within my reach! | jester.bin | Joke of the Day | combat.m | The Arena | %s.mon
+OVR_180c	484c:0000	8292	23	34	1	out:19 in:109 cli:19 sti:26	award.bin | back.raw | %lu mil | esc.icn | global.icn | gargoyle.brd | grabber.brd | bat.brd | fecp.brd | protect.icn
+OVR_1816	4a53:0000	8339	28	27	0	out:17 in:135 cli:49 sti:10	Too dangerous to rest here! | Some Chars may die. Rest anyway? | Hit Pts and Spell Pts restored. | confirm.icn | cpanel.icn | No Loading Allowed in Combat! | *.mm3 | No Saving Allowed in Combat! | Are you sure you want to quit? | Are you sure you want Mr. Wizard's Help?
+OVR_1821	4c5d:0000	8673	20	23	7	out:34 in:90 int21:1 cli:37 sti:6	maze%02u.bin | Max Monsters Exceeded. (%u - %u) | Max Objects Exceeded. (%u- %u) | text%02u.maz | %s.pic | %s.mon | esc.icn | Too dangerous to dismiss here! | You cannot dismiss your last character! | scroll.icn
+OVR_182a	4e7c:0000	8559	15	18	10	out:81 in:56 cli:36 sti:23	quest.bin | train.icn | Come back when you're | You have learned all we can | You don't know any spells... | Not a spell caster... | scroll.icn | Spell Pts | Gold | %s  Do you wish to purchase 
+OVR_1831	5093:0000	8788	18	23	5	out:104 in:127 cli:22 sti:15	%s.out | train2.out | train3.out | train4.out | guild2.out | frame.out | confirm2.icn | bank.m | bank.icn | bank2.icn
+OVR_1839	52b9:0000	8741	23	30	2	out:16 in:72 cli:26 sti:28	
+OVR_1843	54dc:0000	8346	88	90	1	out:6 in:128 cli:22 sti:8	spfx9.icn | element.icn | Name | lloyds.icn | cast.icn | detctmon.icn
+OVR_1861	56e6:0000	8484	12	16	5	out:22 in:43 cli:33 sti:7	%s is not equippable! | %shas no special abilities! | %s needs to be equipped to be used! | Permanently discard %s? | The %s is necessary and cannot be discarded! | Sell %s for %lu gold? | We have no need of this %s! | That item is not broken! | Buy %s for %lu gold? | None
+OVR_1867	58f9:0000	8709	18	21	6	out:53 in:59 cli:29 sti:9	equip.icn | %s.icn | view.icn | Identify | %s %s for %lu gold? | %s%s%s%s%s

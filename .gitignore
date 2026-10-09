@@ -1,0 +1,11 @@
+gog/
+toolchain/
+orig/
+ghidra/proj/
+ghidra/*.log
+run/game/
+run/capture/
+run/build/*
+!run/build/BUILD.BAT
+tools/__pycache__/
+.DS_Store

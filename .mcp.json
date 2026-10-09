@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ghidra": {
+      "command": "/Users/felix/.local/bin/bridge-mcp-ghidra",
+      "env": { "GHIDRA_MCP_URL": "http://127.0.0.1:8091" }
+    }
+  }
+}

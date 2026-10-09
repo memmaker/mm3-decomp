@@ -1,0 +1,571 @@
+lib	module	seg	size	masked	matches	first	publics
+C0M.OBJ	c0.ASM	_TEXT	576	124	1	root+00000	__MMODEL@root+0023e _abort@root+00226 __restorezero@root+001ae __exit@root+00133 DGROUP@@root+0023c __exitclean@root+00113
+CM.LIB	ACCESS	_TEXT	55	6	1	root+00275	_access@root+00275
+CM.LIB	ASSERT	_TEXT	34	10	0	-	___assertfail
+CM.LIB	ATEXIT	_TEXT	45	10	1	root+002ac	_atexit@root+002ac
+CM.LIB	BCD1	_TEXT	384	46	0	-	__BCD_POW10 __BCD_LOG10 __BCD_TOBINARY __BCD_TODECIMAL
+CM.LIB	BSEARCH	_TEXT	97	0	0	-	_bsearch
+CM.LIB	CALLOC	_TEXT	81	10	0	-	_calloc
+CM.LIB	CGETS	_TEXT	156	24	0	-	_cgets
+CM.LIB	CHMOD	_TEXT	74	8	0	-	_chmod
+CM.LIB	CLEARERR	_TEXT	15	0	0	-	_clearerr
+CM.LIB	CLOSE	_TEXT	45	8	1	root+002d9	_close@root+002d9
+CM.LIB	CLOSEALL	_TEXT	71	6	0	-	_fcloseall
+CM.LIB	CLREOL	_TEXT	46	8	0	-	_clreol
+CM.LIB	CLRSCR	_TEXT	41	16	1	root+00306	_clrscr@root+00306
+CM.LIB	COLOR	_TEXT	76	18	1	root+0032f	_textcolor@root+0032f _textattr@root+0035d _highvideo@root+00368 _normvideo@root+00374 _lowvideo@root+0036e _textbackground@root+00344
+CM.LIB	CPRINTF	_TEXT	329	66	1	root+0037b	_cprintf@root+004ae __CPUTN@root+0037b
+CM.LIB	CPUTS	_TEXT	25	6	1	root+004c4	_cputs@root+004c4
+CM.LIB	CSCANF	_TEXT	29	6	0	-	_cscanf
+CM.LIB	CTIME	_TEXT	2305	274	1	root+004dd	_gmtime@root+00702 _strftime@root+00970 _localtime@root+0071b _ctime@root+00777 _asctime@root+00753 _mktime@root+0091a
+CM.LIB	CTRLBRK	_TEXT	76	18	0	-	_ctrlbrk
+CM.LIB	CURSOR	_TEXT	139	6	1	root+00dde	__setcursortype@root+00dde
+CM.LIB	DOSCMD	_TEXT	185	12	0	-	__DOSCMD
+CM.LIB	DOSENV	_TEXT	232	20	1	root+00e69	__DOSENV@root+00e69
+CM.LIB	EXECL	_TEXT	26	4	0	-	_execl
+CM.LIB	EXECLE	_TEXT	43	4	0	-	_execle
+CM.LIB	EXECLP	_TEXT	29	4	0	-	_execlp
+CM.LIB	EXECLPE	_TEXT	44	4	0	-	_execlpe
+CM.LIB	EXECV	_TEXT	25	4	0	-	_execv
+CM.LIB	EXECVE	_TEXT	27	4	0	-	_execve
+CM.LIB	EXECVP	_TEXT	28	4	0	-	_execvp
+CM.LIB	EXECVPE	_TEXT	28	4	0	-	_execvpe
+CM.LIB	EXIT	_TEXT	38	10	1	root+00f51	_exit@root+00f52
+CM.LIB	FBRK	_TEXT	300	62	1	root+00f77	__brk@root+00ff7 __sbrk@root+01036
+CM.LIB	FCLOSE	_TEXT	128	18	1	root+010a3	_fclose@root+010a3
+CM.LIB	FCORELFT	_TEXT	82	10	0	-	_farcoreleft
+CM.LIB	FFLUSH	_TEXT	130	8	1	root+01123	_fflush@root+01123
+CM.LIB	FFMALLOC	_TEXT	18	4	1	ovr+0df3c	__ffarmalloc@ovr+0df3c
+CM.LIB	FGETPOS	_TEXT	41	4	0	-	_fgetpos
+CM.LIB	FGETS	_TEXT	106	4	0	-	_fgets
+CM.LIB	FLUSHALL	_TEXT	56	6	1	root+011a5	_flushall@root+011a5
+CM.LIB	FNMERGE	_TEXT	118	12	0	-	_fnmerge
+CM.LIB	FNSPLIT	_TEXT	532	46	0	-	_fnsplit
+CM.LIB	FOPEN	_TEXT	492	34	1	root+011dd	_freopen@root+0137b _fdopen@root+0139f _fopen@root+0135d
+CM.LIB	FPRINTF	_TEXT	22	4	0	-	_fprintf
+CM.LIB	FPUTS	_TEXT	45	6	0	-	_fputs
+CM.LIB	FREAD	_TEXT	308	10	1	root+013c9	_fread@root+014b0
+CM.LIB	FSCANF	_TEXT	29	6	0	-	_fscanf
+CM.LIB	FSEEK	_TEXT	282	12	1	root+014fd	_ftell@root+015d4 _fseek@root+0156c
+CM.LIB	FSETPOS	_TEXT	29	4	0	-	_fsetpos
+CM.LIB	FTIME	_TEXT	177	30	0	-	_ftime
+CM.LIB	FWRITE	_TEXT	76	4	1	root+01617	_fwrite@root+01617
+CM.LIB	GETCBRK	_TEXT	27	0	0	-	_setcbrk _getcbrk
+CM.LIB	GETCWD	_TEXT	122	24	0	-	_getcwd
+CM.LIB	GETDATE	_TEXT	38	0	1	root+01663	_getdate@root+01663 _gettime@root+01676
+CM.LIB	GETPASS	_TEXT	136	28	0	-	_getpass
+CM.LIB	GETPSP	_TEXT	7	0	0	-	_getpsp
+CM.LIB	GETS	_TEXT	101	14	0	-	_gets
+CM.LIB	GETSWIT	_TEXT	23	0	1	root+01689	_setswitchar@root+01693 _getswitchar@root+01689
+CM.LIB	GETW	_TEXT	93	8	0	-	_getw
+CM.LIB	GEXIT	_TEXT	14	4	0	-	__graphexit
+CM.LIB	GFREEMEM	_TEXT	14	4	0	-	__graphfreemem
+CM.LIB	GGETMEM	_TEXT	16	4	0	-	__graphgetmem
+CM.LIB	GOTOXY	_TEXT	80	14	1	root+016a0	_gotoxy@root+016a0
+CM.LIB	GPTEXT	_TEXT	149	10	0	-	_puttext _gettext
+CM.LIB	GREGISTR	_TEXT	36	8	0	-	_registerbgidriver _registerbgifont
+CM.LIB	INSLINE	_TEXT	60	20	0	-	_insline _delline
+CM.LIB	KEEP	_TEXT	20	4	0	-	_keep
+CM.LIB	LABS	_TEXT	40	0	0	-	_labs
+CM.LIB	LOADPROG	_TEXT	151	28	0	-	__LoadProg
+CM.LIB	LOCALE	_TEXT	50	10	0	-	_setlocale _localeconv
+CM.LIB	LSEARCH	_TEXT	135	4	0	-	_lfind _lsearch
+CM.LIB	MEMICMP	_TEXT	75	8	0	-	_memicmp
+CM.LIB	MKTEMP	_TEXT	200	14	0	-	_mktemp
+CM.LIB	MOVETEXT	_TEXT	166	10	1	root+016f0	_movetext@root+016f0
+CM.LIB	MULTBYTE	_TEXT	197	0	0	-	_mbtowc _mbstowcs _mblen _wcstombs _wctomb
+CM.LIB	PEEK	_TEXT	32	0	0	-	_peekb _peek
+CM.LIB	PERROR	_TEXT	58	20	0	-	_perror
+CM.LIB	POKE	_TEXT	38	0	0	-	_pokeb _poke
+CM.LIB	PRINTF	_TEXT	23	6	0	-	_printf
+CM.LIB	PUTC	_TEXT	621	72	1	root+01796	__fputc@root+01796 _fputchar@root+018b3 _fputc@root+017af __FPUTN@root+018c8
+CM.LIB	PUTCH	_TEXT	19	2	0	-	_putch
+CM.LIB	PUTS	_TEXT	67	14	0	-	_puts
+CM.LIB	PUTW	_TEXT	90	8	0	-	_putw
+CM.LIB	RAND	_TEXT	55	16	0	-	_srand _rand
+CM.LIB	REWIND	_TEXT	35	4	1	root+01a03	_rewind@root+01a03
+CM.LIB	SCANF	_TEXT	30	8	0	-	_scanf
+CM.LIB	SCREEN	_TEXT	430	30	1	root+01a26	__VALIDATEXY@root+01b91 __SCREENIO@root+01b53
+CM.LIB	SCROLL	_TEXT	216	14	1	root+01bd4	__SCROLL@root+01bf7
+CM.LIB	SETBUF	_TEXT	38	4	0	-	_setbuf
+CM.LIB	SETMODE	_TEXT	97	8	0	-	_setmode
+CM.LIB	SETUPIO	_TEXT	113	32	1	root+01cac	__setupio@root+01cac
+CM.LIB	SETVBUF	_TEXT	216	32	1	root+01d1d	_setvbuf@root+01d1d
+CM.LIB	SIGNAL	_TEXT	987	146	0	-	_raise _signal
+CM.LIB	SLEEP	_TEXT	99	12	0	-	_sleep
+CM.LIB	SPAWNL	_TEXT	68	8	0	-	_spawnl
+CM.LIB	SPAWNLE	_TEXT	86	8	0	-	_spawnle
+CM.LIB	SPAWNLP	_TEXT	74	8	0	-	_spawnlp
+CM.LIB	SPAWNLPE	_TEXT	88	8	0	-	_spawnlpe
+CM.LIB	SPAWNV	_TEXT	67	8	0	-	_spawnv
+CM.LIB	SPAWNVE	_TEXT	71	8	0	-	_spawnve
+CM.LIB	SPAWNVP	_TEXT	73	8	0	-	_spawnvp
+CM.LIB	SPAWNVPE	_TEXT	73	8	0	-	_spawnvpe
+CM.LIB	SPRINTF	_TEXT	97	12	1	root+01df5	_sprintf@root+01e1d _vsprintf@root+01e3a
+CM.LIB	SSCANF	_TEXT	102	12	1	root+01e56	_vsscanf@root+01e9f _sscanf@root+01e81
+CM.LIB	STIME	_TEXT	135	24	1	root+01ebc	_time@root+01ef6 _stime@root+01ebc
+CM.LIB	STPCPY	_TEXT	41	8	1	root+01f43	_stpcpy@root+01f43
+CM.LIB	STRCOLL	_TEXT	18	4	1	ovr+0df3c	_strcoll@ovr+0df3c
+CM.LIB	STRCSPN	_TEXT	42	0	0	-	_strcspn
+CM.LIB	STRDUP	_TEXT	57	12	0	-	_strdup
+CM.LIB	STRERROR	_TEXT	131	26	0	-	_strerror __strerror
+CM.LIB	STRNCAT	_TEXT	73	12	0	-	_strncat
+CM.LIB	STRNSET	_TEXT	53	8	0	-	_strnset
+CM.LIB	STRPBRK	_TEXT	43	0	0	-	_strpbrk
+CM.LIB	STRRCHR	_TEXT	51	4	0	-	_strrchr
+CM.LIB	STRSET	_TEXT	33	8	0	-	_strset
+CM.LIB	STRSPN	_TEXT	47	0	0	-	_strspn
+CM.LIB	STRTOK	_TEXT	127	20	0	-	_strtok
+CM.LIB	STRTOL	_TEXT	150	10	0	-	_strtol
+CM.LIB	STRTOUL	_TEXT	209	12	0	-	_strtoul
+CM.LIB	STRXFRM	_TEXT	55	4	0	-	_strxfrm
+CM.LIB	SYSTEM	_TEXT	283	64	1	root+01f6c	_system@root+01f6c
+CM.LIB	TELL	_TEXT	26	4	1	root+02087	_tell@root+02087
+CM.LIB	TEXTMODE	_TEXT	33	8	1	root+020a1	_textmode@root+020a1
+CM.LIB	TIMECVT	_TEXT	755	62	1	root+020c2	_dostounix@root+020c2 _unixtodos@root+021e5
+CM.LIB	TMPFILE	_TEXT	51	12	0	-	_tmpfile
+CM.LIB	TMPNAM	_TEXT	129	28	1	root+023b5	_tmpnam@root+023fd __MKNAME@root+023b5
+CM.LIB	TOLOWER	_TEXT	44	2	0	-	_tolower
+CM.LIB	TOUPPER	_TEXT	44	2	1	root+02436	_toupper@root+02436
+CM.LIB	UMASK	_TEXT	24	4	0	-	_umask
+CM.LIB	VFPRINTF	_TEXT	21	4	0	-	_vfprintf
+CM.LIB	VFSCANF	_TEXT	28	6	0	-	_vfscanf
+CM.LIB	VIDINFO	_TEXT	69	12	1	root+02462	_gettextinfo@root+02462
+CM.LIB	VPRINTF	_TEXT	22	6	0	-	_vprintf
+CM.LIB	VSCANF	_TEXT	29	8	0	-	_vscanf
+CM.LIB	WHEREXY	_TEXT	44	6	1	root+024a7	_wherey@root+024c0 _wherex@root+024b1 __wherexy@root+024a7
+CM.LIB	WINDOW	_TEXT	102	14	1	root+024d3	_window@root+024d3
+CM.LIB	WRITE	_TEXT	249	16	1	root+02539	_write@root+02539
+CM.LIB	XCLOSE	_TEXT	21	4	0	-	__xclose
+CM.LIB	XFCLOSE	_TEXT	35	6	1	root+02632	__xfclose@root+02632
+CM.LIB	XFFLUSH	_TEXT	35	6	1	root+02655	__xfflush@root+02655
+CM.LIB	ABS	_TEXT	14	0	0	-	_abs
+CM.LIB	ABSREAD	_TEXT	275	18	0	-	_abswrite _absread
+CM.LIB	ALLOCMEM	_TEXT	32	2	1	root+02678	_allocmem@root+02678
+CM.LIB	ATOL	_TEXT	125	2	1	root+02698	_atoi@root+02708 _atol@root+02698
+CM.LIB	BDOS	_TEXT	16	0	0	-	_bdos
+CM.LIB	BDOSPTR	_TEXT	25	2	0	-	_bdosptr
+CM.LIB	BIOSCOM	_TEXT	16	0	0	-	_bioscom
+CM.LIB	BIOSDISK	_TEXT	55	0	0	-	_biosdisk
+CM.LIB	BIOSEQU	_TEXT	25	0	0	-	_biosmemory _biostime _biosequip
+CM.LIB	BIOSKEY	_TEXT	37	0	1	root+02715	_bioskey@root+02715
+CM.LIB	BIOSPRIN	_TEXT	20	0	0	-	_biosprint
+CM.LIB	BRK	_TEXT	111	10	1	root+0273a	_sbrk@root+02799 _brk@root+0278d ___sbrk@root+0275c ___brk@root+0273a
+CM.LIB	CHDIR	_TEXT	41	2	1	root+027a9	_chdir@root+027a9 _getdisk@root+027bf _setdisk@root+027c5
+CM.LIB	CHMODA	_TEXT	27	2	1	root+027d2	__chmod@root+027d2
+CM.LIB	CHSIZE	_TEXT	195	4	0	-	_chsize
+CM.LIB	CLOCK	_TEXT	54	8	0	-	_clock
+CM.LIB	CLOSEA	_TEXT	30	4	1	root+027ed	__close@root+027ed
+CM.LIB	CORELEFT	_TEXT	16	2	0	-	_coreleft
+CM.LIB	COUNTRY	_TEXT	24	0	0	-	_country
+CM.LIB	CREAT	_TEXT	122	20	0	-	_creat
+CM.LIB	CREATA	_TEXT	112	8	0	-	__creat _creatnew _creattemp
+CM.LIB	CRTINIT	_TEXT	435	56	1	root+0280b	__crtinit@root+028e4 __c0crtinit@root+028c7 __VideoInt@root+02843
+CM.LIB	DELAY	_TEXT	125	2	0	-	_delay
+CM.LIB	DIVT	_TEXT	12	0	0	-	_div
+CM.LIB	DOSEXT	_TEXT	34	0	0	-	_dosexterr
+CM.LIB	DOSTIMU	_TEXT	198	10	0	-	__DOSTIMETOU
+CM.LIB	DUP2	_TEXT	110	28	0	-	_dup _dup2
+CM.LIB	EOF	_TEXT	104	4	1	root+029be	_eof@root+029be
+CM.LIB	FCALLOC	_TEXT	161	8	0	-	_farcalloc
+CM.LIB	FINDFIRS	_TEXT	96	4	1	root+02a26	_findfirst@root+02a26 _findnext@root+02a59
+CM.LIB	FLENGTH	_TEXT	65	2	0	-	_filelength
+CM.LIB	FREEMEM	_TEXT	22	2	0	-	_freemem
+CM.LIB	FSTAT	_TEXT	123	8	0	-	_fstat
+CM.LIB	GETC	_TEXT	332	26	1	root+02a86	__Nfgetc@root+02b1a __fgetc@root+02b08 _fgetc@root+02b1d _fgetchar@root+02bc8
+CM.LIB	GETCH	_TEXT	92	18	0	-	_getch _ungetch _getche __Ngetche __Nungetch
+CM.LIB	GETCURDI	_TEXT	27	2	0	-	_getcurdir
+CM.LIB	GETDTA	_TEXT	9	0	0	-	_getdta
+CM.LIB	GETENV	_TEXT	94	2	1	root+02bd2	_getenv@root+02bd2
+CM.LIB	GETFAT	_TEXT	84	0	1	root+02c30	_getfatd@root+02c30 _getdfree@root+02c5e _getfat@root+02c41
+CM.LIB	GETFTIME	_TEXT	33	2	0	-	_getftime
+CM.LIB	GETVECT	_TEXT	32	0	0	-	_setvect _getvect
+CM.LIB	GETVERF	_TEXT	20	0	0	-	_getverify _setverify
+CM.LIB	HARDERR	_TEXT	169	24	0	-	_hardretn _hardresume _harderr
+CM.LIB	INPORT	_TEXT	20	0	0	-	_inport _inportb
+CM.LIB	INT86	_TEXT	196	6	0	-	_int86 _int86x
+CM.LIB	INTDOS	_TEXT	136	6	0	-	_intdos _intdosx
+CM.LIB	INTR	_TEXT	164	0	0	-	_intr
+CM.LIB	IOCTL	_TEXT	39	2	1	root+02c84	_ioctl@root+02c84
+CM.LIB	IOERROR	_TEXT	61	8	1	root+02cab	__IOERROR@root+02cab
+CM.LIB	IS	_TEXT	415	50	0	-	_isascii _getchar _putchar _isgraph _isprint _isspace _isupper _isalpha _ferror _islower _isdigit _isalnum _ispunct _isxdigit _feof _iscntrl _getc _putc
+CM.LIB	ISATTY	_TEXT	17	0	1	root+02ce8	_isatty@root+02ce8
+CM.LIB	KBHIT	_TEXT	6	0	0	-	_kbhit
+CM.LIB	LDIVT	_TEXT	149	2	0	-	_ldiv
+CM.LIB	LOCK	_TEXT	78	4	0	-	_lock _unlock
+CM.LIB	LROTL	_TEXT	28	0	0	-	__lrotl
+CM.LIB	LROTR	_TEXT	29	0	0	-	__lrotr
+CM.LIB	LSEEK	_TEXT	41	4	1	root+02cf9	_lseek@root+02cf9
+CM.LIB	LTOA	_TEXT	234	0	1	root+02d22	_ultoa@root+02dcb _itoa@root+02d9f _ltoa@root+02de5 __LONGTOA@root+02d22
+CM.LIB	MEMCCPY	_TEXT	55	0	0	-	_memccpy
+CM.LIB	MEMCHR	_TEXT	33	0	0	-	_memchr
+CM.LIB	MEMCMP	_TEXT	41	0	0	-	_memcmp
+CM.LIB	MEMCPY	_TEXT	33	0	1	root+02e0c	_memcpy@root+02e0c
+CM.LIB	MEMSET	_TEXT	67	0	1	root+02e2d	_setmem@root+02e2d _memset@root+02e55
+CM.LIB	MKDIR	_TEXT	22	2	0	-	_mkdir
+CM.LIB	MOVEDATA	_TEXT	34	0	1	root+02e70	_movedata@root+02e70
+CM.LIB	MOVMEM	_TEXT	101	0	0	-	_movmem _memmove
+CM.LIB	OPEN	_TEXT	354	36	1	root+02e92	_open@root+02ebd
+CM.LIB	OPENA	_TEXT	76	4	1	root+02ff4	__open@root+02ff4
+CM.LIB	OUTPORT	_TEXT	24	0	0	-	_outportb _outport
+CM.LIB	PARSFNM	_TEXT	36	0	0	-	_parsfnm
+CM.LIB	PUTENV	_TEXT	202	30	0	-	_putenv
+CM.LIB	QSORT	_TEXT	391	40	0	-	_qsort
+CM.LIB	RANDBLK	_TEXT	32	0	0	-	_randbrd _randbwr
+CM.LIB	READ	_TEXT	187	18	1	root+03040	_read@root+03040
+CM.LIB	READA	_TEXT	26	2	1	root+030fb	__read@root+030fb
+CM.LIB	REMOVE	_TEXT	22	2	1	root+03b02	_remove@root+03b02
+CM.LIB	RENAME	_TEXT	31	2	0	-	_rename
+CM.LIB	RMDIR	_TEXT	22	2	0	-	_rmdir
+CM.LIB	ROTL	_TEXT	13	0	0	-	__rotl
+CM.LIB	ROTR	_TEXT	13	0	0	-	__rotr
+CM.LIB	SCANNER	_TEXT	1167	66	1	root+03115	__scanner@root+03115
+CM.LIB	SCANTOL	_TEXT	426	2	1	root+035a4	__scantol@root+035cf
+CM.LIB	SEARCHP	_TEXT	587	74	0	-	__SEARCHPATH _searchpath
+CM.LIB	SEGREAD	_TEXT	24	0	0	-	_segread
+CM.LIB	SETBLOCK	_TEXT	28	2	1	root+0374e	_setblock@root+0374e
+CM.LIB	SETDATE	_TEXT	38	0	1	root+0376a	_setdate@root+0376a _settime@root+0377d
+CM.LIB	SETDTA	_TEXT	14	0	0	-	_setdta
+CM.LIB	SETFTIME	_TEXT	33	2	0	-	_setftime
+CM.LIB	SETJMP	_TEXT	105	0	0	-	_setjmp _longjmp
+CM.LIB	SOUND	_TEXT	51	0	0	-	_sound _nosound
+CM.LIB	STAT	_TEXT	155	4	0	-	_stat
+CM.LIB	STRCAT	_TEXT	57	0	1	root+03790	_strcat@root+03790
+CM.LIB	STRCHR	_TEXT	54	0	0	-	_strchr
+CM.LIB	STRCMP	_TEXT	47	0	1	root+037c9	_strcmp@root+037c9
+CM.LIB	STRCPY	_TEXT	36	0	1	root+037f8	_strcpy@root+037f8
+CM.LIB	STRICMP	_TEXT	64	0	1	root+0381c	_stricmp@root+0381c
+CM.LIB	STRLEN	_TEXT	26	0	1	root+0385c	_strlen@root+0385c
+CM.LIB	STRLWR	_TEXT	32	0	0	-	_strlwr
+CM.LIB	STRNCMP	_TEXT	55	0	0	-	_strncmp
+CM.LIB	STRNCPY	_TEXT	44	0	1	root+03876	_strncpy@root+03876
+CM.LIB	STRNICMP	_TEXT	69	0	0	-	_strnicmp
+CM.LIB	STRREV	_TEXT	48	0	0	-	_strrev
+CM.LIB	STRSTR	_TEXT	98	0	0	-	_strstr
+CM.LIB	STRUPR	_TEXT	32	0	0	-	_strupr
+CM.LIB	SWAB	_TEXT	31	0	0	-	_swab
+CM.LIB	TZSET	_TEXT	608	98	1	root+038a2	__ISDST@root+03a23 _tzset@root+038a2
+CM.LIB	UNGETC	_TEXT	75	0	0	-	__Nungetc _ungetc
+CM.LIB	UNLINK	_TEXT	22	2	1	root+03b02	_unlink@root+03b02
+CM.LIB	VPRINTER	_TEXT	1239	58	1	root+03b18	__VPRINTER@root+03b30
+CM.LIB	VRAM	_TEXT	159	8	1	root+03fef	__VPTR@root+03fef __VRAM@root+04015
+CM.LIB	WRITEA	_TEXT	73	10	1	root+0408e	__write@root+0408e
+CM.LIB	ZAPCTLZ	_TEXT	165	4	0	-	__TRIMCTLZ __APPENDCTLZ
+CM.LIB	BCD2	_TEXT	93	26	0	-	@$BLSH$QR7OSTREAMR3BCD @$BRSH$QR7ISTREAMR3BCD
+CM.LIB	CPLX1	_TEXT	204	86	0	-	@$bmul$qr7complext1 @complex@$brmul$qr7complex @norm$qr7complex @abs$qr7complex
+CM.LIB	CPLX2	_TEXT	3868	1592	0	-	@complex@$brdiv$qr7complex @$bdiv$qr7complext1 @$bdiv$qdr7complex @acos$qr7complex @arg$qr7complex @asin$qr7complex @atan$qr7complex @cos$qr7complex @cosh$qr7complex @exp$qr7complex @log$qr7complex @log10$qr7complex @pow$qr7complexd @pow$qdr7complex @pow$qr7complext1 @sin$qr7complex @sinh$qr7complex @sqrt$qr7complex @tan$qr7complex @tanh$qr7complex @$blsh$qr7ostreamr7complex @$brsh$qr7istreamr7complex
+CM.LIB	DEL	_TEXT	14	4	0	-	@$bdele$qpv
+CM.LIB	NEW	_TEXT	97	18	0	-	@set_new_handler$qnqv$v @$bnew$qui
+CM.LIB	OLDDEL	_TEXT	14	4	0	-	@$bdele$qpvui
+CM.LIB	PUREERR	_TEXT	42	20	0	-	__npure_error_ __fpure_error_
+CM.LIB	VAPP	_TEXT	220	16	0	-	__vector_apply_
+CM.LIB	VAPPV	_TEXT	249	16	0	-	__vector_applyv_
+CM.LIB	VDEL	_TEXT	281	20	0	-	__vector_delete_
+CM.LIB	VNEW	_TEXT	229	20	0	-	__vector_new_
+CM.LIB	VNEWV	_TEXT	260	20	0	-	__vector_vnew_
+CM.LIB	CVTFAK	_TEXT	31	8	1	root+040d7	
+CM.LIB	EXEC	_TEXT	887	38	0	-	__exec
+CM.LIB	FARHEAP	_TEXT	1003	88	1	root+040f6	_farmalloc@root+0431a _farfree@root+04234 ___rover@root+040fa _farrealloc@root+04473 ___last@root+040f8 ___first@root+040f6
+CM.LIB	FHEAPCHK	_TEXT	631	42	0	-	_farheapcheck _farheapcheckfree _farheapfillfree _farheapwalk _farheapchecknode
+CM.LIB	F_LXMUL	_TEXT	23	0	1	root+044e1	LXMUL@@root+044e1 F_LXMUL@@root+044e1
+CM.LIB	F_PCMP	_TEXT	33	0	0	-	F_PCMP@ PCMP@
+CM.LIB	H_LDIV	_TEXT	174	0	1	root+044f8	LUMOD@@root+04512 LDIV@@root+044fb F_LUMOD@@root+04512 N_LUMOD@@root+0450f N_LMOD@@root+04507 F_LMOD@@root+0450a LMOD@@root+0450a N_LUDIV@@root+044ff F_LUDIV@@root+04502 LUDIV@@root+04502 N_LDIV@@root+044f8 F_LDIV@@root+044fb
+CM.LIB	H_LLSH	_TEXT	33	0	1	root+045a6	LXLSH@@root+045a9 N_LXLSH@@root+045a6 F_LXLSH@@root+045a9
+CM.LIB	H_LRSH	_TEXT	32	0	0	-	LXRSH@ N_LXRSH@ F_LXRSH@
+CM.LIB	H_LURSH	_TEXT	33	0	1	root+045c7	LXURSH@@root+045ca F_LXURSH@@root+045ca N_LXURSH@@root+045c7
+CM.LIB	H_PADA	_TEXT	136	0	0	-	N_PADA@ F_PADA@ PSBA@ F_PSBA@ N_PSBA@ PADA@
+CM.LIB	H_PADD	_TEXT	96	0	1	root+045e8	F_PADD@@root+045eb N_PADD@@root+045e8 F_PSUB@@root+0461a N_PSUB@@root+04617 PSUB@@root+0461a PADD@@root+045eb
+CM.LIB	H_PINA	_TEXT	102	0	0	-	N_PDEA@ F_PDEA@ F_PINA@ N_PINA@ PINA@ PDEA@
+CM.LIB	H_PSBH	_TEXT	32	4	0	-	F_PSBH@ N_PSBH@
+CM.LIB	H_PSBP	_TEXT	40	0	0	-	PSBP@ F_PSBP@ N_PSBP@
+CM.LIB	H_SCOPY	_TEXT	31	0	1	root+04648	SCOPY@@root+0464b N_SCOPY@@root+04648 F_SCOPY@@root+0464b
+CM.LIB	H_SPUSH	_TEXT	39	0	0	-	N_SPUSH@ F_SPUSH@ SPUSH@
+CM.LIB	NEARHEAP	_TEXT	635	52	1	root+04667	_free@root+04667 _malloc@root+04736 _realloc@root+0488f
+CM.LIB	NHEAPCHK	_TEXT	500	44	0	-	_heapcheckfree _heapcheck _heapchecknode _heapwalk _heapfillfree
+CM.LIB	N_LXMUL	_TEXT	23	0	1	root+048e2	N_LXMUL@@root+048e2
+CM.LIB	N_PCMP	_TEXT	33	0	1	root+048f9	N_PCMP@@root+048f9
+CM.LIB	SCANTOD	_TEXT	12	6	1	root+0491a	__scantod@root+0491a __scanpop@root+04922 __scanrslt@root+0491e
+CM.LIB	SETARGV	_TEXT	277	50	1	root+0492a	
+CM.LIB	SETENVP	_TEXT	88	24	1	root+04a3f	
+CM.LIB	SPAWN	_TEXT	180	14	1	root+04a97	__spawn@root+04a9b
+CM.LIB	STACK	_TEXT	30	4	0	-	F_OVERFLOW@ N_OVERFLOW@ OVERFLOW@
+CM.LIB	WILD	_TEXT	679	78	0	-	__wildargv
+CM.LIB	FMEMCCPY	_TEXT	57	0	0	-	__fmemccpy
+CM.LIB	FMEMCHR	_TEXT	35	0	0	-	__fmemchr
+CM.LIB	FMEMCMP	_TEXT	40	0	0	-	__fmemcmp
+CM.LIB	FMEMCPY	_TEXT	36	0	1	root+04b4b	__fmemcpy@root+04b4b
+CM.LIB	FMEMICMP	_TEXT	73	8	0	-	__fmemicmp
+CM.LIB	FMEMSET	_TEXT	67	0	1	root+04b6f	__fmemset@root+04b93 __fsetmem@root+04b6f
+CM.LIB	FMOVMEM	_TEXT	115	2	0	-	__fmemmove __fmovmem
+CM.LIB	FSTRCAT	_TEXT	63	0	0	-	__fstrcat
+CM.LIB	FSTRCHR	_TEXT	61	0	0	-	__fstrchr
+CM.LIB	FSTRCMP	_TEXT	48	0	0	-	__fstrcmp
+CM.LIB	FSTRCPY	_TEXT	41	0	0	-	__fstrcpy
+CM.LIB	FSTRCSPN	_TEXT	71	0	0	-	__fstrcspn
+CM.LIB	FSTRDUP	_TEXT	76	12	0	-	__fstrdup
+CM.LIB	FSTRICMP	_TEXT	65	0	0	-	__fstricmp
+CM.LIB	FSTRLEN	_TEXT	31	0	0	-	__fstrlen
+CM.LIB	FSTRLWR	_TEXT	36	0	0	-	__fstrlwr
+CM.LIB	FSTRNCAT	_TEXT	98	12	0	-	__fstrncat
+CM.LIB	FSTRNCMP	_TEXT	56	0	0	-	__fstrncmp
+CM.LIB	FSTRNCPY	_TEXT	49	0	1	root+04bb2	__fstrncpy@root+04bb2
+CM.LIB	FSTRNICM	_TEXT	68	0	0	-	__fstrnicmp
+CM.LIB	FSTRNSET	_TEXT	58	8	0	-	__fstrnset
+CM.LIB	FSTRPBRK	_TEXT	76	0	0	-	__fstrpbrk
+CM.LIB	FSTRRCHR	_TEXT	75	4	0	-	__fstrrchr
+CM.LIB	FSTRREV	_TEXT	52	0	0	-	__fstrrev
+CM.LIB	FSTRSET	_TEXT	43	8	0	-	__fstrset
+CM.LIB	FSTRSPN	_TEXT	80	0	0	-	__fstrspn
+CM.LIB	FSTRSTR	_TEXT	110	0	0	-	__fstrstr
+CM.LIB	FSTRTOK	_TEXT	199	24	0	-	__fstrtok
+CM.LIB	FSTRUPR	_TEXT	36	0	0	-	__fstrupr
+CM.LIB	FTOUPPER	_TEXT	44	2	1	root+02436	__ftoupper@root+02436
+CM.LIB	FTOLOWER	_TEXT	44	2	0	-	__ftolower
+CM.LIB	STBDBP	_TEXT	216	56	0	-	@streambuf@dbp$qv
+CM.LIB	FSATTCH	_TEXT	65	12	0	-	@fstreambase@attach$qi
+CM.LIB	FSBATTCH	_TEXT	161	16	0	-	@filebuf@attach$qi
+CM.LIB	FSBCLOSE	_TEXT	121	4	0	-	@filebuf@close$qv
+CM.LIB	FSBCTR1	_TEXT	156	26	0	-	@filebuf@$bctr$qv
+CM.LIB	FSBCTR2	_TEXT	157	26	0	-	@filebuf@$bctr$qi
+CM.LIB	FSBCTR3	_TEXT	92	10	0	-	@filebuf@$bctr$qipzci
+CM.LIB	FSBDTR	_TEXT	74	14	0	-	@filebuf@$bdtr$qv
+CM.LIB	FSBOFLOW	_TEXT	268	16	0	-	@filebuf@overflow$qi
+CM.LIB	FSBOPEN	_TEXT	319	16	0	-	@filebuf@open$qpxzcii
+CM.LIB	FSBSBUF	_TEXT	138	12	0	-	@filebuf@setbuf$qpzci
+CM.LIB	FSBSKOFF	_TEXT	315	16	0	-	@filebuf@seekoff$ql8seek_diri
+CM.LIB	FSBSYNC	_TEXT	168	12	0	-	@filebuf@sync$qv
+CM.LIB	FSBUFLOW	_TEXT	353	24	0	-	@filebuf@underflow$qv
+CM.LIB	FSCLOSE	_TEXT	50	12	0	-	@fstreambase@close$qv
+CM.LIB	FSCTR1	_TEXT	108	24	0	-	@fstreambase@$bctr$qv
+CM.LIB	FSCTR2	_TEXT	126	28	0	-	@fstreambase@$bctr$qpxzcii
+CM.LIB	FSCTR3	_TEXT	112	24	0	-	@fstreambase@$bctr$qi
+CM.LIB	FSCTR4	_TEXT	119	24	0	-	@fstreambase@$bctr$qipzci
+CM.LIB	FSDTR	_TEXT	98	16	0	-	@fstreambase@$bdtr$qv
+CM.LIB	FSOPEN	_TEXT	93	8	0	-	@fstreambase@open$qpxzcii
+CM.LIB	FSSBUF	_TEXT	59	8	0	-	@fstreambase@setbuf$qpzci
+CM.LIB	IFSCTR1	_TEXT	137	30	0	-	@ifstream@$bctr$qv
+CM.LIB	IFSCTR2	_TEXT	151	30	0	-	@ifstream@$bctr$qpxzcii
+CM.LIB	IFSCTR3	_TEXT	141	30	0	-	@ifstream@$bctr$qi
+CM.LIB	IFSCTR4	_TEXT	147	30	0	-	@ifstream@$bctr$qipzci
+CM.LIB	IFSDTR	_TEXT	126	30	0	-	@ifstream@$bdtr$qv
+CM.LIB	IOFSCTR1	_TEXT	162	36	0	-	@fstream@$bctr$qv
+CM.LIB	IOFSCTR2	_TEXT	172	36	0	-	@fstream@$bctr$qpxzcii
+CM.LIB	IOFSCTR3	_TEXT	166	36	0	-	@fstream@$bctr$qi
+CM.LIB	IOFSCTR4	_TEXT	172	36	0	-	@fstream@$bctr$qipzci
+CM.LIB	IOFSDTR	_TEXT	143	36	0	-	@fstream@$bdtr$qv
+CM.LIB	IOSRCTR1	_TEXT	168	36	0	-	@strstream@$bctr$qv
+CM.LIB	IOSRCTR2	_TEXT	219	40	0	-	@strstream@$bctr$qpzcii
+CM.LIB	IOSRDTR	_TEXT	143	36	0	-	@strstream@$bdtr$qv
+CM.LIB	IOSTASN1	_TEXT	28	4	0	-	@iostream_withassign@$basg$qr3ios
+CM.LIB	IOSTASN2	_TEXT	24	4	0	-	@iostream_withassign@$basg$qp9streambuf
+CM.LIB	IOSTCTR1	_TEXT	149	34	0	-	@iostream@$bctr$qp9streambuf
+CM.LIB	IOSTCTR2	_TEXT	137	30	0	-	@iostream@$bctr$qv
+CM.LIB	IOSTCTR3	_TEXT	120	26	0	-	@iostream_withassign@$bctr$qv
+CM.LIB	IOSTDTR1	_TEXT	126	30	0	-	@iostream@$bdtr$qv
+CM.LIB	IOSTDTR2	_TEXT	110	26	0	-	@iostream_withassign@$bdtr$qv
+CM.LIB	IOSTSTD	_TEXT	465	180	0	-	@Iostream_delete$qv
+CM.LIB	ISRCTR1	_TEXT	151	30	0	-	@istrstream@$bctr$qpzc
+CM.LIB	ISRCTR2	_TEXT	153	30	0	-	@istrstream@$bctr$qpzci
+CM.LIB	ISRDTR	_TEXT	126	30	0	-	@istrstream@$bdtr$qv
+CM.LIB	ISTASN1	_TEXT	30	4	0	-	@istream_withassign@$basg$qr7istream
+CM.LIB	ISTASN2	_TEXT	24	4	0	-	@istream_withassign@$basg$qp9streambuf
+CM.LIB	ISTCTR1	_TEXT	88	16	0	-	@istream@$bctr$qv
+CM.LIB	ISTCTR2	_TEXT	100	20	0	-	@istream@$bctr$qp9streambuf
+CM.LIB	ISTCTR3	_TEXT	124	28	0	-	@istream@$bctr$qp9streambufip7ostream
+CM.LIB	ISTCTR4	_TEXT	95	20	0	-	@istream_withassign@$bctr$qv
+CM.LIB	ISTDGET	_TEXT	86	4	0	-	@istream@do_get$qv
+CM.LIB	ISTDIPFX	_TEXT	118	8	0	-	@istream@ipfx$qi
+CM.LIB	ISTDTR1	_TEXT	82	16	0	-	@istream@$bdtr$qv
+CM.LIB	ISTDTR2	_TEXT	93	20	0	-	@istream_withassign@$bdtr$qv
+CM.LIB	ISTEATWH	_TEXT	121	6	0	-	@istream@eatwhite$qv
+CM.LIB	ISTEBUF	_TEXT	245	8	0	-	@istream@$brsh$qp9streambuf
+CM.LIB	ISTECHP	_TEXT	220	10	0	-	@istream@$brsh$qpzc
+CM.LIB	ISTEDBL	_TEXT	136	52	0	-	@istream@$brsh$qrd
+CM.LIB	ISTEFLT	_TEXT	132	50	0	-	@istream@$brsh$qrf
+CM.LIB	ISTEINT	_TEXT	48	4	0	-	@istream@$brsh$qri
+CM.LIB	ISTELDBL	_TEXT	1435	226	0	-	@istream@$brsh$qrg
+CM.LIB	ISTELNG	_TEXT	968	58	0	-	@istream@$brsh$qrl
+CM.LIB	ISTESCHR	_TEXT	118	8	0	-	@istream@$brsh$qrzc
+CM.LIB	ISTESH	_TEXT	48	4	0	-	@istream@$brsh$qrs
+CM.LIB	ISTEUCHR	_TEXT	118	8	0	-	@istream@$brsh$qruc
+CM.LIB	ISTEUINT	_TEXT	48	4	0	-	@istream@$brsh$qrui
+CM.LIB	ISTEULNG	_TEXT	54	4	0	-	@istream@$brsh$qrul
+CM.LIB	ISTEUSH	_TEXT	48	4	0	-	@istream@$brsh$qrus
+CM.LIB	ISTGBUF	_TEXT	240	12	0	-	@istream@get$qr9streambufzc
+CM.LIB	ISTGET	_TEXT	109	8	0	-	@istream@get$qv
+CM.LIB	ISTGLINE	_TEXT	188	8	0	-	@istream@getline$qpzcizc
+CM.LIB	ISTGSCHR	_TEXT	125	8	0	-	@istream@get$qrzc
+CM.LIB	ISTGSTR	_TEXT	190	8	0	-	@istream@get$qpzcizc
+CM.LIB	ISTGUCHR	_TEXT	125	8	0	-	@istream@get$qruc
+CM.LIB	ISTIGN	_TEXT	147	8	0	-	@istream@ignore$qii
+CM.LIB	ISTMANIP	_TEXT	27	0	0	-	@istream@$brsh$qnqr3ios$r3ios
+CM.LIB	ISTPBACK	_TEXT	100	8	0	-	@istream@putback$qzc
+CM.LIB	ISTREAD	_TEXT	164	8	0	-	@istream@read$qpzci
+CM.LIB	ISTSKOFF	_TEXT	74	4	0	-	@istream@seekg$ql8seek_dir
+CM.LIB	ISTSKPOS	_TEXT	71	4	0	-	@istream@seekg$ql
+CM.LIB	ISTTELLG	_TEXT	97	4	0	-	@istream@tellg$qv
+CM.LIB	ISTWS	_TEXT	77	12	0	-	@ws$qr7istream
+CM.LIB	ISTX	_TEXT	239	56	0	-	@istream@$bctr$qipzci @istream@$bctr$qiip7ostream
+CM.LIB	MNRSTFLG	_TEXT	57	6	0	-	@resetiosflags$ql
+CM.LIB	MNSBASE	_TEXT	128	10	0	-	@setbase$qi
+CM.LIB	MNSETFLG	_TEXT	57	6	0	-	@setiosflags$ql
+CM.LIB	MNSETW	_TEXT	52	2	0	-	@setw$qi
+CM.LIB	MNSFILL	_TEXT	53	2	0	-	@setfill$qi
+CM.LIB	MNSPREC	_TEXT	52	2	0	-	@setprecision$qi
+CM.LIB	OFSCTR1	_TEXT	137	30	0	-	@ofstream@$bctr$qv
+CM.LIB	OFSCTR2	_TEXT	151	30	0	-	@ofstream@$bctr$qpxzcii
+CM.LIB	OFSCTR3	_TEXT	141	30	0	-	@ofstream@$bctr$qi
+CM.LIB	OFSCTR4	_TEXT	147	30	0	-	@ofstream@$bctr$qipzci
+CM.LIB	OFSDTR	_TEXT	126	30	0	-	@ofstream@$bdtr$qv
+CM.LIB	OSRCTR1	_TEXT	194	34	0	-	@ostrstream@$bctr$qpzcii
+CM.LIB	OSRCTR2	_TEXT	143	30	0	-	@ostrstream@$bctr$qv
+CM.LIB	OSRDTR	_TEXT	126	30	0	-	@ostrstream@$bdtr$qv
+CM.LIB	OSTASN1	_TEXT	30	4	0	-	@ostream_withassign@$basg$qr7ostream
+CM.LIB	OSTASN2	_TEXT	24	4	0	-	@ostream_withassign@$basg$qp9streambuf
+CM.LIB	OSTCTR1	_TEXT	83	16	0	-	@ostream@$bctr$qv
+CM.LIB	OSTCTR2	_TEXT	95	20	0	-	@ostream@$bctr$qp9streambuf
+CM.LIB	OSTCTR3	_TEXT	95	20	0	-	@ostream_withassign@$bctr$qv
+CM.LIB	OSTDTR1	_TEXT	89	20	0	-	@ostream@$bdtr$qv
+CM.LIB	OSTDTR2	_TEXT	93	20	0	-	@ostream_withassign@$bdtr$qv
+CM.LIB	OSTENDL	_TEXT	30	8	0	-	@endl$qr7ostream
+CM.LIB	OSTENDS	_TEXT	23	4	0	-	@ends$qr7ostream
+CM.LIB	OSTFLOAT	_TEXT	1424	286	0	-	@fpclass$qg @fpcopysign$qgg @ostream@$blsh$qg
+CM.LIB	OSTFLUSH	_TEXT	45	4	0	-	@ostream@flush$qv
+CM.LIB	OSTIBUF	_TEXT	189	12	0	-	@ostream@$blsh$qp9streambuf
+CM.LIB	OSTINT	_TEXT	745	38	0	-	@ostream@$blsh$ql @ostream@$blsh$qul
+CM.LIB	OSTISCHR	_TEXT	131	12	0	-	@ostream@$blsh$qzc
+CM.LIB	OSTMANIP	_TEXT	27	0	0	-	@ostream@$blsh$qnqr3ios$r3ios
+CM.LIB	OSTMFLSH	_TEXT	19	4	0	-	@flush$qr7ostream
+CM.LIB	OSTOPFX	_TEXT	45	4	0	-	@ostream@do_opfx$qv
+CM.LIB	OSTOSFX	_TEXT	72	16	0	-	@ostream@do_osfx$qv
+CM.LIB	OSTOUTST	_TEXT	566	44	0	-	@ostream@outstr$qpxzct1
+CM.LIB	OSTPTR	_TEXT	90	16	0	-	@ostream@$blsh$qpv
+CM.LIB	OSTSKOFF	_TEXT	74	4	0	-	@ostream@seekp$ql8seek_dir
+CM.LIB	OSTSKPOS	_TEXT	71	4	0	-	@ostream@seekp$ql
+CM.LIB	OSTTELLP	_TEXT	100	4	0	-	@ostream@tellp$qv
+CM.LIB	OSTWRITE	_TEXT	59	8	0	-	@ostream@write$qpxzci
+CM.LIB	OSTX	_TEXT	208	44	0	-	@ostream@$bctr$qi @ostream@$bctr$qipzc
+CM.LIB	SDBCTR	_TEXT	140	26	0	-	@stdiobuf@$bctr$qp4FILE
+CM.LIB	SDBDTR	_TEXT	59	10	0	-	@stdiobuf@$bdtr$qv
+CM.LIB	SDBOFLOW	_TEXT	251	16	0	-	@stdiobuf@overflow$qi
+CM.LIB	SDBPBFL	_TEXT	23	4	0	-	@stdiobuf@pbackfail$qi
+CM.LIB	SDBSKOFF	_TEXT	213	16	0	-	@stdiobuf@seekoff$ql8seek_diri
+CM.LIB	SDBSYNC	_TEXT	177	16	0	-	@stdiobuf@sync$qv
+CM.LIB	SDBUFLOW	_TEXT	288	20	0	-	@stdiobuf@underflow$qv
+CM.LIB	SDCTR	_TEXT	78	18	0	-	@stdiostream@$bctr$qp4FILE
+CM.LIB	SDDTR	_TEXT	63	10	0	-	@stdiostream@$bdtr$qv
+CM.LIB	SRBCTR1	_TEXT	75	10	0	-	@strstreambuf@$bctr$qv
+CM.LIB	SRBCTR2	_TEXT	79	10	0	-	@strstreambuf@$bctr$qnql$pvnqpv$v
+CM.LIB	SRBCTR3	_TEXT	129	18	0	-	@strstreambuf@$bctr$qi
+CM.LIB	SRBCTR4	_TEXT	68	14	0	-	@strstreambuf@$bctr$qpzcit1
+CM.LIB	SRBCTR5	_TEXT	68	14	0	-	@strstreambuf@$bctr$qpucit1
+CM.LIB	SRBDALC	_TEXT	104	8	0	-	@strstreambuf@doallocate$qv
+CM.LIB	SRBDTR	_TEXT	82	14	0	-	@strstreambuf@$bdtr$qv
+CM.LIB	SRBFREEZ	_TEXT	35	0	0	-	@strstreambuf@freeze$qi
+CM.LIB	SRBINIT	_TEXT	133	16	0	-	@strstreambuf@init$qpzcit1
+CM.LIB	SRBOFLOW	_TEXT	329	24	0	-	@strstreambuf@overflow$qi
+CM.LIB	SRBSBUF	_TEXT	35	0	0	-	@strstreambuf@setbuf$qpzci
+CM.LIB	SRBSKOFF	_TEXT	442	8	0	-	@strstreambuf@seekoff$ql8seek_diri
+CM.LIB	SRBSTR	_TEXT	25	4	0	-	@strstreambuf@str$qv
+CM.LIB	SRBUFLOW	_TEXT	103	4	0	-	@strstreambuf@underflow$qv
+CM.LIB	SRCTR1	_TEXT	119	24	0	-	@strstreambase@$bctr$qpzcit1
+CM.LIB	SRCTR2	_TEXT	108	24	0	-	@strstreambase@$bctr$qv
+CM.LIB	SRDTR	_TEXT	98	16	0	-	@strstreambase@$bdtr$qv
+CM.LIB	STBALC	_TEXT	51	4	0	-	@streambuf@doallocate$qv
+CM.LIB	STBCTR1	_TEXT	90	6	0	-	@streambuf@$bctr$qv
+CM.LIB	STBCTR2	_TEXT	106	6	0	-	@streambuf@$bctr$qpzci
+CM.LIB	STBDNEXT	_TEXT	35	0	0	-	@streambuf@do_snextc$qv
+CM.LIB	STBDSGTN	_TEXT	126	4	0	-	@streambuf@do_sgetn$qpzci
+CM.LIB	STBDSPTN	_TEXT	114	4	0	-	@streambuf@do_sputn$qpxzci
+CM.LIB	STBDTR	_TEXT	49	10	0	-	@streambuf@$bdtr$qv
+CM.LIB	STBOFLOW	_TEXT	8	0	0	-	@streambuf@overflow$qi
+CM.LIB	STBPBFL	_TEXT	8	0	0	-	@streambuf@pbackfail$qi
+CM.LIB	STBSBUF	_TEXT	36	4	0	-	@streambuf@setbuf$qpzci
+CM.LIB	STBSETB	_TEXT	101	4	0	-	@streambuf@setb$qpzct1i
+CM.LIB	STBSETG	_TEXT	62	0	0	-	@streambuf@setg$qpzct1t1
+CM.LIB	STBSETP	_TEXT	47	0	0	-	@streambuf@setp$qpzct1
+CM.LIB	STBSGETN	_TEXT	61	4	0	-	@streambuf@sgetn$qpzci
+CM.LIB	STBSKOFF	_TEXT	11	0	0	-	@streambuf@seekoff$ql8seek_diri
+CM.LIB	STBSKPOS	_TEXT	32	0	0	-	@streambuf@seekpos$qli
+CM.LIB	STBSPUTN	_TEXT	61	4	0	-	@streambuf@sputn$qpxzci
+CM.LIB	STBSTB1	_TEXT	57	8	0	-	@streambuf@setbuf$qpzcii
+CM.LIB	STBSYNC	_TEXT	59	0	0	-	@streambuf@sync$qv
+CM.LIB	STBTALC	_TEXT	43	10	0	-	@ios@bitalloc$qv
+CM.LIB	STBUFLOW	_TEXT	36	0	0	-	@streambuf@underflow$qv
+CM.LIB	STCLEAR	_TEXT	52	0	0	-	@ios@clear$qi
+CM.LIB	STCTR1	_TEXT	46	6	0	-	@ios@$bctr$qv
+CM.LIB	STCTR2	_TEXT	57	10	0	-	@ios@$bctr$qp9streambuf
+CM.LIB	STDEC	_TEXT	36	8	0	-	@dec$qr3ios
+CM.LIB	STDTR	_TEXT	50	10	0	-	@ios@$bdtr$qv
+CM.LIB	STFLAGS	_TEXT	68	0	0	-	@ios@flags$ql
+CM.LIB	STHEX	_TEXT	36	8	0	-	@hex$qr3ios
+CM.LIB	STINIT	_TEXT	61	0	0	-	@ios@init$qp9streambuf
+CM.LIB	STIWORD	_TEXT	69	10	0	-	@ios@iword$qi
+CM.LIB	STOCT	_TEXT	36	8	0	-	@oct$qr3ios
+CM.LIB	STPWORD	_TEXT	69	10	0	-	@ios@pword$qi
+CM.LIB	STSETF1	_TEXT	74	0	0	-	@ios@setf$ql
+CM.LIB	STSETF2	_TEXT	96	0	0	-	@ios@setf$qll
+CM.LIB	STSETST	_TEXT	39	0	0	-	@ios@setstate$qi
+CM.LIB	STSKIP	_TEXT	74	0	0	-	@ios@skip$qi
+CM.LIB	STSYNC	_TEXT	258	92	0	-	@ios@sync_with_stdio$qv
+CM.LIB	STTIE	_TEXT	62	4	0	-	@ios@tie$qp7ostream
+CM.LIB	STUNSET	_TEXT	78	0	0	-	@ios@unsetf$ql
+CM.LIB	STUSIZE	_TEXT	97	12	0	-	@ios@usersize$qi
+MATHM.LIB	ACOSASIN	_TEXT	298	80	0	-	_acos _asin
+MATHM.LIB	ATAN	_TEXT	13	2	0	-	_atan
+MATHM.LIB	ATAN2	_TEXT	176	48	0	-	_atan2
+MATHM.LIB	ATOF	_TEXT	18	4	0	-	_atof
+MATHM.LIB	CEIL	_TEXT	48	12	0	-	_ceil
+MATHM.LIB	CLEAR87	_TEXT	29	6	0	-	__clear87
+MATHM.LIB	COS	_TEXT	77	20	0	-	_cos
+MATHM.LIB	COSH	_TEXT	114	38	0	-	_cosh
+MATHM.LIB	CTRL87	_TEXT	75	12	0	-	__control87
+MATHM.LIB	EFCVT	_TEXT	93	12	0	-	_fcvt _ecvt
+MATHM.LIB	EXP	_TEXT	107	20	0	-	_exp
+MATHM.LIB	FABS	_TEXT	15	4	0	-	_fabs
+MATHM.LIB	FLOOR	_TEXT	48	12	0	-	_floor
+MATHM.LIB	FMOD	_TEXT	77	22	0	-	_fmod
+MATHM.LIB	FPERR	_TEXT	162	26	0	-	__fperror
+MATHM.LIB	FPRESET	_TEXT	8	2	0	-	__fpreset
+MATHM.LIB	FREXP	_TEXT	61	24	0	-	_frexp
+MATHM.LIB	GCVT	_TEXT	31	2	0	-	_gcvt
+MATHM.LIB	HYPOT	_TEXT	91	30	0	-	_hypot
+MATHM.LIB	LDEXP	_TEXT	122	28	0	-	_ldexp
+MATHM.LIB	LDTRUNC	_TEXT	155	28	0	-	__LDTRUNC
+MATHM.LIB	LOG	_TEXT	121	42	0	-	_log
+MATHM.LIB	LOG10	_TEXT	121	42	0	-	_log10
+MATHM.LIB	MATHERR	_TEXT	38	6	0	-	_matherr
+MATHM.LIB	MODF	_TEXT	73	22	0	-	_modf
+MATHM.LIB	POLY	_TEXT	108	30	0	-	_poly
+MATHM.LIB	POW	_TEXT	500	124	0	-	_pow __EXPL
+MATHM.LIB	POW10	_TEXT	200	72	0	-	_pow10
+MATHM.LIB	REALCVT	_TEXT	429	2	0	-	
+MATHM.LIB	SCANTOD	_TEXT	864	84	0	-	
+MATHM.LIB	SIN	_TEXT	77	20	0	-	_sin
+MATHM.LIB	SINH	_TEXT	164	58	0	-	_sinh
+MATHM.LIB	SQRT	_TEXT	63	20	0	-	_sqrt
+MATHM.LIB	STAT87	_TEXT	26	6	0	-	__status87
+MATHM.LIB	STRTOD	_TEXT	165	26	0	-	_strtod
+MATHM.LIB	TAN	_TEXT	80	22	0	-	_tan
+MATHM.LIB	TANH	_TEXT	119	48	0	-	_tanh
+MATHM.LIB	XCVT	_TEXT	483	64	0	-	__XCVT
+MATHM.LIB	NFTOL	_TEXT	44	10	0	-	N_FTOL@
+MATHM.LIB	FFTOL	_TEXT	44	10	0	-	F_FTOL@ FTOL@
+MATHM.LIB	DIFFTIME	_TEXT	45	6	0	-	_difftime
+MATHM.LIB	_MATHERR	_TEXT	144	38	0	-	__matherr
+EMU.LIB	FPINIT	_TEXT	600	102	0	-	___fpreset
+EMU.LIB	EMU086	EMU_PROG	10087	702	0	-	e086_Shortcut EmuVectorException e086_Entry
+EMU.LIB	EMU087	E87_PROG	995	62	0	-	e087_Shortcut e087_Entry
+EMU.LIB	E87TRAP	E87_PROG	472	62	0	-	e087_Trap
+FP87.LIB	FP87INIT	_TEXT	526	92	0	-	___fpreset
+FP87.LIB	EMU087	E87_PROG	995	62	0	-	e087_Shortcut e087_Entry
+FP87.LIB	E87TRAP	E87_PROG	472	62	0	-	e087_Trap
+OVERLAY.LIB	OVRMAN	_OVRTEXT_	2278	244	1	root+1699e	__ISOVERLAYMOD@root+1715e __CHECKOVERLAY@root+1722c __OVRINIT@root+169a9 __OVRGROUP@root+1699e __InitModules@root+16c34 __DGROUP@root+169a0 __CHECKSTACK@root+17194 __OVREXIT@root+16b2c __ReadOvrDisk@root+16e5f
+OVERLAY.LIB	OVRSWAP	_OVRTEXT_	1084	154	1	root+17284	__SwapOverlay@root+176aa __OvrInitEms@root+17284 __OvrInitExt@root+1744e
+OVERLAY.LIB	OVRUSER	_OVRTEXT_	91	26	1	root+176c0	__OvrPrepare@root+176c0
+OVERLAY.LIB	OVRDETEC	_OVRTEXT_	1236	262	0	-	__INITEMSPAGE __INITEXTMEM __EXITEMS __EXITEXT __INITEMS __INITEXT __EXTCOPY
+OVERLAY.LIB	OVRHALT	_TEXT	52	8	1	root+00240	__OverlayHalt@root+00257
+OVERLAY.LIB	SETJMP	_TEXT	183	20	0	-	_setjmp _longjmp
+GRAPHICS.LIB	GRAPHC	_BGI_TEXT	6319	1116	0	-	_setusercharsize _textheight __GraphNotInstalled _circle _setgraphbufsize _settextjustify _setlinestyle _lineto _getmaxx _getmaxy _moveto _setviewport _getfillsettings _closegraph _imagesize ___move _clearviewport _arc _setbkcolor _getbkcolor _getlinesettings _installuserdriver _setfillpattern _getfillpattern _initgraph _cleardevice _rectangle _getcolor _getgraphmode _registerfarbgidriver _linerel _getviewsettings _outtext _getmoderange _getdrivername _setallpalette _gettextsettings _graphresult _graphdefaults _registerfarbgifont _pieslice _settextstyle _installuserfont _putimage _setgraphmode _setfillstyle _grapherrormsg _detectgraph _setaspectratio _setpalette _getpalette _restorecrtmode _getaspectratio _getmodename _getx _gety _moverel
+GRAPHICS.LIB	GRAPH	_BGI_TEXT	2599	354	0	-	_bar _getpalettesize _textwidth __installdevice __initdevice __gr_putimage __gr_setbkcolor __gr_setgraphmode __gr_moveto __gr_setfillstyle __gr_setallpalette __gr_lineto __gr_cleardevice __gr_settextstyle _setcolor _line __autodetect __gr_textheight _setrgbpalette __gr_setusercharsize _postdevice __gr_restorecrtmode __gr_setviewport _drawpoly _setvisualpage __gr_settextjustify _getarccoords _floodfill _fillpoly _bar3d _ellipse __gr_setpalette _getmaxcolor _getmaxmode _setwritemode __gr_detectgraph _setactivepage _fillellipse __gr_getmodename _getdefaultpalette _putpixel _getpixel __reinstalldevice _outtextxy @DGROUP _sector __gr_imagesize __gr_setfillpattern __gr_setlinestyle _getimage
+GRAPHICS.LIB	BGIOVR	_BGI_TEXT	6544	0	0	-	__GRP_ovr
