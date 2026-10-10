@@ -202,6 +202,5 @@ everywhere, and `results/character_record.md` documents the layout with evidence
 ## Legal
 
 This is a research and preservation project. You need your own copy of the game: the repository contains no
-original executable or game data files. Its sources and generated data tables are derived from the original program,
-so keep the repository private. *Might and Magic* is a trademark of its current owner; this project isn't
+original executable or game data files. *Might and Magic* is a trademark of its current owner; this project isn't
 affiliated with or endorsed by them.
