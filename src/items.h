@@ -24,111 +24,111 @@ struct chr {
 };
 
 /* own data (DGROUP 4e78-52d2) */
-extern u8 g_4e78[];
+extern u8 g_quest_item_ids[];
 
-extern u8 g_c49c, g_047d, g_e8f7, g_c520, g_e8ea, g_e8f4, g_e8f5, g_e8f6, g_c52d, g_00af, g_00aa,
-	g_f02b, g_4b7c, g_c4a2, g_c4a3, g_c4a4, g_c4a5, g_c4a8, g_c4a9, g_a747, g_a748, g_a749, g_a74a, g_a74b,
-	g_a74c, g_ecb6[], g_b9bb[], g_ecc9[], g_017f, g_00b5;
-extern char g_00b0, g_014f, g_015b, g_c53e, g_00b1;
-extern int g_0471, g_0473, g_c49a, g_e60e, g_b9c4, g_e8bc;
-extern unsigned g_0183;
-extern long g_ec54;
-extern char far *g_92f6, far *g_abda, far *g_ecdc, far *g_a742, far *g_027a, far *g_098d;
-extern char *g_5978[][9], *g_5412[], *g_52d2, *g_52d4, *g_5808[], *g_5a96[], *g_5a8a[], *g_56e6[];
-extern char g_d256[], g_e610[], g_e73c[], g_d66e[];
-extern struct chr *g_a74e, g_b9d6[];
-extern u8 g_0cd0[], g_0d19[], g_0a4c[], g_0a27[], g_0c87[], g_5ac9[];
-extern char g_0a88[], g_0acd[], g_0a9f[], g_0a71[];
-extern u8 g_c3de[], g_c3f1[], g_c404[], g_c417[], g_c42a[], g_c43d[];
-extern u8 g_e8e6[][3][9], g_e96d[][3][9], g_e9f4[][3][9], g_ea7b[][3][9], g_eb02[][3][9], g_eb89[][3][9];
-extern char g_12cf[][0x2e], g_1387[][0x2e];
-extern int g_143c[][0x2c];
-extern u8 g_159c[][0x58], g_c86f[][0x340];
-extern int *g_c522, *g_c524, *g_c526, *g_c528, g_0267[], g_026f[], g_0272[], g_0275[];
-extern u8 g_0278[];
-extern unsigned g_1c16[];
+extern u8 g_portrait_click_on, g_itemscr_hot_y, g_map_num, g_game_mode, g_party_count, g_party_dir, g_party_x, g_party_y, g_cur_town, g_party_cell_no_terrain, g_spell_anim_active,
+	g_target_slot, g_target_mon, g_mon_d0c_1, g_mon_d0c_2, g_mon_d0c_3, g_mon_d1c_1, g_mon_d1c_2, g_mon_d1c_3, g_mon_d2c_1, g_mon_d3c_1, g_mon_d2c_2, g_mon_d3c_2, g_mon_d2c_3,
+	g_mon_d3c_3, g_party_resisted[], g_missile_pos[], g_combat_order[], g_monster_scan_delay, g_spell_moved_party;
+extern char g_items_in_combat, g_combat_actor, g_outdoors, g_map_quadrant, g_cast_char;
+extern int g_itemscr_hot_x, g_itemscr_hot_x1, g_spell_hits_party, g_attack_type, g_attack_damage, g_attack_scope;
+extern unsigned g_free_mem_kb;
+extern long g_party_gold;
+extern char far *g_cur_icons, far *g_global_icons, far *g_charpow_sprites, far *g_pow_icon, far *g_bank_sprites_img, far *g_cpanel_buttons_img;
+extern char *g_item_action_labels[][9], *g_item_names[], *g_msg_cant_act, *g_msg_spell_failed, *g_class_names[], *g_attrib_names[], *g_damage_type_names[], *g_spell_names[];
+extern char g_text_buf[], g_text_buf2[], g_tmp_text[], g_draw_list[];
+extern struct chr *g_cur_char, g_party[];
+extern u8 g_weapon_dice_count[], g_weapon_die_sides[], g_elem_dmg_bonus[], g_elem_resist_bonus[], g_item_ac_values[], g_power_spell_ids[];
+extern char g_material_dmg_bonus[], g_attrib_bonus_values[], g_material_ac_bonus[], g_material_to_hit[];
+extern u8 g_shop_inv_flags[], g_shop_inv_elems[], g_shop_inv_materials[], g_shop_inv_attribs[], g_shop_inv_ids[], g_shop_inv_powers[];
+extern u8 g_shop_stock_flags[][3][9], g_shop_stock_elems[][3][9], g_shop_stock_materials[][3][9], g_shop_stock_attribs[][3][9], g_shop_stock_ids[][3][9], g_shop_stock_powers[][3][9];
+extern char g_view_dx_from7[][0x2e], g_view_dy_from7[][0x2e];
+extern int g_view_wall_masks_from2[][0x2c];
+extern u8 g_view_wall_shifts_from2[][0x58], g_map_door_strengths[][0x340];
+extern int *g_btn_xs, *g_btn_ys, *g_btn_ws, *g_btn_hs, g_bank_btn_xs[], g_bank_btn_ys[], g_bank_btn_ws[], g_bank_btn_hs[];
+extern u8 g_bank_sprites[];
+extern unsigned g_spell_gem_costs[];
 
-int far fn_124f_29dc(int, int);
-char far *far fn_124f_2a7f(char far *);
-void far fn_124f_2ab1(int, int, int, int, int, int, int, int, char far *);
-void far fn_124f_2abb(int);
-void far fn_124f_2ac5(char far *);
-void far fn_124f_2ad9(char far *, int, int, int, int);
-int far fn_1511_03aa(void);
-void far fn_1511_0d8e(int);
-void far fn_1511_1575(void *);
-void far fn_1523_0041(void);
-int far fn_1523_01ba(int);
-void far fn_1523_0506(int);
-u8 far fn_1523_1c1a(struct chr *);
-int far fn_1523_1c3b(void far *, int);
-unsigned far fn_1523_1d59(void far *);
-unsigned far fn_1523_1d81(void far *, int, int);
-void far fn_1523_1ec7(void);
-void far fn_1523_21ea(void);
-void far fn_1903_0008(struct chr *, int);
-void far fn_1903_0099(int);
-int far fn_1903_010e(int);
-int far fn_1903_0129(int);
-void far fn_1903_213b(int);
-void far fn_1b66_0009(void);
-int far fn_1b66_05b5(int, int, int);
-void far fn_1b66_07de(int, int, int, int);
-void far ovr_17f2_005c(void);
-void far ovr_17f2_0070(struct chr *, int);
-void far ovr_180c_002a(void);
-void far ovr_180c_002f(char *);
-void far ovr_180c_0034(struct chr *);
-void far ovr_180c_004d(struct chr far *, int);
-void far ovr_180c_0057(void);
-void far ovr_180c_006b(char *);
-void far ovr_180c_007a(void);
-void far ovr_180c_0084(void);
-int far ovr_1816_0039(char *, int);
-int far ovr_1816_006b(int, long, int);
-int far ovr_1816_0075(struct chr *);
-void far ovr_1821_0020(void);
-void far ovr_1821_005c(u8, void far *, int);
-struct chr *far ovr_182a_0039(struct chr *, int);
-unsigned far ovr_182a_0048(int, int);
-void far ovr_1839_0043(struct chr *, int);
-int far ovr_1867_0025(int, int, int);
-void far ovr_1867_002f(int);
-long far ovr_1867_0020(struct chr *, int, int, int);
-char *far ovr_1867_0057(struct chr *, int, char *, int);
-long far ovr_1867_0070(struct chr *, int, int, int, int);
-int far ovr_1843_0034(struct chr *, int);
-int far ovr_1843_0098(struct chr *);
-void far ovr_1843_0147(struct chr *, int);
-void far ovr_1843_0110(int);
-void far ovr_1843_00c5(int, int);
-void far ovr_1843_005c(void);
-void far ovr_1843_0020(void), ovr_1843_0025(void), ovr_1843_002a(void), ovr_1843_002f(void), ovr_1843_0039(void),
-	ovr_1843_003e(void), ovr_1843_0043(void), ovr_1843_0048(void), ovr_1843_004d(void), ovr_1843_0057(void),
-	ovr_1843_0061(void), ovr_1843_0066(void), ovr_1843_006b(void), ovr_1843_0070(void), ovr_1843_0075(void),
-	ovr_1843_007a(void), ovr_1843_007f(void), ovr_1843_0084(void), ovr_1843_0089(void), ovr_1843_008e(void),
-	ovr_1843_0093(void), ovr_1843_009d(void), ovr_1843_00a2(void), ovr_1843_00a7(void), ovr_1843_00ac(void),
-	ovr_1843_00b6(void), ovr_1843_00bb(void), ovr_1843_00c0(void), ovr_1843_00ca(void), ovr_1843_00cf(void),
-	ovr_1843_00d4(void), ovr_1843_00d9(void), ovr_1843_00de(void), ovr_1843_00e3(void), ovr_1843_00e8(void),
-	ovr_1843_00ed(void), ovr_1843_00f2(void), ovr_1843_00f7(void), ovr_1843_00fc(void), ovr_1843_0101(void),
-	ovr_1843_0106(void), ovr_1843_010b(void), ovr_1843_011f(void), ovr_1843_0124(void), ovr_1843_0129(void),
-	ovr_1843_012e(void), ovr_1843_0133(void), ovr_1843_0138(void), ovr_1843_013d(void), ovr_1843_0142(void),
-	ovr_1843_014c(void), ovr_1843_0151(void), ovr_1843_0156(void), ovr_1843_015b(void), ovr_1843_0160(void),
-	ovr_1843_016a(void), ovr_1843_016f(void), ovr_1843_0174(void), ovr_1843_0179(void), ovr_1843_017e(void),
-	ovr_1843_0183(void), ovr_1843_0188(void), ovr_1843_018d(void), ovr_1843_0192(void), ovr_1843_0197(void),
-	ovr_1843_019c(void), ovr_1843_01a1(void), ovr_1843_01a6(void), ovr_1843_01ab(void), ovr_1843_01b0(void),
-	ovr_1843_01b5(void), ovr_1843_01ba(void), ovr_1843_01bf(void), ovr_1843_01c4(void), ovr_1843_01c9(void),
-	ovr_1843_01ce(void), ovr_1843_01d3(void);
+int far random_range(int, int);
+char far *far load_graphic(char far *);
+void far open_text_window(int, int, int, int, int, int, int, int, char far *);
+void far close_windows(int);
+void far print_window_text(char far *);
+void far draw_icon(char far *, int, int, int, int);
+int far get_input(void);
+void far idle_frames_or_key(int);
+void far free_and_null(void *);
+void far update_party_disabled(void);
+int far party_has_skill(int);
+void far draw_wizard_eye(int);
+u8 far get_worst_condition(struct chr *);
+int far get_item_stat_bonus(void far *, int);
+unsigned far get_char_level(void far *);
+unsigned far get_char_stat(void far *, int, int);
+void far draw_party_portraits(void);
+void far update_free_mem_kb(void);
+void far char_take_damage(struct chr *, int);
+void far highlight_portrait(int);
+int far get_element_index(int);
+int far get_bonus_stat_index(int);
+void far play_sfx(int);
+void far refresh_view(void);
+int far get_cell_walls_region(int, int, int);
+void far set_cell_wall(int, int, int, int);
+void far clear_char_highlight(void);
+void far equip_item(struct chr *, int);
+void far pop_buttons(void);
+void far push_icons(char *);
+void far compact_backpack(struct chr *);
+void far clear_item_slot(struct chr far *, int);
+void far pop_icons(void);
+void far show_message(char *);
+void far set_anykey_buttons(void);
+void far push_buttons(void);
+int far ask_yes_no(char *, int);
+int far pay_cost(int, long, int);
+int far char_cannot_act(struct chr *);
+void far award_found_loot(void);
+void far generate_random_item(u8, void far *, int);
+struct chr *far spell_list_dialog(struct chr *, int);
+unsigned far spell_sp_cost(int, int);
+void far party_attack_monster(struct chr *, int);
+int far class_can_use_item(int, int, int);
+void far use_item_power(int);
+long far get_item_price(struct chr *, int, int, int);
+char *far format_item_name(struct chr *, int, char *, int);
+long far fix_identify_prompt(struct chr *, int, int, int, int);
+int far spell_pay_cost(struct chr *, int);
+int far char_can_shoot(struct chr *);
+void far spell_refund_cost(struct chr *, int);
+void far show_cant_cast_engaged(int);
+void far show_not_enough_to_cast(int, int);
+void far clear_party_attack_flags(void);
+void far spell_resurrect(void), spell_cure_paralysis(void), spell_dancing_sword(void), spell_awaken(void), spell_lightning_bolt(void),
+	spell_cold_ray(void), spell_moon_ray(void), spell_frost_bite(void), spell_finger_of_death(void), spell_enchant_item(void),
+	spell_create_food(void), spell_disintegrate(void), spell_create_rope(void), spell_mass_distortion(void), spell_suppress_poison(void),
+	spell_time_distortion(void), spell_incinerate(void), spell_acid_spray(void), spell_energy_blast(void), spell_suppress_disease(void),
+	spell_sleep(void), spell_acid_stream(void), spell_fantastic_freeze(void), spell_holy_word(void), spell_town_portal(void),
+	spell_dragon_breath(void), spell_prismatic_light(void), spell_power_cure(void), spell_blessed(void), spell_sparks(void),
+	spell_holy_bonus(void), spell_divine_intervention(void), spell_power_shield(void), spell_half_for_me(void), spell_toxic_cloud(void),
+	spell_pain(void), spell_jump(void), spell_light(void), spell_sun_ray(void), spell_prot_from_elements(void),
+	spell_silence(void), spell_star_burst(void), spell_flying_fist(void), spell_first_aid(void), spell_walk_on_water(void),
+	spell_etherealize(void), spell_raise_dead(void), spell_heroism(void), spell_fireball(void), spell_lloyds_beacon(void),
+	spell_turn_undead(void), spell_cure_wounds(void), spell_teleport(void), spell_stone_to_flesh(void), spell_levitate(void),
+	spell_implosion(void), spell_fiery_flail(void), spell_paralyze(void), spell_mega_volts(void), spell_identify_monster(void),
+	spell_feeble_mind(void), spell_cure_poison(void), spell_elemental_arrow(void), spell_detect_magic(void), spell_elemental_storm(void),
+	spell_wizard_eye(void), spell_inferno(void), spell_recharge_item(void), spell_super_shelter(void), spell_duplication(void),
+	spell_deadly_swarm(void), spell_immobilize(void), spell_cure_disease(void), spell_natures_cure(void), spell_revitalize(void),
+	spell_detect_monster(void), spell_natures_gate(void);
 
-int far ovr_1861_0034(struct chr *c, int cat, int slot, int base, int act);
-void far ovr_1861_0052(int slot, struct chr *c);
-int far ovr_1861_0043(int id);
-void far ovr_1861_0039(void);
-int far ovr_1861_0057(struct chr *c);
-void far ovr_1861_0025(int n);
-void far ovr_1861_0020(int n);
-int far ovr_1861_002a(struct chr *c, int id);
-void far ovr_1861_003e(int k);
-void far ovr_1861_002f(int x, int y, int dir);
-void far ovr_1861_004d(int n);
-int far ovr_1861_0048(int arg);
+int far do_item_action(struct chr *c, int cat, int slot, int base, int act);
+void far format_item_info(int slot, struct chr *c);
+int far is_quest_item(int id);
+void far show_please_wait(void);
+int far get_thievery(struct chr *c);
+void far save_shop_stock(int n);
+void far load_shop_stock(int n);
+int far get_item_equip_cat(struct chr *c, int id);
+void far draw_compass_button(int k);
+void far bash_door(int x, int y, int dir);
+void far spell_attack_monsters(int n);
+int far cast_spell_dialog(int arg);

@@ -8,6 +8,7 @@ NAMED = {'_main': '0003'}  # functions whose name cannot carry the orig offset
 def orig_off(name):
     """orig offset of a function from its name: fn_SSSS_OOOO / loc_SSSS_OOOO -> OOOO; ovr_SSSS_OOOO -> overlay code
     offset of stub entry OOOO (tools/ovr.py); NAMED for the rest. None if unknown."""
+    from names import orig as _o; name = _o(name)
     if name in NAMED: return int(NAMED[name], 16)
     mm = re.match(r'[_@](fn|loc|ovr)_([0-9a-f]{4})_([0-9a-f]{4})(\$.*)?$', name)
     if not mm: return None

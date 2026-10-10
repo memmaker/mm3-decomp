@@ -3,35 +3,35 @@ typedef unsigned char u8;
 typedef unsigned int u16;
 
 struct anim { u16 frame; int type; char pad[8]; };     /* 12-byte object records */
-extern struct anim g_a794[];
+extern struct anim g_map_objects_anim[];
 
-extern u8 g_00aa, g_00ac, g_0121, g_0122, g_0123, g_015d, g_0180, g_0185, g_8d60, g_8d61, g_8ef2, g_8ef3, g_92f5,
-	g_a746, g_a76e, g_abb3, g_abb6, g_abb7, g_abbe, g_abbf, g_abc0, g_abc1, g_abde, g_abdf, g_abe2, g_abf2, g_abf7,
-	g_abf8, g_abf9, g_abfa, g_abff, g_ac00, g_ac03, g_ac04, g_ac05, g_ac06, g_ac07, g_ac0a, g_ac0b, g_ac0c, g_ac0f,
-	g_ac10, g_ac11, g_ac12, g_ac13, g_ac1c, g_ac1d, g_ac1e, g_ac1f, g_ac20, g_ac24, g_ac25, g_ac26, g_acc2, g_acc3,
-	g_acc4, g_acc5, g_acc6, g_acc7, g_acc8, g_acc9, g_acca, g_acd5, g_ad4e, g_ad4f, g_ad50, g_ad51, g_ad52, g_ad53,
-	g_ad60, g_ad61, g_ad62, g_b98e, g_b98f, g_b9b8, g_b9b9, g_b9ba, g_b9c3, g_b9c6, g_b9c7, g_b9c8, g_c47d, g_c47e,
-	g_c498, g_c49d, g_c4a2, g_c4c6, g_c4c8, g_c4d7, g_c4fc, g_c4fd, g_c501, g_c502, g_c505, g_c506, g_c50e, g_c50f,
-	g_c512, g_c513, g_c520, g_c52a, g_c53a, g_c53b, g_c53c, g_c53d, g_d665, g_d666, g_d668, g_d669, g_d66a, g_d66b,
-	g_e8b8, g_e8b9, g_e8be, g_e8bf, g_e8c0, g_e8c1, g_ec80, g_ec81, g_ec86, g_ec87, g_ec89, g_ec8a, g_ec94, g_ec95,
-	g_ec97, g_ec9a, g_ec9b, g_ec9c, g_ec9d, g_ec9e, g_ec9f, g_eca0, g_eca1, g_eca2, g_eca6, g_ecac, g_ecad, g_ecae,
-	g_ecaf, g_ecb0, g_ecb1, g_ecb2, g_ecd2, g_ecd3, g_ecd4, g_ecd5, g_ecd6, g_ecd7, g_ecd8, g_ecd9, g_ecda, g_ece0,
-	g_ece1, g_ece4, g_ece5, g_ece6, g_ece7, g_ecf7, g_ecf8, g_ed72, g_ed73;
-extern u8 g_ab52[], g_b9bb[], g_1a6c[], g_2815[], g_00bb[], g_0e61[], g_0e77[];
-extern int g_b810[], g_b6bc[], g_0142[], g_d66e[];
-extern u16 g_b018[];
-extern long g_ecc4, g_c4b6, g_c4b2, g_a742;
-extern char g_ac27[], g_d256[], g_acd6[];
+extern u8 g_spell_anim_active, g_mon_missile_active, g_hover_phase_1, g_hover_phase_2, g_hover_phase_3, g_torch_frame, g_view_bg_flip, g_view_flip, g_wall_d3r4_torch, g_wall_d2l2, g_wall_d4l1_lside, g_wall_d4r1_rside, g_wall_d2r2,
+	g_wall_d3c, g_wall_d3c_lside, g_wall_d3c_rside, g_wall_d3c_t7, g_wall_d2c_t7, g_wall_d1l1, g_wall_d1r1, g_wall_d3l2, g_wall_d3l2_lside, g_wall_d3c_lside_t7, g_wall_d2c_lside_t7, g_wall_d4c_lside_t7, g_wall_d3r2, g_wall_d2l1_bashed,
+	g_wall_d2r1_bashed, g_wall_d2l1_locked, g_wall_d2r1_locked, g_wall_d2l1_door, g_wall_d2r1_door, g_wall_d3r2_rside, g_wall_d3l1_bashed, g_wall_d3r1_bashed, g_wall_d3c_rside_t7, g_wall_d2c_rside_t7, g_wall_d4c_rside_t7, g_wall_d3l1_locked, g_wall_d3r1_locked, g_wall_d3l3,
+	g_wall_d2l1_unlocked, g_wall_d2r1_unlocked, g_wall_d3l1_door, g_wall_d3r1_door, g_wall_d3l3_lside, g_wall_d2l1_torch, g_wall_d2r1_torch, g_wall_d3l1_unlocked, g_wall_d3r1_unlocked, g_wall_d3l1_torch, g_wall_d3r1_torch, g_wall_d0c, g_wall_d3r3, g_wall_d3r3_rside,
+	g_wall_d3l4, g_wall_d0c_lside, g_wall_d4c_lside, g_wall_d3l2_t7, g_wall_d2l2_t7, g_wall_d3l2_lside_t7, g_wall_d4l2_lside_t7, g_wall_d3r4, g_wall_d0c_rside, g_wall_d4c_rside, g_wall_d3r2_t7, g_wall_d2r2_t7, g_wall_d3r2_rside_t7, g_wall_d4r2_rside_t7,
+	g_wall_d3l3_t7, g_wall_d3l3_lside_t7, g_wall_d4l3_lside_t7, g_wall_d2l1, g_wall_d2r1, g_wall_d3r3_t7, g_wall_d3r3_rside_t7, g_wall_d4r3_rside_t7, g_wall_d2l1_lside, g_wall_d2r1_rside, g_wall_d4l2_lside, g_wall_d3l4_t7, g_wall_d4r2_rside, g_wall_d3r4_t7,
+	g_wall_d4l3_lside, g_wall_d1c, g_mon_d0c_1, g_obj_d0c, g_wall_d4r3_rside, g_wall_d1c_lside, g_wall_d3c_bashed, g_wall_d2c_bashed, g_wall_d3c_locked, g_wall_d2c_locked, g_wall_d3c_door, g_wall_d2c_door, g_wall_d3c_unlocked, g_wall_d2c_unlocked,
+	g_wall_d3c_torch, g_wall_d2c_torch, g_game_mode, g_wall_d1c_rside, g_wall_d3l1, g_wall_d3r1, g_wall_d3l1_lside, g_wall_d3r1_rside, g_wall_d3l2_bashed, g_wall_d2l2_bashed, g_wall_d3l2_locked, g_wall_d2l2_locked, g_wall_d3l2_door, g_wall_d2l2_door,
+	g_wall_d3l2_unlocked, g_wall_d2l2_unlocked, g_wall_d3l2_torch, g_wall_d2l2_torch, g_wall_d2c, g_dim_level, g_wall_d3r2_bashed, g_wall_d2r2_bashed, g_wall_d3r2_locked, g_wall_d2r2_locked, g_wall_d3r2_door, g_wall_d2r2_door, g_wall_d3r2_unlocked, g_wall_d2r2_unlocked,
+	g_wall_d3l3_bashed, g_wall_d3l3_locked, g_wall_d3r2_torch, g_wall_d2r2_torch, g_wall_d3l3_door, g_wall_d2l1_t7, g_wall_d2r1_t7, g_wall_d2l1_lside_t7, g_wall_d2r1_rside_t7, g_wall_d2c_lside, g_wall_d3l3_unlocked, g_wall_d3l1_t7, g_wall_d3r1_t7, g_wall_d3l1_lside_t7,
+	g_wall_d3r1_rside_t7, g_wall_d3l3_torch, g_wall_d4l1_lside_t7, g_wall_d4r1_rside_t7, g_wall_d3r3_bashed, g_wall_d3r3_locked, g_wall_d3r3_door, g_wall_d3r3_unlocked, g_wall_d2c_rside, g_wall_d3l4_bashed, g_wall_d3l4_locked, g_wall_d3r3_torch, g_wall_d3l4_door, g_obj_count,
+	g_wall_d3l4_unlocked, g_wall_d3l4_torch, g_wall_d0l1, g_wall_d0r1, g_wall_d3r4_bashed, g_wall_d3r4_locked, g_wall_d3r4_door, g_mon_count, g_wall_d3r4_unlocked;
+extern u8 g_missile_steps[], g_missile_pos[], g_mon_frame_counts[], g_obj_frame_counts[], g_step_sound_toggle[], g_class_hp_per_level[], g_sidewall_d1_t7_frames[];
+extern int g_mon_status[], g_mon_type[], g_missile_layers[], g_draw_list[];
+extern u16 g_mon_frames[];
+extern long g_sky_gfx, g_c4b6, g_c4b2, g_pow_icon;
+extern char g_view_caption[], g_text_buf[], g_border_sprites[];
 
-void far fn_1e40_0007(void);
-int *far fn_1523_2209(register int *o);
-int *far fn_1523_2d08(register int *o);
-void far fn_1903_213b(int);
-void far fn_1903_2168(int *o);
-void far fn_124f_2ac5(char far *);
-void far fn_124f_2acf(int, int);
-void far fn_1511_1575(void *);
-void far fn_1b66_0071(void);
-void far fn_1b66_24dd(register int *o);
+void far draw_maze_view(void);
+int *far add_view_sprites_d3(register int *o);
+int *far add_view_sprites_d2(register int *o);
+void far play_sfx(int);
+void far check_wall_list_size(int *o);
+void far print_window_text(char far *);
+void far fade_screen(int, int);
+void far free_and_null(void *);
+void far add_ui_gadget_sprites(void);
+void far add_view_sprites_near(register int *o);
 void *far memset(void *, int, unsigned);
 int far sprintf(char *, const char *, ...);

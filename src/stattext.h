@@ -3,39 +3,39 @@ typedef unsigned char u8;
 typedef unsigned int u16;
 
 struct anim { u16 frame; int type; char pad[8]; };     /* 12-byte object records */
-extern struct anim g_a794[];
+extern struct anim g_map_objects_anim[];
 
 /* own _DATA (statd.inc) */
-extern int g_1724, g_1726;
-extern u8 g_1728[2], g_172a[2], g_172c[2], g_172e[2], g_1730[2], g_1732[2], g_1734[2], g_1736[2], g_1738[2], g_173a[2];
+extern int g_outdoor_flip, g_outdoor_flip_tick;
+extern u8 g_terrain_frames_d4x4[2], g_terrain_frames_d4x3[2], g_terrain_frames_d4x2[2], g_terrain_frames_d4x1[2], g_terrain_frames_d3x2[2], g_terrain_frames_d3x1[2], g_terrain_frames_d2x2[2], g_terrain_frames_d2x1[2], g_terrain_frames_d1x1[2], g_terrain_frames_d0x1[2];
 
-extern u8 g_00aa, g_00ac, g_00af, g_0121, g_0122, g_0123, g_017f, g_0180, g_0185, g_c4a2, g_c4c6, g_c520, g_c52b,
-	g_e8f4, g_e8f5, g_e8f6, g_ece0, g_ed72;
-extern char g_e8c1;
-extern u8 g_ab52[], g_b9bb[], g_1a6c[], g_2815[], g_00bb[], g_00dd[], g_00e5[], g_00ed[], g_00f5[];
-extern int g_b810[], g_b6bc[], g_0142[], g_0165[], g_d66e[];
-extern u16 g_b018[];
-extern long g_ecc4, g_ec8c, g_a742, g_c4a6[];
-extern char g_ac27[], g_d256[], g_acd6[];
-extern char g_12c8[][46], g_1380[][46];      /* per-facing x / y offsets */
+extern u8 g_spell_anim_active, g_mon_missile_active, g_party_cell_no_terrain, g_hover_phase_1, g_hover_phase_2, g_hover_phase_3, g_monster_scan_delay, g_view_bg_flip, g_view_flip, g_mon_d0c_1, g_obj_d0c, g_game_mode, g_light_changed,
+	g_party_dir, g_party_x, g_party_y, g_obj_count, g_mon_count;
+extern char g_dim_level;
+extern u8 g_missile_steps[], g_missile_pos[], g_mon_frame_counts[], g_obj_frame_counts[], g_step_sound_toggle[], g_missile_d1_x[], g_missile_d1_y[], g_missile_d0_x[], g_missile_d0_y[];
+extern int g_mon_status[], g_mon_type[], g_missile_layers[], g_dir_block_bits[], g_draw_list[];
+extern u16 g_mon_frames[];
+extern long g_sky_gfx, g_water_gfx, g_pow_icon, g_mon_d1l1[];
+extern char g_view_caption[], g_text_buf[], g_border_sprites[];
+extern char g_view_dx[][46], g_view_dy[][46];      /* per-facing x / y offsets */
 
-void far fn_203f_000e(void);
-void far fn_203f_006a(void);
-void far fn_1b66_0889(void);
-void far fn_1b66_0adc(void);
-void far fn_1523_0920(void);
-void far fn_1523_0f7d(void);
-void far fn_1903_2328(void);
-int far fn_1b66_05b5(int, int, int);
-int *far fn_1523_2209(register int *o);
-int *far fn_1523_2d08(register int *o);
-int *far fn_1523_33fa(int *o);
-int *far fn_1523_39c1(int *o);
-void far fn_1903_213b(int);
-void far fn_1903_2168(int *o);
-void far fn_124f_2ac5(char far *);
-void far fn_124f_2acf(int, int);
-void far fn_1511_1575(void *);
-void far fn_1b66_0071(void);
+void far refresh_outdoor_view(void);
+void far draw_outdoor_view(void);
+void far clear_view_walls(void);
+void far update_darkness(void);
+void far scan_view_objects(void);
+void far scan_view_monsters(void);
+void far move_monsters(void);
+int far get_cell_walls_region(int, int, int);
+int *far add_view_sprites_d3(register int *o);
+int *far add_view_sprites_d2(register int *o);
+int *far add_view_sprites_d1(int *o);
+int *far add_view_sprites_d0(int *o);
+void far play_sfx(int);
+void far check_wall_list_size(int *o);
+void far print_window_text(char far *);
+void far fade_screen(int, int);
+void far free_and_null(void *);
+void far add_ui_gadget_sprites(void);
 void *far memset(void *, int, unsigned);
 int far sprintf(char *, const char *, ...);

@@ -7,41 +7,41 @@
 #include <dos.h>
 typedef unsigned char u8;
 
-extern char g_e610[], g_d256[], g_ece8[];
-extern char far *g_a76a, far *g_a78a, far *g_e8c2, far *g_eca8, far *g_abec;
-extern int g_c51e;
-extern u8 g_acbd, g_acbe, g_acbf, g_acc0;
-extern char g_c4ca, g_abb5, g_ec90, g_c49c;
-extern char g_0152, g_0153, g_0154, g_0155, g_0156, g_0157, g_0158, g_0159, g_e8f8, g_e8f9;
+extern char g_text_buf2[], g_text_buf[], g_cur_music[];
+extern char far *g_maze_script, far *g_map_text, far *g_mouse_cursor, far *g_roster, far *g_music_buf;
+extern int g_video_mode;
+extern u8 g_cfg_video, g_cfg_sound, g_cfg_sound_port_lo, g_cfg_sound_port_hi;
+extern char g_cmdline_c_flag, g_no_sound, g_archive_open, g_portrait_click_on;
+extern char g_snd_dev_3, g_snd_dev_6, g_snd_dev_0, g_snd_dev_2, g_snd_dev_1, g_snd_dev_4, g_snd_dev_5, g_music_enabled, g_sfx_on, g_music_on;
 
 #include "mdata.inc"
 
-void far ovr_17f2_0066(void);
-void far ovr_17f2_007f(void);
-void far ovr_17f2_0084(int);
-void far ovr_17f2_0093(void);
-void far fn_124f_2bb8(void);
-void far fn_1511_0128(void);
-void far fn_124f_2a93(int, char far *);
-void far ovr_1821_0070(int);
-void far ovr_180c_0066(void);
-int far ovr_1806_0025(void);
-void far fn_124f_0146(void);
-char far *far fn_124f_2aed(char far *);
-void far fn_124f_2a2a(int, char far *);
-void far fn_168b_000e(int);
-void far fn_168b_008f(int);
-char far *far fn_124f_0034(unsigned);
-void far fn_124f_2a75(char far *);
-void far fn_124f_2acf(int, int);
-void far fn_1511_1575(char far **);
-void far fn_124f_2ab1(int, int, int, int, int, int, int, int, char far *);
-char far *far fn_124f_2a7f(char far *);
-void far fn_1511_1606(void);
-void far fn_1511_0cee(void);
-int far ovr_1821_0043(char *, int, int);
-void far fn_124f_2abb(int);
-void far fn_124f_2a89(char far *);
+void far quit_to_dos(void);
+void far check_config_and_disk(void);
+void far fatal_missing_file(int);
+void far play_intro(void);
+void far install_break_handlers(void);
+void far reset_session_timer(void);
+void far set_mouse_cursor(int, char far *);
+void far options_menu(int);
+void far inn_roster_screen(void);
+int far game_main_loop(void);
+void far open_cc_archive(void);
+char far *far load_cc_file(char far *);
+void far load_video_driver(int, char far *);
+void far load_sound_driver(int);
+void far snd_init(int);
+char far *far mem_alloc(unsigned);
+void far show_raw_picture(char far *);
+void far fade_screen(int, int);
+void far free_and_null(char far **);
+void far open_text_window(int, int, int, int, int, int, int, int, char far *);
+char far *far load_graphic(char far *);
+void far load_monster_tables(void);
+void far flush_input(void);
+int far input_text(char *, int, int);
+void far close_windows(int);
+void far free_graphic(char far *);
 
 int far main(int argc, char **argv)
 {
@@ -67,7 +67,7 @@ int far main(int argc, char **argv)
 	asm db 61h,66h,74h,73h
 	asm dec ax
 	asm jz l53
-	ovr_17f2_0066();
+	quit_to_dos();
 	asm cmp ax,8043h
 	asm jz l4c
 	asm pop cx
@@ -93,10 +93,10 @@ l53:
 	for (i = 1; i < argc; i++) {
 		switch (toupper(argv[i][0])) {
 		case 'C':
-			g_c4ca = 0;
+			g_cmdline_c_flag = 0;
 			break;
 		case 'S':
-			g_abb5 = 0;
+			g_no_sound = 0;
 			break;
 		}
 	}
@@ -105,67 +105,67 @@ l53:
 		cputs("\r\nMight and Magic ]I[ - Version 1.0\n\n");
 		exit(1);
 	}
-	ovr_17f2_007f();
-	fn_124f_2bb8();
-	fn_1511_0128();
-	g_ec90 = 0;
-	switch (g_acbd) {
+	check_config_and_disk();
+	install_break_handlers();
+	reset_session_timer();
+	g_archive_open = 0;
+	switch (g_cfg_video) {
 	case 0:
-		g_c51e = 0;
+		g_video_mode = 0;
 		break;
 	case 1:
-		g_c51e = 4;
+		g_video_mode = 4;
 		break;
 	case 2:
-		g_c51e = 3;
+		g_video_mode = 3;
 		break;
 	case 3:
-		g_c51e = 1;
+		g_video_mode = 1;
 		break;
 	case 4:
-		g_c51e = 5;
+		g_video_mode = 5;
 		break;
 	default:
-		ovr_17f2_0084(0);
+		fatal_missing_file(0);
 	}
-	switch (g_acbe) {
+	switch (g_cfg_sound) {
 	case 0:
-		g_0154 = 1;
+		g_snd_dev_0 = 1;
 		break;
 	case 1:
-		g_0156 = 1;
+		g_snd_dev_1 = 1;
 		break;
 	case 2:
-		g_0155 = 1;
+		g_snd_dev_2 = 1;
 		break;
 		asm ;	/* two empty asm lines: keep the code below (entered via the self-check's pushed return address 0x177) and inflate BCC's jump-size estimate */
 		asm ;
 		x = 0;
-		fn_124f_2a93(0, g_e8c2);
+		set_mouse_cursor(0, g_mouse_cursor);
 		for (;;) {
-			ovr_1821_0070(x);
+			options_menu(x);
 			x = 1;
 			do
-				ovr_180c_0066();
-			while (ovr_1806_0025() == 2);
+				inn_roster_screen();
+			while (game_main_loop() == 2);
 		}
 	case 3:
-		g_0152 = 1;
+		g_snd_dev_3 = 1;
 		break;
 	case 4:
-		g_0157 = 1;
+		g_snd_dev_4 = 1;
 		break;
 	case 5:
-		g_0158 = 1;
+		g_snd_dev_5 = 1;
 		break;
 	case 6:
-		g_0153 = 1;
+		g_snd_dev_6 = 1;
 		break;
 	default:
-		ovr_17f2_0084(0);
+		fatal_missing_file(0);
 	}
 l1d3:
-	fn_124f_0146();
+	open_cc_archive();
 	asm mov ah,2ah
 	asm int 21h
 	asm pop bx
@@ -176,7 +176,7 @@ l1d3:
 	asm xchg dh,dl
 	asm sbb dx,di
 	asm push dx
-	p = fn_124f_2aed("timer.drv");
+	p = load_cc_file("timer.drv");
 	asm mov ah,2ch
 	asm int 21h
 	asm rcl dx,cl
@@ -189,26 +189,26 @@ l1d3:
 	asm adc al,ah
 	asm and al,0feh
 	asm push ax
-	fn_124f_2a2a(g_c51e, p);
+	load_video_driver(g_video_mode, p);
 	asm pop bx
 	asm sub bh,bh
 	asm mov bx,word ptr cs:[bx+484h]
 	asm push bx
-	g_0159 = g_0153 || g_0154 || g_0155 || g_0156 || g_0157 || g_0152;
-	if (g_abb5)
-		g_0159 = 0;
+	g_music_enabled = g_snd_dev_6 || g_snd_dev_0 || g_snd_dev_2 || g_snd_dev_1 || g_snd_dev_4 || g_snd_dev_3;
+	if (g_no_sound)
+		g_music_enabled = 0;
 	else {
-		fn_168b_000e(g_acbe);
-		fn_168b_008f(g_acbf + (g_acc0 << 8));
+		load_sound_driver(g_cfg_sound);
+		snd_init(g_cfg_sound_port_lo + (g_cfg_sound_port_hi << 8));
 	}
-	g_abec = fn_124f_0034(0x1890);
-	g_e8f9 = g_e8f8 = 1;
-	ovr_17f2_0093();
-	if (g_acbd == 4)
-		fn_124f_2a75("logy5.raw");
+	g_music_buf = mem_alloc(0x1890);
+	g_music_on = g_sfx_on = 1;
+	play_intro();
+	if (g_cfg_video == 4)
+		show_raw_picture("logy5.raw");
 	else
-		fn_124f_2a75("control.raw");
-	fn_124f_2acf(1, 4);
+		show_raw_picture("control.raw");
+	fade_screen(1, 4);
 	asm pop ax
 	asm sub ax,31h
 	asm rol al,1
@@ -237,11 +237,11 @@ l1d3:
 	asm and ah,0fh
 	asm mov ca,ah
 	asm push ax
-	g_a76a = fn_124f_2aed("copy.bin");
-	_fstrncpy(g_e610, g_a76a, 0x10e);
-	fn_1511_1575(&g_a76a);
-	sprintf(g_d256, g_e610, c9, cb, ca);
-	fn_124f_2ab1(0x32, 0x23, 0xdc, 0x82, 0, 0x96, 4, 6, g_d256);
+	g_maze_script = load_cc_file("copy.bin");
+	_fstrncpy(g_text_buf2, g_maze_script, 0x10e);
+	free_and_null(&g_maze_script);
+	sprintf(g_text_buf, g_text_buf2, c9, cb, ca);
+	open_text_window(0x32, 0x23, 0xdc, 0x82, 0, 0x96, 4, 6, g_text_buf);
 	asm pop cx
 	asm or cx,cx
 	asm jnz l3b0
@@ -253,7 +253,7 @@ l1d3:
 l3af:
 	asm db 0d7h
 l3b0:
-	g_c49c = 0;
+	g_portrait_click_on = 0;
 	asm mov ax,cs
 	asm mov ds,ax
 	asm mov es,ax
@@ -280,23 +280,23 @@ l3d2:
 	asm int 21h
 	asm pop es
 	asm pop ds
-	g_eca8 = 0;
+	g_roster = 0;
 	asm push cs
-	g_a76a = g_a78a = 0;
+	g_maze_script = g_map_text = 0;
 	asm mov x,si
-	g_e8c2 = fn_124f_2a7f("mouse.icn");
+	g_mouse_cursor = load_graphic("mouse.icn");
 	asm push ax
 	asm push bp
 	asm mov bp,sp
 	asm mov word ptr [bp+2],2ch
 	asm pop bp
-	fn_1511_1606();
-	strcpy(g_ece8, "mm3theme.m");
+	load_monster_tables();
+	strcpy(g_cur_music, "mm3theme.m");
 	asm push word ptr p+2
-	fn_1511_0cee();
+	flush_input();
 	asm push x
-	x = ovr_1821_0043(buf, 16, 200);
-	fn_124f_2abb(1);
+	x = input_text(buf, 16, 200);
+	close_windows(1);
 	asm pop di
 	asm sub ax,ax
 	asm push ax
@@ -337,7 +337,7 @@ l3d2:
 	asm db 04fh,0dfh,0dbh,017h,0f0h,0fch,0d9h,0ffh,0d4h,096h,09ah,0d7h,0e1h,9,0dch,0feh
 	asm db 0c4h,098h,08bh,03eh,0b1h,0dah,059h
 	asm add word ptr cs:[1a2h],cx
-	fn_124f_2a89(p);
+	free_graphic(p);
 	asm pop cx
 	asm add cx,887eh
 	asm jnz l631

@@ -3,30 +3,30 @@
 
 /* 0000: item action act (0/8 equip, 1 remove, 2 use, 3 discard; shop 0 sell, 1 repair, 2 identify; buy, recharge,
    duplicate, enchant) on c's slot (asks for the slot when out of range) */
-int far ovr_1861_0034(register struct chr *c, int cat, register int slot, int base, int act)
+int far do_item_action(register struct chr *c, int cat, register int slot, int base, int act)
 {
 	char far *sv = 0;
 	int a, n, f48, f64, f63;
 	long price;
 
 	if (!c->adc[0]) return 0;
-	g_c49c = 0;
+	g_portrait_click_on = 0;
 	if ((slot < 0 || slot > 0x11) && act != 1) {
 		int s[10];
 
-		g_0471 = 0xeb;
-		g_0473 = -1;
-		g_047d = 0x6f;
-		if (g_92f6) sv = g_92f6;
+		g_itemscr_hot_x = 0xeb;
+		g_itemscr_hot_x1 = -1;
+		g_itemscr_hot_y = 0x6f;
+		if (g_cur_icons) sv = g_cur_icons;
 		memset(s, 0, 0x14);
 		s[0] = s[7] = -1;
 		s[3] = 0xb1;
-		g_92f6 = fn_124f_2a7f("esc.icn");
-		*(char far **)(s + 1) = g_92f6;
-		sprintf(g_d256, "\t010\x0b""005%s which item?\x05%p", g_5978[cat][act], s);
-		fn_124f_2ab1(0x32, 0x67, 0xd8, 0x24, 0, 0x96, 4, 6, g_d256);
+		g_cur_icons = load_graphic("esc.icn");
+		*(char far **)(s + 1) = g_cur_icons;
+		sprintf(g_text_buf, "\t010\x0b""005%s which item?\x05%p", g_item_action_labels[cat][act], s);
+		open_text_window(0x32, 0x67, 0xd8, 0x24, 0, 0x96, 4, 6, g_text_buf);
 		for (;;) {
-			slot = fn_1511_03aa();
+			slot = get_input();
 			if (!slot || slot == 0x1b) {
 				slot = -1;
 				break;
@@ -38,12 +38,12 @@ int far ovr_1861_0034(register struct chr *c, int cat, register int slot, int ba
 				break;
 			}
 		}
-		fn_124f_2abb(1);
-		fn_1511_1575(&g_92f6);
-		g_92f6 = sv;
-		g_0471 = 0x5b;
-		g_0473 = 0x81;
-		g_047d = 0x6d;
+		close_windows(1);
+		free_and_null(&g_cur_icons);
+		g_cur_icons = sv;
+		g_itemscr_hot_x = 0x5b;
+		g_itemscr_hot_x1 = 0x81;
+		g_itemscr_hot_y = 0x6d;
 		if (slot == -1) goto out;
 	}
 	switch (act) {
@@ -52,32 +52,32 @@ int far ovr_1861_0034(register struct chr *c, int cat, register int slot, int ba
 			switch (cat) {
 			case 0:
 				if (c->adc[slot] > 0x47) {
-					sprintf(g_e610, "%s is not equippable!", g_5412[c->adc[slot]]);
-					ovr_180c_006b(g_e610);
+					sprintf(g_text_buf2, "%s is not equippable!", g_item_names[c->adc[slot]]);
+					show_message(g_text_buf2);
 				} else
-					ovr_17f2_0070(c, slot);
+					equip_item(c, slot);
 				break;
 			case 1:
 				if (c->a90[slot] & 0x40)
-					ovr_180c_006b("\x03""cYou cannot remove a cursed item!");
+					show_message("\x03""cYou cannot remove a cursed item!");
 				else
 					c->a7d[slot] = 0;
 				break;
 			case 2:
-				if (!g_e8f7) {
-					ovr_180c_006b("\x0b""007What's your hurry?\nWait till you get out of here!");
+				if (!g_map_num) {
+					show_message("\x0b""007What's your hurry?\nWait till you get out of here!");
 					break;
 				}
-				switch (fn_1523_1c1a(c)) {
+				switch (get_worst_condition(c)) {
 				case 8: case 11: case 12: case 13: case 14: case 15:
-					sprintf(g_e73c, g_52d2, c);
-					ovr_180c_006b(g_e73c);
-					g_c49c = 1;
+					sprintf(g_tmp_text, g_msg_cant_act, c);
+					show_message(g_tmp_text);
+					g_portrait_click_on = 1;
 					break;
 				default:
-					if (g_00b0) {
-						ovr_180c_006b("\x0b""007To use an item in Combat, invoke the Use command on your turn!");
-						g_c49c = 1;
+					if (g_items_in_combat) {
+						show_message("\x0b""007To use an item in Combat, invoke the Use command on your turn!");
+						g_portrait_click_on = 1;
 						break;
 					}
 					f48 = c->adc[slot] == 0x48;
@@ -89,36 +89,36 @@ int far ovr_1861_0034(register struct chr *c, int cat, register int slot, int ba
 							n = c->a90[slot] & 0x3f;
 							if (c->adc[slot] == 0x63) n = 2;
 							c->a90[slot] = --n;
-							g_a74e = c;
-							fn_124f_2abb(g_c520 == 2 ? 2 : 3);
-							ovr_1867_002f(f48 ? 1 : f64 ? 0x4c : f63 ? 0x4d : c->aef[slot]);
+							g_cur_char = c;
+							close_windows(g_game_mode == 2 ? 2 : 3);
+							use_item_power(f48 ? 1 : f64 ? 0x4c : f63 ? 0x4d : c->aef[slot]);
 							if (n < 1) {
-								ovr_180c_004d(c, slot);
-								ovr_180c_0034(c);
+								clear_item_slot(c, slot);
+								compact_backpack(c);
 							}
-							g_014f = -1;
-							g_c49c = 1;
+							g_combat_actor = -1;
+							g_portrait_click_on = 1;
 							return 1;
 						} else
-							sprintf(g_d256, "%shas no special abilities!", ovr_1867_0057(c, slot, g_e73c, 0));
+							sprintf(g_text_buf, "%shas no special abilities!", format_item_name(c, slot, g_tmp_text, 0));
 					} else
-						sprintf(g_d256, "%s needs to be equipped to be used!", ovr_1867_0057(c, slot, g_e73c, 0));
-					ovr_180c_006b(g_d256);
-					g_c49c = 1;
+						sprintf(g_text_buf, "%s needs to be equipped to be used!", format_item_name(c, slot, g_tmp_text, 0));
+					show_message(g_text_buf);
+					g_portrait_click_on = 1;
 				}
 				break;
 			case 3:
-				if (!ovr_1861_0043(c->adc[slot]) && !(c->a90[slot] & 0x40)) {
-					sprintf(g_d256, "Permanently discard %s?", ovr_1867_0057(c, slot, g_e73c, 0));
-					if (!ovr_1816_0039(g_d256, 0)) break;
-					ovr_180c_004d(c, slot);
-					ovr_180c_0034(c);
+				if (!is_quest_item(c->adc[slot]) && !(c->a90[slot] & 0x40)) {
+					sprintf(g_text_buf, "Permanently discard %s?", format_item_name(c, slot, g_tmp_text, 0));
+					if (!ask_yes_no(g_text_buf, 0)) break;
+					clear_item_slot(c, slot);
+					compact_backpack(c);
 					if (act == 8) return 2;
 				} else if (c->a90[slot] & 0x40)
-					ovr_180c_006b("\x03""cYou cannot discard a cursed item!");
+					show_message("\x03""cYou cannot discard a cursed item!");
 				else {
-					sprintf(g_d256, "The %s is necessary and cannot be discarded!", ovr_1867_0057(c, slot, g_e73c, 0));
-					ovr_180c_006b(g_d256);
+					sprintf(g_text_buf, "The %s is necessary and cannot be discarded!", format_item_name(c, slot, g_tmp_text, 0));
+					show_message(g_text_buf);
 				}
 				break;
 			}
@@ -129,97 +129,97 @@ int far ovr_1861_0034(register struct chr *c, int cat, register int slot, int ba
 			switch (cat) {
 			case 0:
 				if ((c->adc[slot] < 0x46 && !(c->a90[slot] & 0x40)) || c->adc[slot] == 0x4b || c->adc[slot] == 0x52) {
-					price = ovr_1867_0020(c, slot, act, !c->f2f | 0x80);
-					sprintf(g_d256, "Sell %s for %lu gold?", ovr_1867_0057(c, slot, g_e73c, 0), price);
-					if (!ovr_1816_0039(g_d256, 0)) break;
-					ovr_180c_004d(c, slot);
-					g_ec54 += price;
-					ovr_180c_0034(c);
+					price = get_item_price(c, slot, act, !c->f2f | 0x80);
+					sprintf(g_text_buf, "Sell %s for %lu gold?", format_item_name(c, slot, g_tmp_text, 0), price);
+					if (!ask_yes_no(g_text_buf, 0)) break;
+					clear_item_slot(c, slot);
+					g_party_gold += price;
+					compact_backpack(c);
 				} else {
-					sprintf(g_d256, "We have no need of this %s!", ovr_1867_0057(c, slot, g_e73c, 0));
-					ovr_180c_006b(g_d256);
+					sprintf(g_text_buf, "We have no need of this %s!", format_item_name(c, slot, g_tmp_text, 0));
+					show_message(g_text_buf);
 				}
 				break;
 			case 1:
 				if (!(c->a90[slot] & 0x80)) {
-					ovr_180c_006b("That item is not broken!");
+					show_message("That item is not broken!");
 					break;
 				}
-				price = ovr_1867_0070(c, slot, act, 0, cat);
-				if (!ovr_1816_0039(g_d256, 0)) break;
-				if (!ovr_1816_006b(0, price, 0)) break;
+				price = fix_identify_prompt(c, slot, act, 0, cat);
+				if (!ask_yes_no(g_text_buf, 0)) break;
+				if (!pay_cost(0, price, 0)) break;
 				c->a90[slot] &= 0x7f;
 				break;
 			case 2:
-				price = ovr_1867_0070(c, slot, act, 1, cat);
-				if (!ovr_1816_0039(g_d256, 0)) break;
-				if (!ovr_1816_006b(0, price, 0)) break;
-				ovr_1861_0052(slot, c);
-				sprintf(g_d256, "\x03""cIdentify Item\x03l\n\n\x0b""012\x0c""22%s\n\n%s", ovr_1867_0057(c, slot, g_e73c, 0), g_d66e);
-				fn_124f_2ab1(0, 7, 0x140, 0x83, 0, 0x96, 4, 6, g_d256);
-				ovr_180c_0084();
-				ovr_180c_007a();
-				fn_1511_03aa();
-				ovr_180c_002a();
-				fn_124f_2abb(1);
+				price = fix_identify_prompt(c, slot, act, 1, cat);
+				if (!ask_yes_no(g_text_buf, 0)) break;
+				if (!pay_cost(0, price, 0)) break;
+				format_item_info(slot, c);
+				sprintf(g_text_buf, "\x03""cIdentify Item\x03l\n\n\x0b""012\x0c""22%s\n\n%s", format_item_name(c, slot, g_tmp_text, 0), g_draw_list);
+				open_text_window(0, 7, 0x140, 0x83, 0, 0x96, 4, 6, g_text_buf);
+				push_buttons();
+				set_anykey_buttons();
+				get_input();
+				pop_buttons();
+				close_windows(1);
 				break;
 			}
 		}
 		break;
 	case 1:
 		if (c->adc[slot]) {
-			if (g_a74e->adc[0x11]) {
-				sprintf(g_e73c, "\x03""c%s's backpack is full.", g_a74e);
-				ovr_180c_006b(g_e73c);
+			if (g_cur_char->adc[0x11]) {
+				sprintf(g_tmp_text, "\x03""c%s's backpack is full.", g_cur_char);
+				show_message(g_tmp_text);
 				break;
 			}
-			price = ovr_1867_0020(c, slot, act, 0);
-			sprintf(g_d256, "Buy %s for %lu gold?", ovr_1867_0057(c, slot, g_e73c, 0), price);
-			if (!ovr_1816_0039(g_d256, 0)) break;
-			if (!ovr_1816_006b(0, price, 0)) break;
-			g_a74e->a90[0x11] = c->a90[slot];
-			g_a74e->aa3[0x11] = c->aa3[slot];
-			g_a74e->ab6[0x11] = c->ab6[slot];
-			g_a74e->ac9[0x11] = c->ac9[slot];
-			g_a74e->adc[0x11] = c->adc[slot];
-			g_a74e->aef[0x11] = c->aef[slot];
-			ovr_180c_004d(c, slot);
-			ovr_180c_0034(c);
-			ovr_180c_0034(g_a74e);
+			price = get_item_price(c, slot, act, 0);
+			sprintf(g_text_buf, "Buy %s for %lu gold?", format_item_name(c, slot, g_tmp_text, 0), price);
+			if (!ask_yes_no(g_text_buf, 0)) break;
+			if (!pay_cost(0, price, 0)) break;
+			g_cur_char->a90[0x11] = c->a90[slot];
+			g_cur_char->aa3[0x11] = c->aa3[slot];
+			g_cur_char->ab6[0x11] = c->ab6[slot];
+			g_cur_char->ac9[0x11] = c->ac9[slot];
+			g_cur_char->adc[0x11] = c->adc[slot];
+			g_cur_char->aef[0x11] = c->aef[slot];
+			clear_item_slot(c, slot);
+			compact_backpack(c);
+			compact_backpack(g_cur_char);
 		}
 		break;
 	case 4:
 		if (c->adc[slot]) {
 			if (c->adc[slot] > 0x47) goto norech;
 			if (c->aef[slot]) {
-				a = fn_124f_29dc(1, 6);
-				fn_1903_213b(0x14);
+				a = random_range(1, 6);
+				play_sfx(0x14);
 				if ((c->a90[slot] & 0xbf) + a > 0x3f)
 					c->a90[slot] |= 0x3f;
 				else
 					c->a90[slot] += a;
 			} else {
 norech:
-				fn_1903_213b(0x15);
-				sprintf(g_e73c, "\x03""cNot Recharagable.  %s", g_52d4);
-				ovr_180c_006b(g_e73c);
+				play_sfx(0x15);
+				sprintf(g_tmp_text, "\x03""cNot Recharagable.  %s", g_msg_spell_failed);
+				show_message(g_tmp_text);
 			}
 		}
 		break;
 	case 5:
 		if (c->adc[slot]) {
 			if (c->adc[0x11]) {
-				sprintf(g_e73c, "\x03""cBackpack Full.  %s", g_52d4);
-				ovr_180c_006b(g_e73c);
+				sprintf(g_tmp_text, "\x03""cBackpack Full.  %s", g_msg_spell_failed);
+				show_message(g_tmp_text);
 				break;
 			}
 			switch (c->ac9[slot]) {
 			case 9: case 10: case 0x11: case 0x12: case 0x19: case 0x1a: case 0x21: case 0x22: case 0x27: case 0x28:
 			case 0x2d: case 0x2e: case 0x32: case 0x33: case 0x38: case 0x39: case 0x3d: case 0x3e: case 0x47: case 0x48:
 			toopow:
-				sprintf(g_e73c, "\x03""cItem too Powerful.  %s", g_52d4);
-				fn_1903_213b(0x15);
-				ovr_180c_006b(g_e73c);
+				sprintf(g_tmp_text, "\x03""cItem too Powerful.  %s", g_msg_spell_failed);
+				play_sfx(0x15);
+				show_message(g_tmp_text);
 				break;
 			default:
 				switch (c->aa3[slot]) {
@@ -233,35 +233,35 @@ norech:
 				c->ac9[0x11] = c->ac9[slot];
 				c->adc[0x11] = c->adc[slot];
 				c->aef[0x11] = c->aef[slot];
-				ovr_180c_0034(c);
-				fn_1903_213b(0x14);
+				compact_backpack(c);
+				play_sfx(0x14);
 			}
 		}
 		break;
 	case 6:
 		if (c->adc[slot]) {
 			if (c->aa3[slot] || c->ab6[slot] || c->ac9[slot] || c->aef[slot] || c->adc[slot] > 0x47) {
-				sprintf(g_e73c, "\x03""cNot Enchantable.  %s", g_52d4);
-				fn_1903_213b(0x15);
-				ovr_180c_006b(g_e73c);
+				sprintf(g_tmp_text, "\x03""cNot Enchantable.  %s", g_msg_spell_failed);
+				play_sfx(0x15);
+				show_message(g_tmp_text);
 				break;
 			}
 			a = c->adc[slot];
-			f63 = fn_124f_29dc(1, fn_1523_1d59(g_a74e) / 10 + 1);
+			f63 = random_range(1, get_char_level(g_cur_char) / 10 + 1);
 			if (f63 > 5) f63 = 5;
-			ovr_1821_005c(f63, c, slot);
+			generate_random_item(f63, c, slot);
 			c->adc[slot] = a;
-			fn_1903_213b(0x14);
+			play_sfx(0x14);
 		}
 		break;
 	}
 out:
-	g_c49c = 1;
+	g_portrait_click_on = 1;
 	return 0;
 }
 
-/* 0a16: item info text into g_d66e */
-void far ovr_1861_0052(register int slot, register struct chr *c)
+/* 0a16: item info text into g_draw_list */
+void far format_item_info(register int slot, register struct chr *c)
 {
 	char i;
 	char s4[10];
@@ -273,24 +273,24 @@ void far ovr_1861_0052(register int slot, register struct chr *c)
 	int v28, v2a, v2c, v2e, v30;
 	char s0[40], s1[40], s2[40], s3[40];
 
-	out = g_d66e;
+	out = g_draw_list;
 	memset(s0, 0, 0x28);
 	for (i = k = 0; i <= 9; i++)
-		if (ovr_1867_0025(i, c->adc[slot], 1)) {
-			s0[k++] = g_5808[i][0];
-			s0[k++] = g_5808[i][1];
+		if (class_can_use_item(i, c->adc[slot], 1)) {
+			s0[k++] = g_class_names[i][0];
+			s0[k++] = g_class_names[i][1];
 			s0[k++] = ' ';
 		}
-	if (ovr_1861_0043(c->adc[slot]))
+	if (is_quest_item(c->adc[slot]))
 		strcpy(s0, "None");
 	else if (k == 0x1e)
 		strcpy(s0, "All");
-	v30 = g_0cd0[c->adc[slot]] + g_0a88[c->ab6[slot]];
-	v26 = g_0cd0[c->adc[slot]] * g_0d19[c->adc[slot]] + g_0a88[c->ab6[slot]];
-	v28 = g_0a4c[c->aa3[slot]];
-	v2a = g_0a27[c->aa3[slot]];
-	v2c = g_0acd[c->ac9[slot]];
-	v2e = (c->adc[slot] < 0x22 ? 0 : g_0a9f[c->ab6[slot]]) + g_0c87[c->adc[slot]];
+	v30 = g_weapon_dice_count[c->adc[slot]] + g_material_dmg_bonus[c->ab6[slot]];
+	v26 = g_weapon_dice_count[c->adc[slot]] * g_weapon_die_sides[c->adc[slot]] + g_material_dmg_bonus[c->ab6[slot]];
+	v28 = g_elem_dmg_bonus[c->aa3[slot]];
+	v2a = g_elem_resist_bonus[c->aa3[slot]];
+	v2c = g_attrib_bonus_values[c->ac9[slot]];
+	v2e = (c->adc[slot] < 0x22 ? 0 : g_material_ac_bonus[c->ab6[slot]]) + g_item_ac_values[c->adc[slot]];
 	if (c->adc[slot] > 0x49) {
 		strcpy(s1, c->adc[slot] == 0x64 ? "+5 Might" : "None");
 		strcpy(s2, "None");
@@ -299,93 +299,93 @@ void far ovr_1861_0052(register int slot, register struct chr *c)
 		strcpy(s5, "None");
 		strcpy(s6, "None");
 	} else {
-		sprintf(s1, "%+d %s", v2c, g_5a96[fn_1903_0129(c->ac9[slot])]);
-		sprintf(s2, "%+d %s Damage", v28, g_5a8a[i = fn_1903_010e(c->aa3[slot])]);
-		sprintf(s3, "%+d %s", v2a, g_5a8a[i]);
+		sprintf(s1, "%+d %s", v2c, g_attrib_names[get_bonus_stat_index(c->ac9[slot])]);
+		sprintf(s2, "%+d %s Damage", v28, g_damage_type_names[i = get_element_index(c->aa3[slot])]);
+		sprintf(s3, "%+d %s", v2a, g_damage_type_names[i]);
 		sprintf(s4, "%d to %d", v30 < 1 ? 0 : v30, v26);
-		sprintf(s5, "%+d", g_0a71[c->ab6[slot]]);
+		sprintf(s5, "%+d", g_material_to_hit[c->ab6[slot]]);
 		sprintf(s6, "%+d", v2e);
 	}
 	sprintf(out, "Proficient Classes\t132:\t140%s\nto Hit Modifier\t132:\t140%s\nPhysical Damage\t132:\t140%s\n"
 		"Elemental Damage\t132:\t140%s\nElemental Resistance\t132:\t140%s\nArmor Class Bonus\t132:\t140%s\n"
 		"Attribute Bonus\t132:\t140%s\nSpecial Power\t132:\t140%s",
 		s0,
-		g_0a71[c->ab6[slot]] && c->adc[slot] < 0x22 ? s5 : "None",
+		g_material_to_hit[c->ab6[slot]] && c->adc[slot] < 0x22 ? s5 : "None",
 		c->adc[slot] && c->adc[slot] < 0x22 && v26 > 0 ? s4 : "None",
 		c->aa3[slot] && c->adc[slot] < 0x22 ? s2 : "None",
 		v2a ? s3 : "None",
 		v2e && c->adc[slot] > 0x21 ? s6 : "None",
 		v2c ? s1 : "None",
-		g_56e6[g_5ac9[c->aef[slot]]]);
+		g_spell_names[g_power_spell_ids[c->aef[slot]]]);
 }
 
 /* 0db3: quest item that can't be discarded */
-int far ovr_1861_0043(int id)
+int far is_quest_item(int id)
 {
 	register int i;
 
 	for (i = 0; i < 0x10; i++)
-		if (g_4e78[i] == id) return 1;
+		if (g_quest_item_ids[i] == id) return 1;
 	return 0;
 }
 
 /* 0dd6 */
-void far ovr_1861_0039(void)
+void far show_please_wait(void)
 {
-	fn_124f_2ab1(0x67, 0x9c, 0x72, 0x1e, 0, 0x96, 4, 6, "\x03""c\x0b""002Please Wait...");
+	open_text_window(0x67, 0x9c, 0x72, 0x1e, 0, 0x96, 4, 6, "\x03""c\x0b""002Please Wait...");
 }
 
 /* 0e07 */
-int far ovr_1861_0057(register struct chr *c)
+int far get_thievery(register struct chr *c)
 {
 	register int v;
 
-	v = fn_1523_1d59(c) << 1;
+	v = get_char_level(c) << 1;
 	if (c->cls == 6) v += 0xf;
 	else if (c->cls == 5) v += 0x1e;
 	if (c->f11 == 1 || c->f11 == 3) v += 10;
 	else if (c->f11 == 2) v += 5;
 	else if (c->f11 == 4) v -= 10;
-	v = v + fn_1523_1c3b(c, 10);
+	v = v + get_item_stat_bonus(c, 10);
 	if (!c->f27) v = 0;
 	return v < 1 ? 0 : v;
 }
 
 /* 0e83: save the party item tables into slot n */
-void far ovr_1861_0025(register int n)
+void far save_shop_stock(register int n)
 {
 	register int i;
 
 	for (i = 0; i < 9; i++) {
-		g_e8e6[g_c52d][n][i] = g_c3de[i];
-		g_e96d[g_c52d][n][i] = g_c3f1[i];
-		g_e9f4[g_c52d][n][i] = g_c404[i];
-		g_ea7b[g_c52d][n][i] = g_c417[i];
-		g_eb02[g_c52d][n][i] = g_c42a[i];
-		g_eb89[g_c52d][n][i] = g_c43d[i];
+		g_shop_stock_flags[g_cur_town][n][i] = g_shop_inv_flags[i];
+		g_shop_stock_elems[g_cur_town][n][i] = g_shop_inv_elems[i];
+		g_shop_stock_materials[g_cur_town][n][i] = g_shop_inv_materials[i];
+		g_shop_stock_attribs[g_cur_town][n][i] = g_shop_inv_attribs[i];
+		g_shop_stock_ids[g_cur_town][n][i] = g_shop_inv_ids[i];
+		g_shop_stock_powers[g_cur_town][n][i] = g_shop_inv_powers[i];
 	}
 }
 
 /* 0f4b: load them back */
-void far ovr_1861_0020(register int n)
+void far load_shop_stock(register int n)
 {
 	register int i;
 
 	for (i = 0; i < 9; i++) {
-		g_c3de[i] = g_e8e6[g_c52d][n][i];
-		g_c3f1[i] = g_e96d[g_c52d][n][i];
-		g_c404[i] = g_e9f4[g_c52d][n][i];
-		g_c417[i] = g_ea7b[g_c52d][n][i];
-		g_c42a[i] = g_eb02[g_c52d][n][i];
-		g_c43d[i] = g_eb89[g_c52d][n][i];
+		g_shop_inv_flags[i] = g_shop_stock_flags[g_cur_town][n][i];
+		g_shop_inv_elems[i] = g_shop_stock_elems[g_cur_town][n][i];
+		g_shop_inv_materials[i] = g_shop_stock_materials[g_cur_town][n][i];
+		g_shop_inv_attribs[i] = g_shop_stock_attribs[g_cur_town][n][i];
+		g_shop_inv_ids[i] = g_shop_stock_ids[g_cur_town][n][i];
+		g_shop_inv_powers[i] = g_shop_stock_powers[g_cur_town][n][i];
 	}
 }
 
 /* 1013: item category of id for c (0 = class can't use) */
-int far ovr_1861_002a(register struct chr *c, register int id)
+int far get_item_equip_cat(register struct chr *c, register int id)
 {
 	if (id > 0x48) return 2;
-	if (!ovr_1867_0025(c->cls, id, 1)) return 0;
+	if (!class_can_use_item(c->cls, id, 1)) return 0;
 	if (id <= 0x11) return 1;
 	if (id <= 0x1d) return 0xd;
 	if (id <= 0x21) return 4;
@@ -403,14 +403,14 @@ int far ovr_1861_002a(register struct chr *c, register int id)
 }
 
 /* 10c8 */
-void far ovr_1861_003e(register int k)
+void far draw_compass_button(register int k)
 {
 	int buf[20];
 	register int *p;
 
 	p = buf - 1;
 	*++p = -1;
-	*(char far **)++p = g_abda;
+	*(char far **)++p = g_global_icons;
 	p++;
 	*++p = 0x64;
 	*++p = 0x7c;
@@ -419,23 +419,23 @@ void far ovr_1861_003e(register int k)
 	*++p = 0x6e;
 	*++p = 0x83;
 	*++p = 0;
-	*++p = fn_1523_01ba(6) ? (k ? 0x14 : 0xf) + g_e8f4 : (k ? 0x13 : 0xe);
+	*++p = party_has_skill(6) ? (k ? 0x14 : 0xf) + g_party_dir : (k ? 0x13 : 0xe);
 	*++p = -1;
 	*(long *)++p = 0;
-	sprintf(g_e610, "\x03""d\x05%p", buf);
-	fn_124f_2ac5(g_e610);
+	sprintf(g_text_buf2, "\x03""d\x05%p", buf);
+	print_window_text(g_text_buf2);
 }
 
 /* 1186: bash the door at x,y facing dir */
-void far ovr_1861_002f(int x, int y, int dir)
+void far bash_door(int x, int y, int dir)
 {
 	int ny, a, b, thr;
 	register int i, v;
 
-	if (g_015b) return;
-	fn_1903_213b(0x19);
-	for (i = a = b = 0; i < g_e8ea; i++)
-		switch (fn_1523_1c1a(&g_b9d6[i])) {
+	if (g_outdoors) return;
+	play_sfx(0x19);
+	for (i = a = b = 0; i < g_party_count; i++)
+		switch (get_worst_condition(&g_party[i])) {
 		case 8: case 11: case 12: case 13: case 14: case 15:
 			break;
 		default:
@@ -446,27 +446,27 @@ void far ovr_1861_002f(int x, int y, int dir)
 			}
 		}
 found:
-	fn_1903_0008(&g_b9d6[a - 1], 2);
-	fn_124f_2ad9(g_ecdc, 0, (a - 1) * 0x26 + 0xb, 0x95, 0);
+	char_take_damage(&g_party[a - 1], 2);
+	draw_icon(g_charpow_sprites, 0, (a - 1) * 0x26 + 0xb, 0x95, 0);
 	if (b) {
-		fn_124f_2ad9(g_ecdc, 0, (b - 1) * 0x26 + 0xb, 0x95, 0);
-		fn_1903_0008(&g_b9d6[b - 1], 2);
+		draw_icon(g_charpow_sprites, 0, (b - 1) * 0x26 + 0xb, 0x95, 0);
+		char_take_damage(&g_party[b - 1], 2);
 	}
-	if (fn_1b66_05b5(g_12cf[dir][0] + x, g_1387[dir][0] + y, 0x7777) != 0x1111) {
-		v = fn_1523_1d81(&g_b9d6[a - 1], 0, 0) + (b ? fn_1523_1d81(&g_b9d6[b - 1], 0, 0) : 0);
-		v += fn_124f_29dc(1, 0x1e);
-		switch (fn_1b66_05b5(g_e8f5, g_e8f6, g_143c[g_e8f4][0]) >> g_159c[g_e8f4][0]) {
+	if (get_cell_walls_region(g_view_dx_from7[dir][0] + x, g_view_dy_from7[dir][0] + y, 0x7777) != 0x1111) {
+		v = get_char_stat(&g_party[a - 1], 0, 0) + (b ? get_char_stat(&g_party[b - 1], 0, 0) : 0);
+		v += random_range(1, 0x1e);
+		switch (get_cell_walls_region(g_party_x, g_party_y, g_view_wall_masks_from2[g_party_dir][0]) >> g_view_wall_shifts_from2[g_party_dir][0]) {
 		case 4:
-			thr = g_c86f[g_c53e][1];
+			thr = g_map_door_strengths[g_map_quadrant][1];
 			break;
 		case 2:
-			thr = g_c86f[g_c53e][0];
+			thr = g_map_door_strengths[g_map_quadrant][0];
 			break;
 		default:
-			thr = g_c86f[g_c53e][2];
+			thr = g_map_door_strengths[g_map_quadrant][2];
 		}
 		if (v >= thr) {
-			fn_1b66_07de(x, y, dir, 5);
+			set_cell_wall(x, y, dir, 5);
 			i = x;
 			ny = y;
 			switch (dir) {
@@ -475,380 +475,380 @@ found:
 			case 2: i = x + 1; v = 3; break;
 			case 3: i = x - 1; v = 2; break;
 			}
-			fn_1b66_07de(i, ny, v, 5);
+			set_cell_wall(i, ny, v, 5);
 		}
 	}
-	fn_1523_0041();
-	fn_1511_0d8e(2);
-	fn_1523_1ec7();
+	update_party_disabled();
+	idle_frames_or_key(2);
+	draw_party_portraits();
 }
 
 /* 141e: power-up animation n over the party (11 = everyone it applies to) */
-void far ovr_1861_004d(int n)
+void far spell_attack_monsters(int n)
 {
 	int s4b7c, found, sf02b;
 	u8 buf[3];
 	u8 k;
 	register int f, i;
 
-	g_00af = !fn_1b66_05b5(g_e8f5, g_e8f6, 0x70);
+	g_party_cell_no_terrain = !get_cell_walls_region(g_party_x, g_party_y, 0x70);
 	if (n == 11) {
-		g_c49a = 1;
-		if (!g_e60e) {
-			g_b9c4 = 0;
-			for (i = found = 0; i < g_e8ea; i++)
-				if (ovr_1843_0098(&g_b9d6[i])) {
-					g_b9bb[i] = 1;
+		g_spell_hits_party = 1;
+		if (!g_attack_type) {
+			g_attack_damage = 0;
+			for (i = found = 0; i < g_party_count; i++)
+				if (char_can_shoot(&g_party[i])) {
+					g_missile_pos[i] = 1;
 					found = 1;
 				}
 		} else {
-			g_b9bb[0] = 1;
+			g_missile_pos[0] = 1;
 			found = 1;
 		}
 		if (found)
-			fn_1903_213b(0xc);
+			play_sfx(0xc);
 		else {
-			fn_1903_213b(0x15);
+			play_sfx(0x15);
 			return;
 		}
 	} else {
-		g_b9bb[0] = 1;
-		g_c49a = 0;
+		g_missile_pos[0] = 1;
+		g_spell_hits_party = 0;
 	}
-	g_00aa = 1;
-	sprintf(g_e73c, "pow%d.icn", n);
-	if (g_a742) fn_1511_1575(&g_a742);
-	fn_1523_21ea();
-	if (g_0183 > 7)
-		g_a742 = fn_124f_2a7f(g_e73c);
-	else if (g_0183)
-		g_a742 = fn_124f_2a7f("pow11.icn");
-	sf02b = g_f02b;
-	s4b7c = g_4b7c;
+	g_spell_anim_active = 1;
+	sprintf(g_tmp_text, "pow%d.icn", n);
+	if (g_pow_icon) free_and_null(&g_pow_icon);
+	update_free_mem_kb();
+	if (g_free_mem_kb > 7)
+		g_pow_icon = load_graphic(g_tmp_text);
+	else if (g_free_mem_kb)
+		g_pow_icon = load_graphic("pow11.icn");
+	sf02b = g_target_slot;
+	s4b7c = g_target_mon;
 	f = k = 0;
 	memset(buf, 0, 3);
-	if (g_c4a2) buf[k++] = g_c4a2;
-	if (g_c4a3) buf[k++] = g_c4a3;
-	if (g_c4a4) buf[k++] = g_c4a4;
-	g_f02b = 0xff;
-	if (g_4b7c != 0xff) {
-		g_f02b = sf02b - 1;
+	if (g_mon_d0c_1) buf[k++] = g_mon_d0c_1;
+	if (g_mon_d0c_2) buf[k++] = g_mon_d0c_2;
+	if (g_mon_d0c_3) buf[k++] = g_mon_d0c_3;
+	g_target_slot = 0xff;
+	if (g_target_mon != 0xff) {
+		g_target_slot = sf02b - 1;
 		buf[0] = s4b7c + 1;
 	}
-	fn_1b66_0009();
+	refresh_view();
 	for (k = 0; k < 3; k++) {
-		g_f02b++;
+		g_target_slot++;
 		if (buf[k]) {
-			memset(g_ecb6, 0, 8);
-			g_4b7c = buf[k] - 1;
-			ovr_1839_0043(g_a74e, 1);
+			memset(g_party_resisted, 0, 8);
+			g_target_mon = buf[k] - 1;
+			party_attack_monster(g_cur_char, 1);
 			f = 1;
-			if (!g_e8bc) { ovr_1843_005c(); goto restore; }
+			if (!g_attack_scope) { clear_party_attack_flags(); goto restore; }
 		} else
-			fn_1b66_0009();
+			refresh_view();
 	}
-	if (f && g_e8bc == 1) { ovr_1843_005c(); goto restore; }
-	if (g_a742) {
+	if (f && g_attack_scope == 1) { clear_party_attack_flags(); goto restore; }
+	if (g_pow_icon) {
 		k = 0;
 		memset(buf, 0, 3);
-		if (g_c4a5) buf[k++] = g_c4a5;
-		if (g_c4a8) buf[k++] = g_c4a8;
-		if (g_c4a9) buf[k++] = g_c4a9;
+		if (g_mon_d1c_1) buf[k++] = g_mon_d1c_1;
+		if (g_mon_d1c_2) buf[k++] = g_mon_d1c_2;
+		if (g_mon_d1c_3) buf[k++] = g_mon_d1c_3;
 		for (k = 0; k < 3; k++) {
-			g_f02b++;
+			g_target_slot++;
 			if (buf[k]) {
-				g_4b7c = buf[k] - 1;
-				memset(g_ecb6, 0, 8);
-				ovr_1839_0043(g_a74e, 1);
+				g_target_mon = buf[k] - 1;
+				memset(g_party_resisted, 0, 8);
+				party_attack_monster(g_cur_char, 1);
 				f = 1;
-				if (!g_e8bc) { ovr_1843_005c(); goto restore; }
+				if (!g_attack_scope) { clear_party_attack_flags(); goto restore; }
 			} else
-				fn_1b66_0009();
+				refresh_view();
 		}
-		if (f && g_e8bc == 1) { ovr_1843_005c(); goto restore; }
+		if (f && g_attack_scope == 1) { clear_party_attack_flags(); goto restore; }
 	} else
-		{ ovr_1843_005c(); goto restore; }
-	if (g_a742) {
+		{ clear_party_attack_flags(); goto restore; }
+	if (g_pow_icon) {
 		k = 0;
 		memset(buf, 0, 3);
-		if (g_a747) buf[k++] = g_a747;
-		if (g_a749) buf[k++] = g_a749;
-		if (g_a74b) buf[k++] = g_a74b;
+		if (g_mon_d2c_1) buf[k++] = g_mon_d2c_1;
+		if (g_mon_d2c_2) buf[k++] = g_mon_d2c_2;
+		if (g_mon_d2c_3) buf[k++] = g_mon_d2c_3;
 		for (k = 0; k < 3; k++) {
-			g_f02b++;
+			g_target_slot++;
 			if (buf[k]) {
-				g_4b7c = buf[k] - 1;
-				memset(g_ecb6, 0, 8);
-				ovr_1839_0043(g_a74e, 1);
+				g_target_mon = buf[k] - 1;
+				memset(g_party_resisted, 0, 8);
+				party_attack_monster(g_cur_char, 1);
 				f = 1;
-				if (!g_e8bc) { ovr_1843_005c(); goto restore; }
+				if (!g_attack_scope) { clear_party_attack_flags(); goto restore; }
 			} else
-				fn_1b66_0009();
+				refresh_view();
 		}
-		if (f && g_e8bc == 1) { ovr_1843_005c(); goto restore; }
+		if (f && g_attack_scope == 1) { clear_party_attack_flags(); goto restore; }
 	} else
-		{ ovr_1843_005c(); goto restore; }
-	if (g_a742) {
+		{ clear_party_attack_flags(); goto restore; }
+	if (g_pow_icon) {
 		k = 0;
 		memset(buf, 0, 3);
-		if (g_a748) buf[k++] = g_a748;
-		if (g_a74a) buf[k++] = g_a74a;
-		if (g_a74c) buf[k++] = g_a74c;
+		if (g_mon_d3c_1) buf[k++] = g_mon_d3c_1;
+		if (g_mon_d3c_2) buf[k++] = g_mon_d3c_2;
+		if (g_mon_d3c_3) buf[k++] = g_mon_d3c_3;
 		for (k = 0; k < 3; k++) {
-			g_f02b++;
+			g_target_slot++;
 			if (buf[k]) {
-				g_4b7c = buf[k] - 1;
-				memset(g_ecb6, 0, 8);
-				ovr_1839_0043(g_a74e, 1);
+				g_target_mon = buf[k] - 1;
+				memset(g_party_resisted, 0, 8);
+				party_attack_monster(g_cur_char, 1);
 				f = 1;
-				if (!g_e8bc) { ovr_1843_005c(); goto restore; }
+				if (!g_attack_scope) { clear_party_attack_flags(); goto restore; }
 			} else
-				fn_1b66_0009();
+				refresh_view();
 		}
-		if (f && g_e8bc == 1) { ovr_1843_005c(); goto restore; }
+		if (f && g_attack_scope == 1) { clear_party_attack_flags(); goto restore; }
 	} else
-		ovr_1843_005c();
+		clear_party_attack_flags();
 restore:
-	g_4b7c = s4b7c;
-	g_f02b = sf02b;
-	ovr_1821_0020();
+	g_target_mon = s4b7c;
+	g_target_slot = sf02b;
+	award_found_loot();
 }
 
 /* 191f: cast-spell dialog (arg != 0: cast the ready spell of the current combatant) */
-int far ovr_1861_0048(int arg)
+int far cast_spell_dialog(int arg)
 {
 	int key, mode, res, s17f;
 	struct chr *p;
 	register int sp, r;
 
-	mode = g_c520;
-	g_c520 = 3;
+	mode = g_game_mode;
+	g_game_mode = 3;
 	res = 0;
-	s17f = g_017f;
-	g_017f = 0;
+	s17f = g_monster_scan_delay;
+	g_monster_scan_delay = 0;
 	if (arg) {
-		p = &g_b9d6[g_ecc9[g_014f]];
+		p = &g_party[g_combat_order[g_combat_actor]];
 		goto cast;
 	}
-	ovr_180c_0084();
-	ovr_180c_002f("cast.icn");
-	g_027a = g_92f6;
-	g_c522 = g_0267;
-	g_c524 = g_026f;
-	g_c526 = g_0272;
-	g_c528 = g_0275;
+	push_buttons();
+	push_icons("cast.icn");
+	g_bank_sprites_img = g_cur_icons;
+	g_btn_xs = g_bank_btn_xs;
+	g_btn_ys = g_bank_btn_ys;
+	g_btn_ws = g_bank_btn_ws;
+	g_btn_hs = g_bank_btn_hs;
 	if (mode == 2)
-		key = g_014f;
-	else if (g_00b1 < 0 || (u8)g_00b1 >= g_e8ea) {
-		for (key = g_e8ea - 1; key >= 0; key--)
-			if (g_b9d6[key].f7a) {
-				g_00b1 = key;
+		key = g_combat_actor;
+	else if (g_cast_char < 0 || (u8)g_cast_char >= g_party_count) {
+		for (key = g_party_count - 1; key >= 0; key--)
+			if (g_party[key].f7a) {
+				g_cast_char = key;
 				break;
 			}
 	} else
-		key = g_00b1;
-	p = &g_b9d6[mode == 2 ? g_ecc9[key] : key];
-	fn_1903_0099(key);
+		key = g_cast_char;
+	p = &g_party[mode == 2 ? g_combat_order[key] : key];
+	highlight_portrait(key);
 	sp = p->f7b == 0xff ? 0x4d : p->f7b;
-	sprintf(g_d256, "\r\x05%p\x02\x03""c\x0b""122\t013\x0c""27C\x0c""dast\t040\x0c""27N\x0c""dew\t067ESC\x01\t000\x0b""000\x03""cCast Spell\n\n%s\x03l\n\nSpell Ready:\x03""c\n\n\x0c""12%s\x0c""d\x02\x03l\n\x0b""082Cost\x03r\t077%u/%u\x03l\nCur SP\x03r\t077%u\x01",
-		g_0278, p, g_56e6[sp], ovr_182a_0048(sp, fn_1523_1d59(p)), g_1c16[sp], p->f127);
-	fn_124f_2ab1(0xe2, 0, 0x5d, 0x92, 0, 0x96, 4, 6, g_d256);
+	sprintf(g_text_buf, "\r\x05%p\x02\x03""c\x0b""122\t013\x0c""27C\x0c""dast\t040\x0c""27N\x0c""dew\t067ESC\x01\t000\x0b""000\x03""cCast Spell\n\n%s\x03l\n\nSpell Ready:\x03""c\n\n\x0c""12%s\x0c""d\x02\x03l\n\x0b""082Cost\x03r\t077%u/%u\x03l\nCur SP\x03r\t077%u\x01",
+		g_bank_sprites, p, g_spell_names[sp], spell_sp_cost(sp, get_char_level(p)), g_spell_gem_costs[sp], p->f127);
+	open_text_window(0xe2, 0, 0x5d, 0x92, 0, 0x96, 4, 6, g_text_buf);
 	do {
-		switch (key = fn_1511_03aa()) {
+		switch (key = get_input()) {
 		case 0: case 'C':
-			if (p->f7b >= 0 && p->f7b < 0x4d && !ovr_1816_0075(p)) {
+			if (p->f7b >= 0 && p->f7b < 0x4d && !char_cannot_act(p)) {
 cast:
-				if ((r = ovr_1843_0034(p, p->f7b)) == 0) {
+				if ((r = spell_pay_cost(p, p->f7b)) == 0) {
 					res = 1;
-					g_a74e = p;
-					g_c520 = mode;
+					g_cur_char = p;
+					g_game_mode = mode;
 					switch (p->f7b) {
-					case 0x0: ovr_1843_00f7(); break;
-					case 0x1: ovr_1843_002f(); break;
-					case 0x2: ovr_1843_0124(); break;
-					case 0x3: ovr_1843_011f(); break;
-					case 0x4: ovr_1843_0192(); break;
-					case 0x5: ovr_1843_018d(); break;
-					case 0x6: ovr_1843_01c9(); break;
-					case 0x7: ovr_1843_0151(); break;
-					case 0x8: ovr_1843_00cf(); break;
-					case 0x9: ovr_1843_0089(); break;
-					case 0xa: ovr_1843_0093(); break;
-					case 0xb: ovr_1843_00ed(); break;
-					case 0xc: ovr_1843_006b(); break;
-					case 0xd: ovr_1843_00e8(); break;
-					case 0xe: ovr_1843_0075(); break;
-					case 0xf: ovr_1843_0101(); break;
-					case 0x10: ovr_1843_014c(); break;
+					case 0x0: spell_light(); break;
+					case 0x1: spell_awaken(); break;
+					case 0x2: spell_first_aid(); break;
+					case 0x3: spell_flying_fist(); break;
+					case 0x4: spell_detect_magic(); break;
+					case 0x5: spell_elemental_arrow(); break;
+					case 0x6: spell_revitalize(); break;
+					case 0x7: spell_cure_wounds(); break;
+					case 0x8: spell_sparks(); break;
+					case 0x9: spell_energy_blast(); break;
+					case 0xa: spell_sleep(); break;
+					case 0xb: spell_pain(); break;
+					case 0xc: spell_create_rope(); break;
+					case 0xd: spell_toxic_cloud(); break;
+					case 0xe: spell_suppress_poison(); break;
+					case 0xf: spell_prot_from_elements(); break;
+					case 0x10: spell_turn_undead(); break;
 					case 0x11:
 						if (mode == 2) {
-							ovr_1843_0147(g_a74e, p->f7b);
+							spell_refund_cost(g_cur_char, p->f7b);
 							res = 0;
 							if (arg) goto out;
-							ovr_1843_0110(p->f7b);
+							show_cant_cast_engaged(p->f7b);
 						} else
-							ovr_1843_00f2();
+							spell_jump();
 						break;
-					case 0x12: ovr_1843_009d(); break;
-					case 0x13: ovr_1843_008e(); break;
-					case 0x14: ovr_1843_0106(); break;
-					case 0x15: ovr_1843_00ca(); break;
-					case 0x16: ovr_1843_0160(); break;
+					case 0x12: spell_acid_stream(); break;
+					case 0x13: spell_suppress_disease(); break;
+					case 0x14: spell_silence(); break;
+					case 0x15: spell_blessed(); break;
+					case 0x16: spell_levitate(); break;
 					case 0x17:
 						if (mode == 2) {
-							ovr_1843_0147(g_a74e, p->f7b);
+							spell_refund_cost(g_cur_char, p->f7b);
 							res = 0;
 							if (arg) goto out;
-							ovr_1843_0110(p->f7b);
+							show_cant_cast_engaged(p->f7b);
 						} else
-							ovr_1843_019c();
+							spell_wizard_eye();
 						break;
-					case 0x18: ovr_1843_017e(); break;
-					case 0x19: ovr_1843_00d4(); break;
-					case 0x1a: ovr_1843_00c0(); break;
-					case 0x1b: ovr_1843_01c4(); break;
-					case 0x1c: ovr_1843_0039(); break;
-					case 0x1d: ovr_1843_01ba(); break;
-					case 0x1e: ovr_1843_0138(); break;
-					case 0x1f: ovr_1843_0129(); break;
-					case 0x20: ovr_1843_0048(); break;
+					case 0x18: spell_identify_monster(); break;
+					case 0x19: spell_holy_bonus(); break;
+					case 0x1a: spell_power_cure(); break;
+					case 0x1b: spell_natures_cure(); break;
+					case 0x1c: spell_lightning_bolt(); break;
+					case 0x1d: spell_immobilize(); break;
+					case 0x1e: spell_heroism(); break;
+					case 0x1f: spell_walk_on_water(); break;
+					case 0x20: spell_frost_bite(); break;
 					case 0x21:
 						if (mode == 2) {
-							ovr_1843_0147(g_a74e, p->f7b);
+							spell_refund_cost(g_cur_char, p->f7b);
 							res = 0;
 							if (arg) goto out;
-							ovr_1843_0110(p->f7b);
+							show_cant_cast_engaged(p->f7b);
 						} else
-							ovr_1843_0142();
+							spell_lloyds_beacon();
 						break;
-					case 0x22: ovr_1843_00de(); break;
-					case 0x23: ovr_1843_0188(); break;
-					case 0x24: ovr_1843_013d(); break;
-					case 0x25: ovr_1843_01ce(); break;
-					case 0x26: ovr_1843_0084(); break;
-					case 0x27: ovr_1843_003e(); break;
-					case 0x28: ovr_1843_01bf(); break;
+					case 0x22: spell_power_shield(); break;
+					case 0x23: spell_cure_poison(); break;
+					case 0x24: spell_fireball(); break;
+					case 0x25: spell_detect_monster(); break;
+					case 0x26: spell_acid_spray(); break;
+					case 0x27: spell_cold_ray(); break;
+					case 0x28: spell_cure_disease(); break;
 					case 0x29:
 						if (mode == 2) {
-							ovr_1843_0147(g_a74e, p->f7b);
+							spell_refund_cost(g_cur_char, p->f7b);
 							res = 0;
 							if (arg) goto out;
-							ovr_1843_0110(p->f7b);
+							show_cant_cast_engaged(p->f7b);
 						} else
-							ovr_1843_01d3();
+							spell_natures_gate();
 						break;
-					case 0x2a: ovr_1843_007a(); break;
-					case 0x2b: ovr_1843_0183(); break;
-					case 0x2c: ovr_1843_01b5(); break;
+					case 0x2a: spell_time_distortion(); break;
+					case 0x2b: spell_feeble_mind(); break;
+					case 0x2c: spell_deadly_swarm(); break;
 					case 0x2d:
 						if (mode == 2) {
-							ovr_1843_0147(g_a74e, p->f7b);
+							spell_refund_cost(g_cur_char, p->f7b);
 							res = 0;
 							if (arg) goto out;
-							ovr_1843_0110(p->f7b);
+							show_cant_cast_engaged(p->f7b);
 						} else
-							ovr_1843_0156();
+							spell_teleport();
 						break;
-					case 0x2e: ovr_1843_004d(); break;
-					case 0x2f: ovr_1843_0025(); break;
-					case 0x30: ovr_1843_0174(); break;
-					case 0x31: ovr_1843_00b6(); break;
+					case 0x2e: spell_finger_of_death(); break;
+					case 0x2f: spell_cure_paralysis(); break;
+					case 0x30: spell_paralyze(); break;
+					case 0x31: spell_dragon_breath(); break;
 					case 0x32:
 						if (mode == 2) {
-							ovr_1843_0147(g_a74e, p->f7b);
+							spell_refund_cost(g_cur_char, p->f7b);
 							res = 0;
 							if (arg) goto out;
-							ovr_1843_0110(p->f7b);
+							show_cant_cast_engaged(p->f7b);
 						} else
-							ovr_1843_01ab();
+							spell_super_shelter();
 						break;
-					case 0x33: ovr_1843_016f(); break;
-					case 0x34: ovr_1843_0061(); break;
+					case 0x33: spell_fiery_flail(); break;
+					case 0x34: spell_create_food(); break;
 					case 0x35:
 						if (mode == 2) {
-							ovr_1843_0147(g_a74e, p->f7b);
+							spell_refund_cost(g_cur_char, p->f7b);
 							res = 0;
 							if (arg) goto out;
-							ovr_1843_0110(p->f7b);
+							show_cant_cast_engaged(p->f7b);
 						} else
-							ovr_1843_00ac();
+							spell_town_portal();
 						break;
-					case 0x36: ovr_1843_015b(); break;
-					case 0x37: ovr_1843_01a6(); break;
-					case 0x38: ovr_1843_00a2(); break;
-					case 0x39: ovr_1843_01b0(); break;
-					case 0x3a: ovr_1843_0066(); break;
-					case 0x3b: ovr_1843_0133(); break;
-					case 0x3c: ovr_1843_00e3(); break;
+					case 0x36: spell_stone_to_flesh(); break;
+					case 0x37: spell_recharge_item(); break;
+					case 0x38: spell_fantastic_freeze(); break;
+					case 0x39: spell_duplication(); break;
+					case 0x3a: spell_disintegrate(); break;
+					case 0x3b: spell_raise_dead(); break;
+					case 0x3c: spell_half_for_me(); break;
 					case 0x3d:
 						if (mode == 2) {
-							ovr_1843_0147(g_a74e, p->f7b);
+							spell_refund_cost(g_cur_char, p->f7b);
 							res = 0;
 							if (arg) goto out;
-							ovr_1843_0110(p->f7b);
+							show_cant_cast_engaged(p->f7b);
 						} else
-							ovr_1843_012e();
+							spell_etherealize();
 						break;
-					case 0x3e: ovr_1843_002a(); break;
-					case 0x3f: ovr_1843_00bb(); break;
-					case 0x40: ovr_1843_0043(); break;
-					case 0x41: ovr_1843_0070(); break;
-					case 0x42: ovr_1843_0057(); break;
-					case 0x43: ovr_1843_007f(); break;
-					case 0x44: ovr_1843_0197(); break;
-					case 0x45: ovr_1843_00a7(); break;
-					case 0x46: ovr_1843_0020(); break;
-					case 0x47: ovr_1843_0179(); break;
-					case 0x48: ovr_1843_01a1(); break;
-					case 0x49: ovr_1843_00fc(); break;
-					case 0x4a: ovr_1843_016a(); break;
-					case 0x4b: ovr_1843_010b(); break;
-					case 0x4c: ovr_1843_00d9(); break;
+					case 0x3e: spell_dancing_sword(); break;
+					case 0x3f: spell_prismatic_light(); break;
+					case 0x40: spell_moon_ray(); break;
+					case 0x41: spell_mass_distortion(); break;
+					case 0x42: spell_enchant_item(); break;
+					case 0x43: spell_incinerate(); break;
+					case 0x44: spell_elemental_storm(); break;
+					case 0x45: spell_holy_word(); break;
+					case 0x46: spell_resurrect(); break;
+					case 0x47: spell_mega_volts(); break;
+					case 0x48: spell_inferno(); break;
+					case 0x49: spell_sun_ray(); break;
+					case 0x4a: spell_implosion(); break;
+					case 0x4b: spell_star_burst(); break;
+					case 0x4c: spell_divine_intervention(); break;
 					}
 				} else {
 					if (arg) goto out;
-					ovr_1843_00c5(p->f7b, r);
+					show_not_enough_to_cast(p->f7b, r);
 				}
-				g_c520 = 3;
+				g_game_mode = 3;
 			}
 			break;
 		case 1: case 'N':
-			g_c520 = mode;
-			p = ovr_182a_0039(p, 1);
+			g_game_mode = mode;
+			p = spell_list_dialog(p, 1);
 			goto show;
 		case 2:
 			key = 0x1b;
-			g_c520 = mode;
+			g_game_mode = mode;
 			break;
 		case 0xc9: case 0xca: case 0xcb: case 0xcc: case 0xcd: case 0xce: case 0xcf: case 0xd0:
 			if (mode == 2) break;
-			g_c520 = mode;
-			if ((key -= 0xc9) >= g_e8ea) break;
-			p = &g_b9d6[key];
-			fn_1903_0099(key);
-			g_00b1 = key;
+			g_game_mode = mode;
+			if ((key -= 0xc9) >= g_party_count) break;
+			p = &g_party[key];
+			highlight_portrait(key);
+			g_cast_char = key;
 show:
 			sp = p->f7b == 0xff ? 0x4d : p->f7b;
-			sprintf(g_d256, "\r\x05%p\x02\x03""c\x0b""122\t013\x0c""27C\x0c""dast\t040\x0c""27N\x0c""dew\t067ESC\x01\t000\x0b""000\x03""cCast Spell\n\n%s\x03l\n\nSpell Ready:\x03""c\n\n\x0c""12%s\x0c""d\x02\x03l\n\x0b""082Cost\x03r\t077%u/%u\x03l\nCur SP\x03r\t077%u\x01",
-				g_0278, p, g_56e6[sp], ovr_182a_0048(sp, fn_1523_1d59(p)), g_1c16[sp], p->f127);
-			fn_124f_2ac5(g_d256);
-			g_c520 = 3;
+			sprintf(g_text_buf, "\r\x05%p\x02\x03""c\x0b""122\t013\x0c""27C\x0c""dast\t040\x0c""27N\x0c""dew\t067ESC\x01\t000\x0b""000\x03""cCast Spell\n\n%s\x03l\n\nSpell Ready:\x03""c\n\n\x0c""12%s\x0c""d\x02\x03l\n\x0b""082Cost\x03r\t077%u/%u\x03l\nCur SP\x03r\t077%u\x01",
+				g_bank_sprites, p, g_spell_names[sp], spell_sp_cost(sp, get_char_level(p)), g_spell_gem_costs[sp], p->f127);
+			print_window_text(g_text_buf);
+			g_game_mode = 3;
 			break;
 		}
 	} while (key != 0x1b && !res);
 out:
 	if (!arg) {
-		fn_124f_2abb(1);
-		ovr_180c_0057();
-		g_098d = g_92f6;
-		ovr_180c_002a();
-		ovr_17f2_005c();
-		if (res && g_00b5) {
-			fn_1523_0506(1);
-			g_00b5 = 0;
+		close_windows(1);
+		pop_icons();
+		g_cpanel_buttons_img = g_cur_icons;
+		pop_buttons();
+		clear_char_highlight();
+		if (res && g_spell_moved_party) {
+			draw_wizard_eye(1);
+			g_spell_moved_party = 0;
 		}
 	}
-	g_c520 = mode;
-	g_017f = s17f;
+	g_game_mode = mode;
+	g_monster_scan_delay = s17f;
 	return res;
 }

@@ -4,7 +4,7 @@
 #include "combatd.inc"
 
 /* 0000: damage -> hit-effect size */
-int far ovr_1839_002a(unsigned n)
+int far damage_fx_size(unsigned n)
 {
 	if (n < 10) return 0;
 	if (n < 50) return 1;
@@ -12,132 +12,132 @@ int far ovr_1839_002a(unsigned n)
 	return 3;
 }
 
-/* 002b: deal damage to the current monster g_4b7c */
-void far ovr_1839_0048(struct chr *c, unsigned dmg, int kind)
+/* 002b: deal damage to the current monster g_target_mon */
+void far damage_monster(struct chr *c, unsigned dmg, int kind)
 {
 	int t, killed = 0, v;
 	u8 e;
 
 	if (dmg) {
-		if (g_b810[g_4b7c] == 7) g_b810[g_4b7c] = 0;
-		fn_1903_213b(1);
-		g_a75e[g_f02b] = 3;
+		if (g_mon_status[g_target_mon] == 7) g_mon_status[g_target_mon] = 0;
+		play_sfx(1);
+		g_mon_hit_anim[g_target_slot] = 3;
 		if (kind != 2)
-			g_a77e[g_f02b] = (kind ? g_175e[g_e60e < 7 ? g_e60e : 6] : 0) + 1;
+			g_mon_hit_fx[g_target_slot] = (kind ? g_elem_hit_fx[g_attack_type < 7 ? g_attack_type : 6] : 0) + 1;
 		else
-			g_a77e[g_f02b] = 2;
-		if (g_b6bc[g_4b7c] == 0x19 && kind == 0) ovr_17f2_007a(c);
-		if ((kind == 0 || g_e60e == 0) && (t = g_f07a[g_b6bc[g_4b7c]]) != 0) {
+			g_mon_hit_fx[g_target_slot] = 2;
+		if (g_mon_type[g_target_mon] == 0x19 && kind == 0) break_equipped_weapons(c);
+		if ((kind == 0 || g_attack_type == 0) && (t = g_mon_res_phys[g_mon_type[g_target_mon]]) != 0) {
 			if (t == 100) dmg = 0;
 			else dmg = (100 - t) * dmg / 100;
 		}
-		dmg += (v = ovr_1839_007f(kind));
+		dmg += (v = elem_bonus_damage(kind));
 		if (v > 0) {
-			g_ad63[g_f02b] = fn_1903_010e(g_abb4) + 1;
-			g_c480[g_f02b] = ovr_1839_002a(v);
+			g_mon_elem_fx[g_target_slot] = get_element_index(g_atk_element) + 1;
+			g_c480[g_target_slot] = damage_fx_size(v);
 		} else if (kind != 3)
-			g_ad63[g_f02b] = 0;
-		if (kind && ovr_1839_0084(g_b6bc[g_4b7c]))
-			switch (g_e60e) {
+			g_mon_elem_fx[g_target_slot] = 0;
+		if (kind && monster_saving_throw(g_mon_type[g_target_mon]))
+			switch (g_attack_type) {
 			case 0xb: case 0xd: dmg = 5; break;
 			case 0xf: dmg = 50; break;
 			default: dmg >>= 1;
 			}
-		g_abc2[g_f02b] = ovr_1839_002a(dmg);
-		if (g_b414[g_4b7c] <= dmg) {
+		g_mon_hit_sizes[g_target_slot] = damage_fx_size(dmg);
+		if (g_mon_hp[g_target_mon] <= dmg) {
 			killed = 1;
-			g_b414[g_4b7c] = 0;
+			g_mon_hp[g_target_mon] = 0;
 		} else
-			g_b414[g_4b7c] -= dmg;
+			g_mon_hp[g_target_mon] -= dmg;
 	} else
-		fn_1903_213b(2);
-	fn_1b66_0009();
+		play_sfx(2);
+	refresh_view();
 	if (killed) {
-		fn_1903_213b(0);
-		fn_1903_213b(3);
-		ovr_1839_0075(g_f06e[g_b6bc[g_4b7c]]);
-		if (g_e8f7 != 0x6a) {
-			g_effa += g_f032[g_b6bc[g_4b7c]];
-			g_f008 += g_f036[g_b6bc[g_4b7c]];
-			if ((e = g_f066[g_b6bc[g_4b7c]]) != 0 && fn_124f_29dc(1, 100) <= g_4b24[e - 1]) {
+		play_sfx(0);
+		play_sfx(3);
+		award_experience(g_f06e[g_mon_type[g_target_mon]]);
+		if (g_map_num != 0x6a) {
+			g_loot_gold += g_f032[g_mon_type[g_target_mon]];
+			g_loot_gems += g_f036[g_mon_type[g_target_mon]];
+			if ((e = g_mon_treasure[g_mon_type[g_target_mon]]) != 0 && random_range(1, 100) <= g_treasure_drop_pct[e - 1]) {
 				register struct chr *p;
 
-				if (++g_f020 > 10) g_f020 = 10;
-				p = &g_b9d6[8];
-				ovr_1821_005c(g_f066[g_b6bc[g_4b7c]], p, 0);
-				g_f021[g_f020 - 1] = p->f90[0];
-				g_efe6[g_f020 - 1] = p->fa3[0];
-				g_f00c[g_f020 - 1] = p->fb6[0];
-				g_f016[g_f020 - 1] = p->fc9[0];
-				g_effe[g_f020 - 1] = p->id[0];
-				g_eff0[g_f020 - 1] = p->fef[0];
+				if (++g_loot_count > 10) g_loot_count = 10;
+				p = &g_party[8];
+				generate_random_item(g_mon_treasure[g_mon_type[g_target_mon]], p, 0);
+				g_loot_flags[g_loot_count - 1] = p->f90[0];
+				g_loot_element[g_loot_count - 1] = p->fa3[0];
+				g_loot_material[g_loot_count - 1] = p->fb6[0];
+				g_loot_attrib[g_loot_count - 1] = p->fc9[0];
+				g_loot_ids[g_loot_count - 1] = p->id[0];
+				g_loot_charges[g_loot_count - 1] = p->fef[0];
 			}
 		}
-		g_ad70[g_4b7c] = g_aec4[g_4b7c] = 0x80;
-		g_a75e[g_f02b] = 0;
-		g_4b7c = 0xff;
-		switch (g_f02b) {
-		case 0: g_c4a2 = 0; break;
-		case 1: g_c4a3 = 0; break;
-		case 2: g_c4a4 = 0; break;
-		case 3: g_c4a5 = 0; break;
-		case 4: g_c4a8 = 0; break;
-		case 5: g_c4a9 = 0; break;
-		case 6: g_a747 = 0; break;
-		case 7: g_a749 = 0; break;
-		case 8: g_a74b = 0; break;
-		case 9: g_a748 = 0; break;
-		case 10: g_a74a = 0; break;
-		case 11: g_a74c = 0;
+		g_mon_y[g_target_mon] = g_mon_x[g_target_mon] = 0x80;
+		g_mon_hit_anim[g_target_slot] = 0;
+		g_target_mon = 0xff;
+		switch (g_target_slot) {
+		case 0: g_mon_d0c_1 = 0; break;
+		case 1: g_mon_d0c_2 = 0; break;
+		case 2: g_mon_d0c_3 = 0; break;
+		case 3: g_mon_d1c_1 = 0; break;
+		case 4: g_mon_d1c_2 = 0; break;
+		case 5: g_mon_d1c_3 = 0; break;
+		case 6: g_mon_d2c_1 = 0; break;
+		case 7: g_mon_d2c_2 = 0; break;
+		case 8: g_mon_d2c_3 = 0; break;
+		case 9: g_mon_d3c_1 = 0; break;
+		case 10: g_mon_d3c_2 = 0; break;
+		case 11: g_mon_d3c_3 = 0;
 		}
-		fn_1b66_0009();
-		if (g_c4a2) {
-			g_4b7c = g_c4a2 - 1;
-			g_f02b = 0;
+		refresh_view();
+		if (g_mon_d0c_1) {
+			g_target_mon = g_mon_d0c_1 - 1;
+			g_target_slot = 0;
 		}
 	}
 }
 
 /* 0443: share experience among the living party */
-void far ovr_1839_0075(unsigned long xp)
+void far award_experience(unsigned long xp)
 {
 	int n, cnt, pass, i;
 	struct chr *p;
 
-	n = g_c520 == 2 ? g_acc1 : g_e8ea;
+	n = g_game_mode == 2 ? g_combat_party_n : g_party_count;
 	for (pass = cnt = 0; pass < 2; pass++)
 		for (i = 0; i < n; i++) {
-			p = &g_b9d6[g_c520 == 2 ? g_ecc9[i] : i];
-			switch (fn_1523_1c1a(p)) { }
+			p = &g_party[g_game_mode == 2 ? g_combat_order[i] : i];
+			switch (get_worst_condition(p)) { }
 			if (pass == 0) cnt++;
 			else p->f12b += xp / cnt;
 		}
 }
 
 /* 04ca: elemental bonus damage, reduced by the monster's resistance */
-int far ovr_1839_007f(int kind)
+int far elem_bonus_damage(int kind)
 {
 	int r, s;
 
 	if (kind == 0 || kind == 3) {
-		r = g_0a4c[g_abb4];
-		if (!g_abb4) s = 0;
-		else if (g_abb4 < 9) s = g_f046[g_b6bc[g_4b7c]];
-		else if (g_abb4 < 0x10) s = g_f04a[g_b6bc[g_4b7c]];
-		else if (g_abb4 < 0x15) s = g_f04e[g_b6bc[g_4b7c]];
-		else if (g_abb4 < 0x1a) s = g_f052[g_b6bc[g_4b7c]];
-		else if (g_abb4 < 0x22) s = g_f062[g_b6bc[g_4b7c]];
-		else s = g_f05a[g_b6bc[g_4b7c]];
+		r = g_elem_dmg_bonus[g_atk_element];
+		if (!g_atk_element) s = 0;
+		else if (g_atk_element < 9) s = g_mon_res_fire[g_mon_type[g_target_mon]];
+		else if (g_atk_element < 0x10) s = g_mon_res_elec[g_mon_type[g_target_mon]];
+		else if (g_atk_element < 0x15) s = g_mon_res_cold[g_mon_type[g_target_mon]];
+		else if (g_atk_element < 0x1a) s = g_mon_res_acid[g_mon_type[g_target_mon]];
+		else if (g_atk_element < 0x22) s = g_mon_res_energy[g_mon_type[g_target_mon]];
+		else s = g_mon_res_magic[g_mon_type[g_target_mon]];
 	} else {
 		r = 0;
-		switch (g_e60e) {
-		case 0: s = g_f07a[g_b6bc[g_4b7c]]; break;
-		case 1: s = g_f05a[g_b6bc[g_4b7c]]; break;
-		case 2: s = g_f046[g_b6bc[g_4b7c]]; break;
-		case 3: s = g_f04a[g_b6bc[g_4b7c]]; break;
-		case 4: s = g_f04e[g_b6bc[g_4b7c]]; break;
-		case 5: s = g_f052[g_b6bc[g_4b7c]]; break;
-		case 6: s = g_f062[g_b6bc[g_4b7c]]; break;
+		switch (g_attack_type) {
+		case 0: s = g_mon_res_phys[g_mon_type[g_target_mon]]; break;
+		case 1: s = g_mon_res_magic[g_mon_type[g_target_mon]]; break;
+		case 2: s = g_mon_res_fire[g_mon_type[g_target_mon]]; break;
+		case 3: s = g_mon_res_elec[g_mon_type[g_target_mon]]; break;
+		case 4: s = g_mon_res_cold[g_mon_type[g_target_mon]]; break;
+		case 5: s = g_mon_res_acid[g_mon_type[g_target_mon]]; break;
+		case 6: s = g_mon_res_energy[g_mon_type[g_target_mon]]; break;
 		}
 	}
 	if (s) {
@@ -148,7 +148,7 @@ int far ovr_1839_007f(int kind)
 }
 
 /* 05d0: character attacks (kind 0 = melee) or casts on the monsters */
-void far ovr_1839_0043(struct chr *c, int kind)
+void far party_attack_monster(struct chr *c, int kind)
 {
 	int d;
 	unsigned n, i;
@@ -163,106 +163,106 @@ void far ovr_1839_0043(struct chr *c, int kind)
 		case 3: case 8: d = 7; break;
 		case 4: d = 8; break;
 		}
-		n = fn_1523_1d59(c) / d + 1;
+		n = get_char_level(c) / d + 1;
 		for (i = dmg = 0; i < n; i++)
-			if (ovr_1839_005c(c, 0)) dmg += ovr_1839_008e(c);
-	} else if (g_c49a == 1) {
-		memset(g_ad63, 0, 12);
-		for (j = dmg = 0; j < g_e8ea; j++)
-			if (g_b9bb[j] && !g_ecb6[j]) {
-				if (ovr_1839_005c(&g_b9d6[j], kind)) {
-					if (g_b9c4) dmg = g_b9c4;
-					else dmg = g_abba;
-					g_b9bb[j] = 0;
-					ovr_1839_0048(c, dmg, 3);
-					if (g_4b7c == 0xff) return;
+			if (roll_to_hit(c, 0)) dmg += roll_damage(c);
+	} else if (g_spell_hits_party == 1) {
+		memset(g_mon_elem_fx, 0, 12);
+		for (j = dmg = 0; j < g_party_count; j++)
+			if (g_missile_pos[j] && !g_party_resisted[j]) {
+				if (roll_to_hit(&g_party[j], kind)) {
+					if (g_attack_damage) dmg = g_attack_damage;
+					else dmg = g_atk_damage;
+					g_missile_pos[j] = 0;
+					damage_monster(c, dmg, 3);
+					if (g_target_mon == 0xff) return;
 				} else
-					g_ecb6[j]++;
+					g_party_resisted[j]++;
 			}
 		return;
 	} else {
-		if (g_f05a[g_b6bc[g_4b7c]] &&
-		    fn_124f_29dc(1, fn_1523_1d59(g_a74e) + 100) < g_f05a[g_b6bc[g_4b7c]]) return;
-		if (g_4b7c == 0xff) return;
-		if (g_b9c4) dmg = g_b9c4;
-		else switch (g_e60e) {
+		if (g_mon_res_magic[g_mon_type[g_target_mon]] &&
+		    random_range(1, get_char_level(g_cur_char) + 100) < g_mon_res_magic[g_mon_type[g_target_mon]]) return;
+		if (g_target_mon == 0xff) return;
+		if (g_attack_damage) dmg = g_attack_damage;
+		else switch (g_attack_type) {
 		case 16:
 			for (j = 0; j < 5; j++)
-				if (g_b6bc[g_4b7c] == g_4b77[j]) goto chk;
+				if (g_mon_type[g_target_mon] == g_fx16_targets[j]) goto chk;
 			return;
 		case 7:
 			for (j = 0; j < 5; j++)
-				if (g_b6bc[g_4b7c] == g_4b2a[j]) goto chk;
+				if (g_mon_type[g_target_mon] == g_fx07_targets[j]) goto chk;
 			return;
 		case 8:
 			for (j = 0; j < 13; j++)
-				if (g_b6bc[g_4b7c] == g_4b2f[j]) goto chk;
+				if (g_mon_type[g_target_mon] == g_fx08_targets[j]) goto chk;
 			return;
 		case 9:
 			for (j = 0; j < 13; j++)
-				if (g_b6bc[g_4b7c] == g_4b3c[j]) goto chk;
+				if (g_mon_type[g_target_mon] == g_fx09_targets[j]) goto chk;
 			return;
 		case 10:
 			for (j = 0; j < 0x18; j++)
-				if (g_b6bc[g_4b7c] == g_4b49[j]) {
+				if (g_mon_type[g_target_mon] == g_fx10_targets[j]) {
 				chk:
-					if (ovr_1839_0084(g_b6bc[g_4b7c])) return;
-					g_b810[g_4b7c] = g_e60e;
+					if (monster_saving_throw(g_mon_type[g_target_mon])) return;
+					g_mon_status[g_target_mon] = g_attack_type;
 					return;
 				}
 			return;
 		case 11:
 			for (j = 0; j < 0x16; j++)
-				if (g_b6bc[g_4b7c] == g_4b61[j]) {
-					dmg = g_b414[g_4b7c];
+				if (g_mon_type[g_target_mon] == g_fx11_targets[j]) {
+					dmg = g_mon_hp[g_target_mon];
 					goto two;
 				}
 			return;
 		case 14:
 			for (j = dmg = 0; j < 9; j++)
-				if (g_b6bc[g_4b7c] == g_4bd8[j]) {
+				if (g_mon_type[g_target_mon] == g_fx12_targets[j]) {
 					dmg = 0x19;
 					break;
 				}
 			goto two;
 		case 12:
 			for (j = dmg = 0; j < 9; j++)
-				if (g_b6bc[g_4b7c] == g_4bd8[j]) {
-					dmg = g_f082[g_b6bc[g_4b7c]];
+				if (g_mon_type[g_target_mon] == g_fx12_targets[j]) {
+					dmg = g_mon_max_hp[g_mon_type[g_target_mon]];
 					break;
 				}
 			goto two;
 		case 15:
-			dmg = g_f082[g_b6bc[g_4b7c]];
+			dmg = g_mon_max_hp[g_mon_type[g_target_mon]];
 			if (dmg > 0x96) {
 				dmg = 0x32;
-				g_e60e = 6;
+				g_attack_type = 6;
 			}
 			break;
 		case 13:
-			dmg = g_b414[g_4b7c] >> 1;
+			dmg = g_mon_hp[g_target_mon] >> 1;
 			if (!dmg) dmg++;
 		two:
 			kind = 2;
 			break;
 		}
 	}
-	ovr_1839_0048(c, dmg, kind);
-	ovr_1839_0025();
+	damage_monster(c, dmg, kind);
+	combat_sort_initiative();
 }
 
 /* 09e6: 1 if every party member is down and no monster is left (combat over) */
-int far ovr_1839_006b(void)
+int far combat_round_over(void)
 {
 	int n, i;
 
-	n = g_c4a2 > 0;
-	n += g_c4a3 > 0;
-	n += g_c4a4 > 0;
-	for (i = 0; i < g_acc1 + n; i++)
-		if (!g_b9c9[i]) {
-			if (i < g_acc1) {
-				switch (fn_1523_1c1a(&g_b9d6[g_ecc9[i]])) {
+	n = g_mon_d0c_1 > 0;
+	n += g_mon_d0c_2 > 0;
+	n += g_mon_d0c_3 > 0;
+	for (i = 0; i < g_combat_party_n + n; i++)
+		if (!g_combat_acted[i]) {
+			if (i < g_combat_party_n) {
+				switch (get_worst_condition(&g_party[g_combat_order[i]])) {
 				case 11: case 12: case 13: case 14: case 15:
 					break;
 				default:
@@ -275,96 +275,96 @@ int far ovr_1839_006b(void)
 }
 
 /* 0a7d: close gaps in the combat order */
-void far ovr_1839_0070(void)
+void far compact_combat_order(void)
 {
 	int i, j;
 
 	for (i = 0; i < 8; i++)
-		if (g_ecc9[i] == 0xff)
+		if (g_combat_order[i] == 0xff)
 			for (j = i + 1; j < 8; j++)
-				if (g_ecc9[j] < 0xff) {
-					g_ecc9[i] = g_ecc9[j];
-					g_b9c9[i] = g_b9c9[j];
-					g_b9c9[j] = 0;
-					g_ecc9[j] = 0xff;
+				if (g_combat_order[j] < 0xff) {
+					g_combat_order[i] = g_combat_order[j];
+					g_combat_acted[i] = g_combat_acted[j];
+					g_combat_acted[j] = 0;
+					g_combat_order[j] = 0xff;
 					break;
 				}
-	fn_1523_1ec7();
+	draw_party_portraits();
 }
 
 /* 0acc: saving throw (kind 0 = generic, 1..6 = element) */
-int far ovr_1839_0089(struct chr *c, int kind)
+int far char_saving_throw(struct chr *c, int kind)
 {
 	register int r, roll;
 
 	if (kind == 0) {
-		r = fn_1523_1d59(c) + fn_1523_1bc4(fn_1523_1d81(c, 6, 0) * 2);
-		roll = fn_124f_29dc(1, r + 20);
+		r = get_char_level(c) + stat_bonus(get_char_stat(c, 6, 0) * 2);
+		roll = random_range(1, r + 20);
 	} else {
 		switch (kind) {
-		case 1: r = c->res[5][0] + fn_1523_1c3b(c, 0x10) + c->res[5][1]; break;
-		case 2: r = c->res[0][0] + fn_1523_1c3b(c, 0xb) + c->res[0][1]; break;
-		case 3: r = c->res[2][0] + fn_1523_1c3b(c, 0xc) + c->res[2][1]; break;
-		case 4: r = c->res[1][0] + fn_1523_1c3b(c, 0xd) + c->res[1][1]; break;
-		case 5: r = c->res[3][0] + fn_1523_1c3b(c, 0xe) + c->res[3][1]; break;
-		case 6: r = c->res[4][0] + fn_1523_1c3b(c, 0xf) + c->res[4][1]; break;
+		case 1: r = c->res[5][0] + get_item_stat_bonus(c, 0x10) + c->res[5][1]; break;
+		case 2: r = c->res[0][0] + get_item_stat_bonus(c, 0xb) + c->res[0][1]; break;
+		case 3: r = c->res[2][0] + get_item_stat_bonus(c, 0xc) + c->res[2][1]; break;
+		case 4: r = c->res[1][0] + get_item_stat_bonus(c, 0xd) + c->res[1][1]; break;
+		case 5: r = c->res[3][0] + get_item_stat_bonus(c, 0xe) + c->res[3][1]; break;
+		case 6: r = c->res[4][0] + get_item_stat_bonus(c, 0xf) + c->res[4][1]; break;
 		}
-		roll = fn_124f_29dc(1, r + 40);
+		roll = random_range(1, r + 40);
 	}
 	return roll <= r;
 }
 
 /* 0c19: monster mt hits party member c (slot) */
-void far ovr_1839_004d(struct chr *c, int slot, int mt)
+void far monster_hit_char(struct chr *c, int slot, int mt)
 {
 	int elem, snd;
 	register int i, dmg;
 
 	c->f11b = 0;
 	for (i = elem = dmg = 0; i < g_f06a[mt]; i++)
-		dmg += fn_124f_29dc(1, g_f076[mt]);
+		dmg += random_range(1, g_f076[mt]);
 	snd = 4;
-	if ((i = g_f05e[mt]) != 0) {
-		if (ovr_1839_0089(c, 0)) dmg >>= 1;
+	if ((i = g_mon_dmg_type[mt]) != 0) {
+		if (char_saving_throw(c, 0)) dmg >>= 1;
 		switch (i) {
 		case 1: elem = 6; break;
-		case 2: dmg = dmg - g_ec3a; elem = 1; snd = 0xd; break;
-		case 3: dmg = dmg - g_ec3c; elem = 2; snd = 0xe; break;
-		case 4: dmg = dmg - g_ec3e; elem = 3; snd = 0xf; break;
-		case 5: dmg = dmg - g_ec40; elem = 4; snd = 0x11; break;
+		case 2: dmg = dmg - g_fire_resist; elem = 1; snd = 0xd; break;
+		case 3: dmg = dmg - g_elec_resist; elem = 2; snd = 0xe; break;
+		case 4: dmg = dmg - g_cold_resist; elem = 3; snd = 0xf; break;
+		case 5: dmg = dmg - g_poison_resist; elem = 4; snd = 0x11; break;
 		case 6: elem = 5; break;
 		}
-		do { if (!ovr_1839_0089(c, i)) break; dmg >>= 1; } while (dmg);
+		do { if (!char_saving_throw(c, i)) break; dmg >>= 1; } while (dmg);
 	}
-	fn_1903_213b(snd);
-	fn_124f_2ad9(g_ecdc, elem, slot * 0x26 + 0xb, 0x95, 0);
+	play_sfx(snd);
+	draw_icon(g_charpow_sprites, elem, slot * 0x26 + 0xb, 0x95, 0);
 	dmg -= c->f103;
 	if (dmg < 1) dmg = 0;
-	if (dmg && g_f03e[mt] && !ovr_1839_0089(c, 0))
-		switch (g_f03e[mt]) {
+	if (dmg && g_mon_special[mt] && !char_saving_throw(c, 0))
+		switch (g_mon_special[mt]) {
 		case 1:
 			if (!++c->f116) c->f116 = 0xff;
-			fn_1903_213b(0x11);
+			play_sfx(0x11);
 			break;
 		case 2:
 			if (!++c->f11b) c->f11b = 0xff;
-			fn_1903_213b(0x35);
+			play_sfx(0x35);
 			break;
 		case 3:
 			if (!++c->f118) c->f118 = 0xff;
-			fn_1903_213b(0x35);
+			play_sfx(0x35);
 			break;
 		case 4:
 			if (!++c->f117) c->f117 = 0xff;
-			fn_1903_213b(0x11);
+			play_sfx(0x11);
 			break;
 		case 5:
 			if (!++c->f11d) c->f11d = 0xff;
-			fn_1903_213b(0x35);
+			play_sfx(0x35);
 			break;
 		case 6:
 			if (!++c->f113) c->f113 = 0xff;
-			fn_1903_213b(0x35);
+			play_sfx(0x35);
 			break;
 		case 7:
 			for (i = 0; i < 0x12; i++)
@@ -372,89 +372,89 @@ void far ovr_1839_004d(struct chr *c, int slot, int mt)
 					c->f90[i] |= 0x80;
 					break;
 				}
-			fn_1903_213b(0x35);
+			play_sfx(0x35);
 			break;
 		case 8:
 			if (!++c->f115) c->f115 = 0xff;
-			fn_1903_213b(0x35);
+			play_sfx(0x35);
 			break;
 		case 9:
 			c->f127 = 0;
-			fn_1903_213b(0x35);
+			play_sfx(0x35);
 			break;
 		case 10:
 			if (!++c->f11e) c->f11e = 0xff;
-			fn_1903_213b(0x35);
+			play_sfx(0x35);
 			break;
 		case 11:
 			c->f26 += 5;
-			fn_1903_213b(0x35);
+			play_sfx(0x35);
 			break;
 		case 12:
 			if (!++c->f11f) c->f11f = 0xff;
-			fn_1903_213b(0x35);
+			play_sfx(0x35);
 			if (c->f125 > 0) c->f125 = 0;
 			break;
 		case 13:
 			if (!++c->f122) c->f122 = 0xff;
-			ovr_17f2_0052(c);
-			fn_1903_213b(0x35);
+			break_all_items(c);
+			play_sfx(0x35);
 			if (c->f125 > 0) c->f125 = 0;
 			break;
 		case 14:
 			if (!++c->f121) c->f121 = 0xff;
-			fn_1903_213b(0x35);
+			play_sfx(0x35);
 			if (c->f125 > 0) c->f125 = 0;
 			break;
 		case 15:
 			if (!++c->f120) c->f120 = 0xff;
-			fn_1903_213b(0x35);
+			play_sfx(0x35);
 			if (c->f125 > 0) c->f125 = 0;
 			break;
 		case 16:
 			for (i = 0; i < 0x12; i++)
 				if (c->id[i] < 0x46) c->f90[i] |= 0x40;
-			fn_1903_213b(0x35);
+			play_sfx(0x35);
 			break;
 		}
-	fn_1903_0008(c, dmg);
-	fn_1511_0d8e(2);
-	fn_1523_1ec7();
+	char_take_damage(c, dmg);
+	idle_frames_or_key(2);
+	draw_party_portraits();
 }
 
 /* 1008: monster turn: pick targets and attack */
-void far ovr_1839_0052(int mt)
+void far monster_turn(int mt)
 {
 	int m, n, st, k, flag;
 	struct chr *p;
 	int list[8];
 	register int i, target;
 
-	if (!g_00ac) {
-		switch (i = g_014f - g_acc1) {
-		case 0: m = g_c4a2 - 1; break;
-		case 1: m = g_c4a3 - 1; break;
-		case 2: m = g_c4a4 - 1; break;
+	if (!g_mon_missile_active) {
+		switch (i = g_combat_actor - g_combat_party_n) {
+		case 0: m = g_mon_d0c_1 - 1; break;
+		case 1: m = g_mon_d0c_2 - 1; break;
+		case 2: m = g_mon_d0c_3 - 1; break;
 		}
-		if (g_b810[m] != 0 && g_b810[m] != 1) return;
-		mt = g_b6bc[m];
+		if (g_mon_status[m] != 0 && g_mon_status[m] != 1) return;
+		mt = g_mon_type[m];
 	}
 	for (k = flag = 0; k < g_f056[mt]; k++) {
 		target = -1;
-		if (g_f042[mt] != 1) {
-		switch (g_f042[mt]) {
+		if (g_mon_attack_pref[mt] != 1) {
+		switch (g_mon_attack_pref[mt]) {
 		case 0:
 		all:
 			flag = 1;
 			target++;
-			if (g_acc1 > target) goto chk;
+			if (g_combat_party_n > target) goto chk;
 			continue;
 		}
-		for (i = 0; i < g_acc1; i++) {
-			p = &g_b9d6[g_ecc9[i]];
-			switch (fn_1523_1c1a(p)) {
+		for (i = 0; i < g_combat_party_n; i++) {
+			p = &g_party[g_combat_order[i]];
+			switch (get_worst_condition(p)) {
 			default:
-				switch (g_f042[mt]) {
+				switch (g_mon_attack_pref[mt]) {
 				case 2: if (p->cls == 3) { target = i; goto hit; } break;
 				case 3: if (p->cls == 4) { target = i; goto hit; } break;
 				case 4: if (p->cls == 8) { target = i; goto hit; } break;
@@ -468,74 +468,74 @@ void far ovr_1839_0052(int mt)
 		}
 		}
 	rnd:
-		switch (g_acc1) {
+		switch (g_combat_party_n) {
 		case 1: target = 0; break;
-		case 2: case 3: case 4: case 5: target = fn_124f_29dc(0, g_acc1 - 1); break;
+		case 2: case 3: case 4: case 5: target = random_range(0, g_combat_party_n - 1); break;
 		case 6:
-			i = fn_124f_29dc(1, 8); if (i == 8) target = 5;
-			else target = fn_124f_29dc(0, 4);
+			i = random_range(1, 8); if (i == 8) target = 5;
+			else target = random_range(0, 4);
 			break;
 		case 7:
-			i = fn_124f_29dc(1, 10); if (i == 10) target = 6;
-			else target = fn_124f_29dc(0, 5);
+			i = random_range(1, 10); if (i == 10) target = 6;
+			else target = random_range(0, 5);
 			break;
 		case 8:
-			i = fn_124f_29dc(1, 12); if (i == 12) target = 7;
-			else target = fn_124f_29dc(0, 6);
+			i = random_range(1, 12); if (i == 12) target = 7;
+			else target = random_range(0, 6);
 			break;
 		}
 	chk:
 		if (flag) goto hit;
-		st = fn_1523_1c1a(&g_b9d6[g_ecc9[target]]);
+		st = get_worst_condition(&g_party[g_combat_order[target]]);
 		switch (st) {
 		case 11: case 12: case 13: case 14: case 15:
 			memset(list, -1, 16);
-			for (i = n = 0; i < g_acc1; i++) {
-				st = fn_1523_1c1a(&g_b9d6[g_ecc9[i]]);
+			for (i = n = 0; i < g_combat_party_n; i++) {
+				st = get_worst_condition(&g_party[g_combat_order[i]]);
 				switch (st) {
 				case 11: case 12:
 					if (flag) goto hit;
 					break;
 				default:
-					list[n++] = g_ecc9[i];
+					list[n++] = g_combat_order[i];
 				case 13: case 14: case 15:
 					break;
 				}
 			}
 			if (n == 0) {
-				g_0151 = 1;
-				g_c520 = 1;
+				g_party_defeated = 1;
+				g_game_mode = 1;
 				return;
 			}
-			target = list[fn_124f_29dc(0, n - 1)];
-			for (i = 0; i < g_acc1; i++)
-				if (g_ecc9[i] == target) { target = i; goto hit; }
+			target = list[random_range(0, n - 1)];
+			for (i = 0; i < g_combat_party_n; i++)
+				if (g_combat_order[i] == target) { target = i; goto hit; }
 		}
 	hit:
-		p = &g_b9d6[g_ecc9[target]];
-		if (g_f05e[mt] || p->f11b) {
+		p = &g_party[g_combat_order[target]];
+		if (g_mon_dmg_type[mt] || p->f11b) {
 		att:
-			ovr_1839_004d(p, target, mt);
+			monster_hit_char(p, target, mt);
 		} else {
-			i = fn_124f_29dc(1, 20); if (i == 20) ovr_1839_004d(p, target, mt);
+			i = random_range(1, 20); if (i == 20) monster_hit_char(p, target, mt);
 			else if (i == 1) goto miss;
-			i += (g_f072[mt] >> 2) + fn_124f_29dc(1, g_f072[mt]);
-			if (ovr_1867_005c(p, 0) + (g_c4cb[target] ? (fn_1523_1d59(p) >> 1) + 15 : 10) <= i) goto att;
+			i += (g_mon_hit_bonus[mt] >> 2) + random_range(1, g_mon_hit_bonus[mt]);
+			if (calc_armor_class(p, 0) + (g_combat_blocking[target] ? (get_char_level(p) >> 1) + 15 : 10) <= i) goto att;
 		miss:
-			fn_1903_213b(2);
+			play_sfx(2);
 		}
 		if (flag) goto all;
 	}
-	fn_1523_1ec7();
+	draw_party_portraits();
 }
 
 /* 13f7: 0 if any party member can still act */
-int far ovr_1839_0066(void)
+int far party_cannot_act(void)
 {
 	int i;
 
-	for (i = 0; i < g_acc1; i++)
-		switch (fn_1523_1c1a(&g_b9d6[g_ecc9[i]])) {
+	for (i = 0; i < g_combat_party_n; i++)
+		switch (get_worst_condition(&g_party[g_combat_order[i]])) {
 		default:
 			return 0;
 		case 8: case 11: case 12: case 13: case 14: case 15:
@@ -545,37 +545,37 @@ int far ovr_1839_0066(void)
 }
 
 /* 144b: advance to the next actor */
-void far ovr_1839_0061(void)
+void far combat_next_actor(void)
 {
 	int st;
 	register int n, i;
 
-	n = g_c4a2 > 0;
-	n += g_c4a3 > 0;
-	n += g_c4a4 > 0;
-	if (ovr_1839_006b()) return;
-	if (!g_c4a2 && !g_c4a3 && !g_c4a4 || !g_acc1) {
-		g_c520 = 1;
+	n = g_mon_d0c_1 > 0;
+	n += g_mon_d0c_2 > 0;
+	n += g_mon_d0c_3 > 0;
+	if (combat_round_over()) return;
+	if (!g_mon_d0c_1 && !g_mon_d0c_2 && !g_mon_d0c_3 || !g_combat_party_n) {
+		g_game_mode = 1;
 		return;
 	}
 top:
-	fn_1523_0041();
-	if (g_0151) {
-		g_c520 = 1;
+	update_party_disabled();
+	if (g_party_defeated) {
+		g_game_mode = 1;
 		return;
 	}
-	for (i = 0; i < g_acc1 + n; i++) {
-		if (g_014f != -1) g_b9c9[g_014f] = 1;
-		g_014f = g_ad54[g_0150 = ++g_0150 % (g_acc1 + n)];
-		if (ovr_1839_006b()) {
-			if (!ovr_1839_0066()) return;
-			ovr_1839_0025();
-			g_0150 = g_014f = 0xff;
-			memset(g_b9c9, 0, 12);
+	for (i = 0; i < g_combat_party_n + n; i++) {
+		if (g_combat_actor != -1) g_combat_acted[g_combat_actor] = 1;
+		g_combat_actor = g_initiative_order[g_combat_turn_pos = ++g_combat_turn_pos % (g_combat_party_n + n)];
+		if (combat_round_over()) {
+			if (!party_cannot_act()) return;
+			combat_sort_initiative();
+			g_combat_turn_pos = g_combat_actor = 0xff;
+			memset(g_combat_acted, 0, 12);
 			goto top;
 		}
-		if ((u8)g_014f < g_acc1) {
-			st = fn_1523_1c1a(&g_b9d6[g_ecc9[g_014f]]);
+		if ((u8)g_combat_actor < g_combat_party_n) {
+			st = get_worst_condition(&g_party[g_combat_order[g_combat_actor]]);
 			switch (st) {
 			case 8: case 11: case 12: case 13: case 14: case 15:
 				continue;
@@ -583,380 +583,380 @@ top:
 		}
 		break;
 	}
-	if ((u8)g_014f >= g_acc1) {
-		ovr_1839_0052(0);
-		if (!g_0151) fn_1523_0041();
-		if (g_0151 != 0) return;
+	if ((u8)g_combat_actor >= g_combat_party_n) {
+		monster_turn(0);
+		if (!g_party_defeated) update_party_disabled();
+		if (g_party_defeated != 0) return;
 		goto top;
-	} else if (!ovr_1839_006b())
-		fn_1903_0099(g_014f);
+	} else if (!combat_round_over())
+		highlight_portrait(g_combat_actor);
 }
 
-/* 15d4: party member g_014f acts on its chosen action */
-void far ovr_1839_007a(void)
+/* 15d4: party member g_combat_actor acts on its chosen action */
+void far do_quickfight_action(void)
 {
 	register struct chr *p;
 
-	p = &g_b9d6[g_ecc9[g_014f]];
+	p = &g_party[g_combat_order[g_combat_actor]];
 	switch (p->f7c) {
 	case 0:
-		ovr_1839_0043(p, 0);
+		party_attack_monster(p, 0);
 		break;
 	case 1:
-		if (!ovr_1861_0048(1)) ovr_1839_0043(p, 0);
+		if (!cast_spell_dialog(1)) party_attack_monster(p, 0);
 		break;
 	case 2:
-		ovr_1839_0039();
+		combat_block();
 		break;
 	case 3:
-		ovr_1839_0057();
+		combat_try_run();
 	}
 }
 
 /* 1634: to-hit roll of c against the current monster */
-int far ovr_1839_005c(struct chr *c, int kind)
+int far roll_to_hit(struct chr *c, int kind)
 {
 	int ac;
 	register int v, d;
 
-	ovr_1839_002f(c, kind);
-	v = fn_1523_1bc4(fn_1523_1d81(c, 5, 0));
-	v += g_92fa;
+	load_attack_weapon(c, kind);
+	v = stat_bonus(get_char_stat(c, 5, 0));
+	v += g_atk_hit_bonus;
 	switch (c->cls) {
 	case 0: case 7: d = 1; break;
 	case 1: case 2: case 5: case 6: case 9: d = 2; break;
 	case 3: case 8: d = 3; break;
 	case 4: d = 4; break;
 	}
-	v = v + fn_1523_1d59(c) / d;
-	do v += (d = fn_124f_29dc(1, 20)); while (d == 20);
+	v = v + get_char_level(c) / d;
+	do v += (d = random_range(1, 20)); while (d == 20);
 	v -= c->f113;
-	if (g_b810[g_4b7c]) v += 20;
+	if (g_mon_status[g_target_mon]) v += 20;
 	ac = 10;
-	ac += g_f07e[g_b6bc[g_4b7c]];
+	ac += g_f07e[g_mon_type[g_target_mon]];
 	return v >= ac;
 }
 
 /* 1723: weapon stats of c into the attack globals */
-void far ovr_1839_002f(struct chr *c, int kind)
+void far load_attack_weapon(struct chr *c, int kind)
 {
 	int k;
 	int i;
 
-	g_abb4 = g_c509 = g_92fa = g_abba = g_c4c9 = g_ec88 = 0;
+	g_atk_element = g_atk_weapon_fef = g_atk_hit_bonus = g_atk_damage = g_atk_dice_n = g_atk_die_sides = 0;
 	for (i = 0; i < 0x12; i++)
 		if (kind ? c->eq[i] == 4 : c->eq[i] == 1 || c->eq[i] == 13) {
-			g_abb4 = c->fa3[i];
-			g_c509 = c->fef[i];
-			g_92fa = g_0a71[c->fb6[i]] + c->f105;
-			g_abba = g_0a88[c->fb6[i]] + c->f104;
-			g_c4c9 = g_0cd0[c->id[i]];
-			g_ec88 = g_0d19[c->id[i]];
-			for (k = 0; k < g_c4c9; k++) g_abba += fn_124f_29dc(1, g_ec88);
+			g_atk_element = c->fa3[i];
+			g_atk_weapon_fef = c->fef[i];
+			g_atk_hit_bonus = g_material_to_hit[c->fb6[i]] + c->f105;
+			g_atk_damage = g_material_dmg_bonus[c->fb6[i]] + c->f104;
+			g_atk_dice_n = g_weapon_dice_count[c->id[i]];
+			g_atk_die_sides = g_weapon_die_sides[c->id[i]];
+			for (k = 0; k < g_atk_dice_n; k++) g_atk_damage += random_range(1, g_atk_die_sides);
 		}
-	if (g_abba < 1) g_abba = 0;
+	if (g_atk_damage < 1) g_atk_damage = 0;
 }
 
 /* 181c: damage roll */
-int far ovr_1839_008e(struct chr *c)
+int far roll_damage(struct chr *c)
 {
 	register int v;
 
-	v = fn_1523_1bc4(fn_1523_1d81(c, 0, 0));
-	v += g_abba;
+	v = stat_bonus(get_char_stat(c, 0, 0));
+	v += g_atk_damage;
 	if (v < 1) return 0;
 	return v;
 }
 
 /* 184b */
-int far ovr_1839_0084(int lvl)
+int far monster_saving_throw(int lvl)
 {
-	return fn_124f_29dc(1, lvl + 50) <= lvl;
+	return random_range(1, lvl + 50) <= lvl;
 }
 
-/* 1871: party member g_014f tries to run */
-void far ovr_1839_0057(void)
+/* 1871: party member g_combat_actor tries to run */
+void far combat_try_run(void)
 {
-	if (fn_124f_29dc(1, 100) < g_c85b[g_c53e][0]) {
-		g_ecc9[g_014f] = 0xff;
-		g_acc1--;
-		ovr_1839_0070();
-		ovr_1839_0025();
-		g_0150--;
-		g_014f = 0xff;
-		g_f02c = 1;
+	if (random_range(1, 100) < g_c85b[g_map_quadrant][0]) {
+		g_combat_order[g_combat_actor] = 0xff;
+		g_combat_party_n--;
+		compact_combat_order();
+		combat_sort_initiative();
+		g_combat_turn_pos--;
+		g_combat_actor = 0xff;
+		g_party_fled = 1;
 	}
 }
 
 /* 18c2: block */
-void far ovr_1839_0039(void)
+void far combat_block(void)
 {
-	g_c4cb[g_014f] = 1;
+	g_combat_blocking[g_combat_actor] = 1;
 }
 
 /* 18d2: monster health colour */
-int far ovr_1839_0034(int m)
+int far monster_health_color(int m)
 {
 	unsigned hp;
 
-	hp = g_f082[g_b6bc[m]];
-	if (g_b414[m] == hp) return 0x12;
-	if (g_b414[m] < hp >> 2) return 7;
+	hp = g_mon_max_hp[g_mon_type[m]];
+	if (g_mon_hp[m] == hp) return 0x12;
+	if (g_mon_hp[m] < hp >> 2) return 7;
 	return 0xc;
 }
 
 /* 1918: monster list text */
-void far ovr_1839_003e(void)
+void far format_monster_list(void)
 {
 	char c;
 	char s1[40], s2[40], s3[40];
 
 	s1[0] = s2[0] = s3[0] = 0;
-	if (g_c4a2) {
-		c = ovr_1839_0034(g_c4a2 - 1);
-		sprintf(s1, "\n\v020\f%2u%s\fd", c, g_5632[g_b6bc[g_c4a2 - 1]]);
+	if (g_mon_d0c_1) {
+		c = monster_health_color(g_mon_d0c_1 - 1);
+		sprintf(s1, "\n\v020\f%2u%s\fd", c, g_monster_names[g_mon_type[g_mon_d0c_1 - 1]]);
 	}
-	if (g_c4a3) {
-		c = ovr_1839_0034(g_c4a3 - 1);
-		sprintf(s2, "\n\v030\f%2u%s\fd", c, g_5632[g_b6bc[g_c4a3 - 1]]);
+	if (g_mon_d0c_2) {
+		c = monster_health_color(g_mon_d0c_2 - 1);
+		sprintf(s2, "\n\v030\f%2u%s\fd", c, g_monster_names[g_mon_type[g_mon_d0c_2 - 1]]);
 	}
-	if (g_c4a4) {
-		c = ovr_1839_0034(g_c4a4 - 1);
-		sprintf(s3, "\n\v040\f%2u%s\fd", c, g_5632[g_b6bc[g_c4a4 - 1]]);
+	if (g_mon_d0c_3) {
+		c = monster_health_color(g_mon_d0c_3 - 1);
+		sprintf(s3, "\n\v040\f%2u%s\fd", c, g_monster_names[g_mon_type[g_mon_d0c_3 - 1]]);
 	}
-	if (g_f02b == 2 && g_c4a4) g_4b7c = g_c4a4 - 1;
-	else if (g_f02b == 1 && g_c4a3) g_4b7c = g_c4a3 - 1;
+	if (g_target_slot == 2 && g_mon_d0c_3) g_target_mon = g_mon_d0c_3 - 1;
+	else if (g_target_slot == 1 && g_mon_d0c_2) g_target_mon = g_mon_d0c_2 - 1;
 	else {
-		g_4b7c = g_c4a2 - 1;
-		g_f02b = 0;
+		g_target_mon = g_mon_d0c_1 - 1;
+		g_target_slot = 0;
 	}
-	g_4b85 = g_f02b * 10 + 0x12;
-	sprintf(g_d256, "\r\v000\t000\3c\2Combat%s%s%s\5%p\1", s1, s2, s3, g_4b7d);
+	g_combat_cursor_y = g_target_slot * 10 + 0x12;
+	sprintf(g_text_buf, "\r\v000\t000\3c\2Combat%s%s%s\5%p\1", s1, s2, s3, g_combat_cursor_sprites);
 }
 
-/* 1a4f: initiative order into g_ad54 */
-void far ovr_1839_0025(void)
+/* 1a4f: initiative order into g_initiative_order */
+void far combat_sort_initiative(void)
 {
 	int i, v, cur, had;
 	int sp[12];
 	register int n, max;
 
-	had = g_0150 != -1;
-	cur = g_ad54[g_0150];
-	memset(g_ad54, -1, 12);
+	had = g_combat_turn_pos != -1;
+	cur = g_initiative_order[g_combat_turn_pos];
+	memset(g_initiative_order, -1, 12);
 	memset(sp, -1, 24);
-	for (i = n = max = 0; i < g_acc1; i++) {
-		sp[i] = v = fn_1523_1d81(&g_b9d6[g_ecc9[i]], 4, 0);
+	for (i = n = max = 0; i < g_combat_party_n; i++) {
+		sp[i] = v = get_char_stat(&g_party[g_combat_order[i]], 4, 0);
 		if (v > max) max = v;
 	}
-	if (g_c4a2) {
-		sp[i++] = v = g_f02e[g_b6bc[g_c4a2 - 1]];
+	if (g_mon_d0c_1) {
+		sp[i++] = v = g_mon_speed[g_mon_type[g_mon_d0c_1 - 1]];
 		if (v > max) max = v;
 	}
-	if (g_c4a3) {
-		sp[i++] = v = g_f02e[g_b6bc[g_c4a3 - 1]];
+	if (g_mon_d0c_2) {
+		sp[i++] = v = g_mon_speed[g_mon_type[g_mon_d0c_2 - 1]];
 		if (v > max) max = v;
 	}
-	if (g_c4a4) {
-		sp[i++] = v = g_f02e[g_b6bc[g_c4a4 - 1]];
+	if (g_mon_d0c_3) {
+		sp[i++] = v = g_mon_speed[g_mon_type[g_mon_d0c_3 - 1]];
 		if (v > max) max = v;
 	}
 	for (i = max; i >= 0; i--)
-		for (v = 0; v < g_acc1 + 3; v++)
-			if (sp[v] == i) g_ad54[n++] = v;
-	if (had && g_ad54[g_0150] != cur) {
-		n = g_c4a2 > 0;
-		n += g_c4a3 > 0;
-		n += g_c4a4 > 0;
-		for (i = 0; i < g_acc1 + n; i++)
-			if (g_ad54[i] == cur) {
-				g_0150 = i;
+		for (v = 0; v < g_combat_party_n + 3; v++)
+			if (sp[v] == i) g_initiative_order[n++] = v;
+	if (had && g_initiative_order[g_combat_turn_pos] != cur) {
+		n = g_mon_d0c_1 > 0;
+		n += g_mon_d0c_2 > 0;
+		n += g_mon_d0c_3 > 0;
+		for (i = 0; i < g_combat_party_n + n; i++)
+			if (g_initiative_order[i] == cur) {
+				g_combat_turn_pos = i;
 				break;
 			}
 	}
 }
 
 /* 1c55: combat main loop */
-void far ovr_1839_0020(void)
+void far run_combat(void)
 {
 	int i;
 	register int r;
 
-	g_c520 = 2;
-	ovr_17f2_0043();
-	ovr_1816_0025();
-	memset(g_ecc9, 0xff, 9);
-	memset(g_b9c9, 0, 12);
-	memset(g_c4cb, 0, 12);
-	g_f02c = g_f02b = g_a75e[0] = g_a75e[1] = g_a75e[2] = 0;
-	g_4b7c = g_c4a2 - 1;
-	for (i = r = 0; i < g_e8ea; i++) g_ecc9[i] = i;
-	g_acc1 = g_e8ea;
-	ovr_1839_0025();
-	g_015e = g_014f = g_0150 = 0xff;
-	ovr_1839_0061();
-	if (g_0151) return;
-	if (g_017f) {
-		fn_1903_2328();
-		fn_1b66_0009();
+	g_game_mode = 2;
+	load_combat_icons();
+	draw_main_icons();
+	memset(g_combat_order, 0xff, 9);
+	memset(g_combat_acted, 0, 12);
+	memset(g_combat_blocking, 0, 12);
+	g_party_fled = g_target_slot = g_mon_hit_anim[0] = g_mon_hit_anim[1] = g_mon_hit_anim[2] = 0;
+	g_target_mon = g_mon_d0c_1 - 1;
+	for (i = r = 0; i < g_party_count; i++) g_combat_order[i] = i;
+	g_combat_party_n = g_party_count;
+	combat_sort_initiative();
+	g_highlighted_char = g_combat_actor = g_combat_turn_pos = 0xff;
+	combat_next_actor();
+	if (g_party_defeated) return;
+	if (g_monster_scan_delay) {
+		move_monsters();
+		refresh_view();
 	}
-	fn_1903_0099(g_014f);
-	ovr_1839_003e();
-	fn_124f_2ab1(0xe7, 1, 0x59, 0x48, 0, 0x96, 4, 6, g_d256);
+	highlight_portrait(g_combat_actor);
+	format_monster_list();
+	open_text_window(0xe7, 1, 0x59, 0x48, 0, 0x96, 4, 6, g_text_buf);
 	do {
-		if (g_c4a2) fn_1903_213b(g_b6bc[g_4b7c] + 0x3c);
-		ovr_1839_0025();
-		ovr_1839_003e();
-		fn_124f_2ac5(g_d256);
-		switch (i = fn_1511_03aa()) {
+		if (g_mon_d0c_1) play_sfx(g_mon_type[g_target_mon] + 0x3c);
+		combat_sort_initiative();
+		format_monster_list();
+		print_window_text(g_text_buf);
+		switch (i = get_input()) {
 		case 0xf0:
-			switch (g_e8f4) {
-			case 0: g_e8f4 = 3; break;
-			case 1: g_e8f4 = 2; break;
-			case 2: g_e8f4 = 0; break;
-			case 3: g_e8f4 = 1; break;
+			switch (g_party_dir) {
+			case 0: g_party_dir = 3; break;
+			case 1: g_party_dir = 2; break;
+			case 2: g_party_dir = 0; break;
+			case 3: g_party_dir = 1; break;
 			}
 			goto turn;
 		case 0xf1:
-			switch (g_e8f4) {
-			case 0: g_e8f4 = 2; break;
-			case 1: g_e8f4 = 3; break;
-			case 2: g_e8f4 = 1; break;
-			case 3: g_e8f4 = 0; break;
+			switch (g_party_dir) {
+			case 0: g_party_dir = 2; break;
+			case 1: g_party_dir = 3; break;
+			case 2: g_party_dir = 1; break;
+			case 3: g_party_dir = 0; break;
 			}
 		turn:
-			if (g_017d == 0 || g_015b || g_017d == 3) g_0180 ^= 1;
-			if (g_017f) fn_1903_2328();
-			g_017e = 1;
-			g_0185 ^= 1;
+			if (g_maze_gfx_index == 0 || g_outdoors || g_maze_gfx_index == 3) g_view_bg_flip ^= 1;
+			if (g_monster_scan_delay) move_monsters();
+			g_view_dirty = 1;
+			g_view_flip ^= 1;
 			break;
 		case 0: case 0x46:
-			ovr_1839_007a();
-			ovr_1839_0061();
+			do_quickfight_action();
+			combat_next_actor();
 			break;
 		case 1: case 0x43:
-			if (ovr_1861_0048(0)) {
-				ovr_1839_0061();
+			if (cast_spell_dialog(0)) {
+				combat_next_actor();
 				break;
 			}
-			fn_1903_0099(g_ecc9[g_014f]);
+			highlight_portrait(g_combat_order[g_combat_actor]);
 			break;
 		case 2: case 0x41:
-			ovr_1839_0043(&g_b9d6[g_ecc9[g_014f]], 0);
-			ovr_1839_0061();
+			party_attack_monster(&g_party[g_combat_order[g_combat_actor]], 0);
+			combat_next_actor();
 			break;
 		case 3: case 0x55:
-			i = g_014f;
-			ovr_1867_0034(&g_b9d6[g_ecc9[g_014f]], 7);
-			if (g_014f != i) {
-				g_014f = i;
-				ovr_1839_0061();
+			i = g_combat_actor;
+			item_screen(&g_party[g_combat_order[g_combat_actor]], 7);
+			if (g_combat_actor != i) {
+				g_combat_actor = i;
+				combat_next_actor();
 				break;
 			}
-			fn_1903_0099(g_014f);
-			ovr_17f2_0043();
+			highlight_portrait(g_combat_actor);
+			load_combat_icons();
 			break;
 		case 4: case 0x52:
-			ovr_1839_0057();
-			ovr_1839_0061();
-			if (g_c520 != 1) break;
-			g_effa = g_f020 = g_f008 = 0;
-			fn_1b66_02c5();
+			combat_try_run();
+			combat_next_actor();
+			if (g_game_mode != 1) break;
+			g_loot_gold = g_loot_count = g_loot_gems = 0;
+			set_party_map_start();
 			goto done;
 		case 5: case 0x42:
-			ovr_1839_0039();
-			ovr_1839_0061();
+			combat_block();
+			combat_next_actor();
 			break;
 		case 6: case 0x4f:
-			ovr_182a_003e(&g_b9d6[g_ecc9[g_014f]]);
-			fn_1903_0099(g_014f);
+			quickfight_options(&g_party[g_combat_order[g_combat_actor]]);
+			highlight_portrait(g_combat_actor);
 			break;
 		case 7: case 0x49:
-			ovr_1816_002a();
-			fn_1903_0099(g_014f);
+			show_game_info();
+			highlight_portrait(g_combat_actor);
 			break;
 		case 8: case 0x51:
-			ovr_1867_0043();
-			fn_1903_0099(g_014f);
+			show_quick_ref();
+			highlight_portrait(g_combat_actor);
 			break;
 		case 9:
-			ovr_1816_0057();
-			fn_1903_0099(g_014f);
+			control_panel();
+			highlight_portrait(g_combat_actor);
 			break;
 		case 10: case 13: case 16: case 0x31:
-			if (g_c4a2) {
-				g_4b7c = g_c4a2 - 1;
-				g_f02b = 0;
+			if (g_mon_d0c_1) {
+				g_target_mon = g_mon_d0c_1 - 1;
+				g_target_slot = 0;
 			}
 			break;
 		case 11: case 14: case 17: case 0x32:
-			if (g_c4a3) {
-				g_4b7c = g_c4a3 - 1;
-				g_f02b = 1;
+			if (g_mon_d0c_2) {
+				g_target_mon = g_mon_d0c_2 - 1;
+				g_target_slot = 1;
 			}
 			break;
 		case 12: case 15: case 0x33:
-			if (g_c4a4) {
-				g_4b7c = g_c4a4 - 1;
-				g_f02b = 2;
+			if (g_mon_d0c_3) {
+				g_target_mon = g_mon_d0c_3 - 1;
+				g_target_slot = 2;
 			}
 			break;
 		case 0xc9: case 0xca: case 0xcb: case 0xcc: case 0xcd: case 0xce: case 0xcf: case 0xd0:
-			if ((i -= 0xc9) < g_acc1) {
-				ovr_1867_0048(i);
-				fn_1903_0099(g_014f);
-				ovr_17f2_0043();
+			if ((i -= 0xc9) < g_combat_party_n) {
+				char_screen(i);
+				highlight_portrait(g_combat_actor);
+				load_combat_icons();
 			}
 			break;
 		}
-		if (ovr_1839_006b()) {
+		if (combat_round_over()) {
 			r++;
-			memset(g_b9c9, 0, 12);
-			memset(g_c4cb, 0, 12);
-			ovr_1839_0025();
-			g_0150 = g_014f = 0xff;
-			ovr_1839_0061();
-			for (i = 0; i < g_ed72; i++)
-				if (g_b6bc[i] == 0x37) g_b414[i] = g_f082[0x37];
-			fn_1523_0005();
-			fn_1903_2328();
-			fn_1523_0f7d();
-			fn_1523_1743(1);
+			memset(g_combat_acted, 0, 12);
+			memset(g_combat_blocking, 0, 12);
+			combat_sort_initiative();
+			g_combat_turn_pos = g_combat_actor = 0xff;
+			combat_next_actor();
+			for (i = 0; i < g_mon_count; i++)
+				if (g_mon_type[i] == 0x37) g_mon_hp[i] = g_mon_max_hp[0x37];
+			recover_monster_status();
+			move_monsters();
+			scan_view_monsters();
+			pass_time(1);
 		}
-		if (!g_c4a2 && !g_c4a3 && !g_c4a4) {
-			fn_1523_1743(1);
-			fn_1b66_0009();
-			if (!g_c4a2 && !g_c4a3 && !g_c4a4) break;
+		if (!g_mon_d0c_1 && !g_mon_d0c_2 && !g_mon_d0c_3) {
+			pass_time(1);
+			refresh_view();
+			if (!g_mon_d0c_1 && !g_mon_d0c_2 && !g_mon_d0c_3) break;
 		}
-		fn_1523_0041();
-	} while (g_0151 == 0 && g_c520 == 2);
+		update_party_disabled();
+	} while (g_party_defeated == 0 && g_game_mode == 2);
 done:
-	g_c520 = 1;
-	if (g_f02c && (g_c4a2 || g_c4a3 || g_c4a4)) {
-		fn_1523_0041();
-		if (!g_0151) {
-			fn_1b66_02c5();
-			for (i = 0; i < g_e8ea; i++)
-				switch (fn_1523_1c1a(&g_b9d6[i])) {
+	g_game_mode = 1;
+	if (g_party_fled && (g_mon_d0c_1 || g_mon_d0c_2 || g_mon_d0c_3)) {
+		update_party_disabled();
+		if (!g_party_defeated) {
+			set_party_map_start();
+			for (i = 0; i < g_party_count; i++)
+				switch (get_worst_condition(&g_party[i])) {
 				case 8: case 11: case 12: case 14: case 15:
-					g_b9d6[i].f120 = 1;
+					g_party[i].f120 = 1;
 				}
 		}
 	}
-	fn_124f_2abb(1);
-	fn_1511_0cee();
-	g_c520 = 2;
-	fn_1b66_0009();
-	ovr_1821_0020();
-	g_c520 = 1;
-	g_017e = 1;
-	fn_1523_0506(1);
-	ovr_17f2_005c();
-	for (i = 0; i < g_e8ea; i++) g_ecc9[i] = i;
-	g_acc1 = g_e8ea;
-	fn_1523_1ec7();
-	ovr_1816_0093();
-	ovr_1816_0025();
-	g_4b7c = 0xff;
-	fn_1903_213b(0);
+	close_windows(1);
+	flush_input();
+	g_game_mode = 2;
+	refresh_view();
+	award_found_loot();
+	g_game_mode = 1;
+	g_view_dirty = 1;
+	draw_wizard_eye(1);
+	clear_char_highlight();
+	for (i = 0; i < g_party_count; i++) g_combat_order[i] = i;
+	g_combat_party_n = g_party_count;
+	draw_party_portraits();
+	setup_main_ui();
+	draw_main_icons();
+	g_target_mon = 0xff;
+	play_sfx(0);
 }

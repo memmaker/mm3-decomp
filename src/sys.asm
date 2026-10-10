@@ -4,17 +4,17 @@
 
 DGROUP	group	_DATA
 _DATA	segment byte public 'DATA'	; byte aligned: starts at odd DS 174f right after stattext's data
-	extrn	_g_f086:byte
+	extrn	_g_file_size:byte
 	include	sysd.inc	; DGROUP 174f-1e2e (ASM=1 tools/mkdata.py src/sys.asm 174f 1e2e)
 _DATA	ends
 
-	extrn	_fn_168b_00a2:far
+	extrn	_snd_shutdown:far
 
 SYS_TEXT	segment byte public 'CODE'
 	assume	cs:SYS_TEXT, ds:DGROUP
 
-	public	_fn_124f_0004
-_fn_124f_0004	proc	far
+	public	_close_cc_archives
+_close_cc_archives	proc	far
 L0004:
 	push	es	;@0004
 	mov	es,word ptr cs:[L2a73]	;@0005
@@ -34,9 +34,9 @@ L0004:
 	int	21h	;@0030
 	pop	es	;@0032
 	retf	;@0033
-_fn_124f_0004	endp
-	public	_fn_124f_0034
-_fn_124f_0034	proc	far
+_close_cc_archives	endp
+	public	_mem_alloc
+_mem_alloc	proc	far
 L0034:
 	push	bp	;@0034
 	mov	bp,sp	;@0035
@@ -47,9 +47,9 @@ L0034:
 	sub	ax,ax	;@0040
 	pop	bp	;@0042
 	retf	;@0043
-_fn_124f_0034	endp
-	public	_fn_124f_0044
-_fn_124f_0044	proc	far
+_mem_alloc	endp
+	public	_alloc_paragraphs
+_alloc_paragraphs	proc	far
 L0044:
 	push	es	;@0044
 	add	bx,0fh	;@0045
@@ -99,9 +99,9 @@ L008e:
 	pop	es	;@0090
 	jc	L0099	;@0091
 	retf	;@0093
-_fn_124f_0044	endp
-	public	_fn_124f_0094
-_fn_124f_0094	proc	far
+_alloc_paragraphs	endp
+	public	_fatal_disk_error
+_fatal_disk_error	proc	far
 L0094:
 	mov	si,10eh	;@0094
 	jmp	short L00a6	;@0097
@@ -110,7 +110,7 @@ L0099:
 	mov	word ptr cs:[L013c],cs	;@009c
 	mov	word ptr cs:[L013e],si	;@00a1
 L00a6:
-	call	far ptr _fn_168b_00a2	;@00a6
+	call	far ptr _snd_shutdown	;@00a6
 	push	cs	;@00ab
 	call	near ptr L2c08	;@00ac
 	mov	ax,3	;@00af
@@ -152,15 +152,15 @@ L013e:
 	db	0,0	;@013e
 L0140:
 	db	0,0	;@0140
-_fn_124f_0094	endp
-	public	_fn_124f_0142
-_fn_124f_0142	proc	far
+_fatal_disk_error	endp
+	public	_open_cur_archive
+_open_cur_archive	proc	far
 L0142:
 	sub	ax,ax	;@0142
 	jmp	short L0149	;@0144
-_fn_124f_0142	endp
-	public	_fn_124f_0146
-_fn_124f_0146	proc	far
+_open_cur_archive	endp
+	public	_open_cc_archive
+_open_cc_archive	proc	far
 L0146:
 	mov	ax,2	;@0146
 L0149:
@@ -233,9 +233,9 @@ L01be:
 L01d2:
 	jmp	near ptr L0094	;@01d2
 	db	90h	;@01d5
-_fn_124f_0146	endp
-	public	_fn_124f_01d6
-_fn_124f_01d6	proc	far
+_open_cc_archive	endp
+	public	_cur_write_file
+_cur_write_file	proc	far
 L01d6:
 	push	bp	;@01d6
 	mov	bp,sp	;@01d7
@@ -302,9 +302,9 @@ L0221:
 	pop	bp	;@024d
 	retf	;@024e
 	db	90h	;@024f
-_fn_124f_01d6	endp
-	public	_fn_124f_0250
-_fn_124f_0250	proc	far
+_cur_write_file	endp
+	public	_cc_load_file_raw
+_cc_load_file_raw	proc	far
 L0250:
 	push	bp	;@0250
 	push	ds	;@0251
@@ -382,7 +382,7 @@ L02bd:
 	jnz	L0318	;@02df
 	mov	ax,DGROUP	;@02e1
 	mov	ds,ax	;@02e4
-	mov	word ptr [_g_f086],bx	;@02e6
+	mov	word ptr [_g_file_size],bx	;@02e6
 	mov	ax,word ptr cs:[L0650]	;@02ea
 	or	ax,ax	;@02ee
 	jnz	L02f8	;@02f0
@@ -416,7 +416,7 @@ L0318:
 	mov	ax,DGROUP	;@0336
 	mov	ds,ax	;@0339
 	assume	ds:DGROUP
-	mov	word ptr [_g_f086],bx	;@033b
+	mov	word ptr [_g_file_size],bx	;@033b
 	add	bx,10h	;@033f
 	push	bx	;@0342
 	mov	ax,word ptr cs:[L0650]	;@0343
@@ -858,9 +858,9 @@ L28dc:
 	db	'  !!""##$$%%&&'
 	db	27h,27h
 	db	'(())**++,,--..//0123456789:;<=>?'
-_fn_124f_0250	endp
-	public	_fn_124f_29dc
-_fn_124f_29dc	proc	far
+_cc_load_file_raw	endp
+	public	_random_range
+_random_range	proc	far
 L29dc:
 	push	bp	;@29dc
 	mov	bp,sp	;@29dd
@@ -900,9 +900,9 @@ L2a26:
 	db	62h,0fch	;@2a26
 L2a28:
 	db	0d5h,83h	;@2a28
-_fn_124f_29dc	endp
-	public	_fn_124f_2a2a
-_fn_124f_2a2a	proc	far
+_random_range	endp
+	public	_load_video_driver
+_load_video_driver	proc	far
 L2a2a:
 	push	bp	;@2a2a
 	mov	bp,sp	;@2a2b
@@ -932,9 +932,9 @@ L2a2a:
 	mov	ax,1	;@2a5e
 	pop	bp	;@2a61
 	retf	;@2a62
-_fn_124f_2a2a	endp
-	public	_fn_124f_2a63
-_fn_124f_2a63	proc	far
+_load_video_driver	endp
+	public	_vga_drv_init
+_vga_drv_init	proc	far
 L2a63:
 	push	word ptr cs:[L2a73]	;@2a63
 	mov	bp,30h	;@2a68
@@ -943,105 +943,105 @@ L2a63:
 	db	76h,67h,61h,0,0,0	;@2a6d
 L2a73:
 	db	0,0	;@2a73
-_fn_124f_2a63	endp
-	public	_fn_124f_2a75
-_fn_124f_2a75	proc	far
+_vga_drv_init	endp
+	public	_show_raw_picture
+_show_raw_picture	proc	far
 L2a75:
 	push	word ptr cs:[L2a73]	;@2a75
 	mov	ax,0ch	;@2a7a
 	push	ax	;@2a7d
 	retf	;@2a7e
-_fn_124f_2a75	endp
-	public	_fn_124f_2a7f
-_fn_124f_2a7f	proc	far
+_show_raw_picture	endp
+	public	_load_graphic
+_load_graphic	proc	far
 L2a7f:
 	push	word ptr cs:[L2a73]	;@2a7f
 	mov	ax,21h	;@2a84
 	push	ax	;@2a87
 	retf	;@2a88
-_fn_124f_2a7f	endp
-	public	_fn_124f_2a89
-_fn_124f_2a89	proc	far
+_load_graphic	endp
+	public	_free_graphic
+_free_graphic	proc	far
 L2a89:
 	push	word ptr cs:[L2a73]	;@2a89
 	mov	ax,24h	;@2a8e
 	push	ax	;@2a91
 	retf	;@2a92
-_fn_124f_2a89	endp
-	public	_fn_124f_2a93
-_fn_124f_2a93	proc	far
+_free_graphic	endp
+	public	_set_mouse_cursor
+_set_mouse_cursor	proc	far
 L2a93:
 	push	word ptr cs:[L2a73]	;@2a93
 	mov	ax,27h	;@2a98
 	push	ax	;@2a9b
 	retf	;@2a9c
-_fn_124f_2a93	endp
-	public	_fn_124f_2a9d
-_fn_124f_2a9d	proc	far
+_set_mouse_cursor	endp
+	public	_get_mouse_state
+_get_mouse_state	proc	far
 L2a9d:
 	push	word ptr cs:[L2a73]	;@2a9d
 	mov	ax,18h	;@2aa2
 	push	ax	;@2aa5
 	retf	;@2aa6
-_fn_124f_2a9d	endp
-	public	_fn_124f_2aa7
-_fn_124f_2aa7	proc	far
+_get_mouse_state	endp
+	public	_clear_screen
+_clear_screen	proc	far
 L2aa7:
 	push	word ptr cs:[L2a73]	;@2aa7
 	mov	ax,3	;@2aac
 	push	ax	;@2aaf
 	retf	;@2ab0
-_fn_124f_2aa7	endp
-	public	_fn_124f_2ab1
-_fn_124f_2ab1	proc	far
+_clear_screen	endp
+	public	_open_text_window
+_open_text_window	proc	far
 L2ab1:
 	push	word ptr cs:[L2a73]	;@2ab1
 	mov	ax,1eh	;@2ab6
 	push	ax	;@2ab9
 	retf	;@2aba
-_fn_124f_2ab1	endp
-	public	_fn_124f_2abb
-_fn_124f_2abb	proc	far
+_open_text_window	endp
+	public	_close_windows
+_close_windows	proc	far
 L2abb:
 	push	word ptr cs:[L2a73]	;@2abb
 	mov	ax,6	;@2ac0
 	push	ax	;@2ac3
 	retf	;@2ac4
-_fn_124f_2abb	endp
-	public	_fn_124f_2ac5
-_fn_124f_2ac5	proc	far
+_close_windows	endp
+	public	_print_window_text
+_print_window_text	proc	far
 L2ac5:
 	push	word ptr cs:[L2a73]	;@2ac5
 	mov	ax,2dh	;@2aca
 	push	ax	;@2acd
 	retf	;@2ace
-_fn_124f_2ac5	endp
-	public	_fn_124f_2acf
-_fn_124f_2acf	proc	far
+_print_window_text	endp
+	public	_fade_screen
+_fade_screen	proc	far
 L2acf:
 	push	word ptr cs:[L2a73]	;@2acf
 	mov	ax,0fh	;@2ad4
 	push	ax	;@2ad7
 	retf	;@2ad8
-_fn_124f_2acf	endp
-	public	_fn_124f_2ad9
-_fn_124f_2ad9	proc	far
+_fade_screen	endp
+	public	_draw_icon
+_draw_icon	proc	far
 L2ad9:
 	push	word ptr cs:[L2a73]	;@2ad9
 	mov	ax,15h	;@2ade
 	push	ax	;@2ae1
 	retf	;@2ae2
-_fn_124f_2ad9	endp
-	public	_fn_124f_2ae3
-_fn_124f_2ae3	proc	far
+_draw_icon	endp
+	public	_vga_idle_1b
+_vga_idle_1b	proc	far
 L2ae3:
 	push	word ptr cs:[L2a73]	;@2ae3
 	mov	ax,1bh	;@2ae8
 	push	ax	;@2aeb
 	retf	;@2aec
-_fn_124f_2ae3	endp
-	public	_fn_124f_2aed
-_fn_124f_2aed	proc	far
+_vga_idle_1b	endp
+	public	_load_cc_file
+_load_cc_file	proc	far
 L2aed:
 	push	bp	;@2aed
 	mov	bp,sp	;@2aee
@@ -1054,33 +1054,33 @@ L2aed:
 	sub	ax,ax	;@2afe
 	pop	bp	;@2b00
 	retf	;@2b01
-_fn_124f_2aed	endp
-	public	_fn_124f_2b02
-_fn_124f_2b02	proc	far
+_load_cc_file	endp
+	public	_draw_sprites
+_draw_sprites	proc	far
 L2b02:
 	push	word ptr cs:[L2a73]	;@2b02
 	sub	ax,ax	;@2b07
 	push	ax	;@2b09
 	retf	;@2b0a
-_fn_124f_2b02	endp
-	public	_fn_124f_2b0b
-_fn_124f_2b0b	proc	far
+_draw_sprites	endp
+	public	_draw_sprites_2a
+_draw_sprites_2a	proc	far
 L2b0b:
 	push	word ptr cs:[L2a73]	;@2b0b
 	mov	ax,2ah	;@2b10
 	push	ax	;@2b13
 	retf	;@2b14
-_fn_124f_2b0b	endp
-	public	_fn_124f_2b15
-_fn_124f_2b15	proc	far
+_draw_sprites_2a	endp
+	public	_vga_unused_12
+_vga_unused_12	proc	far
 L2b15:
 	push	word ptr cs:[L2a73]	;@2b15
 	mov	ax,12h	;@2b1a
 	push	ax	;@2b1d
 	retf	;@2b1e
-_fn_124f_2b15	endp
-	public	_fn_124f_2b1f
-_fn_124f_2b1f	proc	far
+_vga_unused_12	endp
+	public	_file_open
+_file_open	proc	far
 L2b1f:
 	push	bp	;@2b1f
 	mov	bp,sp	;@2b20
@@ -1093,9 +1093,9 @@ L2b1f:
 L2b32:
 	pop	bp	;@2b32
 	retf	;@2b33
-_fn_124f_2b1f	endp
-	public	_fn_124f_2b34
-_fn_124f_2b34	proc	far
+_file_open	endp
+	public	_file_close
+_file_close	proc	far
 L2b34:
 	mov	bx,word ptr cs:[L0140]	;@2b34
 	mov	ah,3eh	;@2b39
@@ -1104,9 +1104,9 @@ L2b34:
 	sub	ax,ax	;@2b3f
 L2b41:
 	retf	;@2b41
-_fn_124f_2b34	endp
-	public	_fn_124f_2b42
-_fn_124f_2b42	proc	far
+_file_close	endp
+	public	_file_seek
+_file_seek	proc	far
 L2b42:
 	push	bp	;@2b42
 	mov	bp,sp	;@2b43
@@ -1120,9 +1120,9 @@ L2b42:
 L2b59:
 	pop	bp	;@2b59
 	retf	;@2b5a
-_fn_124f_2b42	endp
-	public	_fn_124f_2b5b
-_fn_124f_2b5b	proc	far
+_file_seek	endp
+	public	_file_read
+_file_read	proc	far
 L2b5b:
 	push	bp	;@2b5b
 	mov	bp,sp	;@2b5c
@@ -1139,9 +1139,9 @@ L2b75:
 	pop	ds	;@2b75
 	pop	bp	;@2b76
 	retf	;@2b77
-_fn_124f_2b5b	endp
-	public	_fn_124f_2b78
-_fn_124f_2b78	proc	far
+_file_read	endp
+	public	_file_write
+_file_write	proc	far
 L2b78:
 	push	bp	;@2b78
 	mov	bp,sp	;@2b79
@@ -1158,9 +1158,9 @@ L2b92:
 	pop	ds	;@2b92
 	pop	bp	;@2b93
 	retf	;@2b94
-_fn_124f_2b78	endp
-	public	_fn_124f_2b95
-_fn_124f_2b95	proc	far
+_file_write	endp
+	public	_reopen_cur_archive
+_reopen_cur_archive	proc	far
 L2b95:
 	push	ds	;@2b95
 	push	cs	;@2b96
@@ -1174,9 +1174,9 @@ L2b95:
 L2ba8:
 	pop	ds	;@2ba8
 	retf	;@2ba9
-_fn_124f_2b95	endp
-	public	_fn_124f_2baa
-_fn_124f_2baa	proc	far
+_reopen_cur_archive	endp
+	public	_close_cur_archive
+_close_cur_archive	proc	far
 L2baa:
 	mov	bx,word ptr cs:[L0648]	;@2baa
 	mov	ah,3eh	;@2baf
@@ -1185,9 +1185,9 @@ L2baa:
 	sub	ax,ax	;@2bb5
 L2bb7:
 	retf	;@2bb7
-_fn_124f_2baa	endp
-	public	_fn_124f_2bb8
-_fn_124f_2bb8	proc	far
+_close_cur_archive	endp
+	public	_install_break_handlers
+_install_break_handlers	proc	far
 L2bb8:
 	push	ds	;@2bb8
 	push	cs	;@2bb9
@@ -1220,9 +1220,9 @@ L2bf2:
 	db	0,0	;@2bf2
 L2bf4:
 	db	0	;@2bf4
-_fn_124f_2bb8	endp
-	public	_fn_124f_2bf5
-_fn_124f_2bf5	proc	far
+_install_break_handlers	endp
+	public	_break_handler
+_break_handler	proc	far
 L2bf5:
 	sti	;@2bf5
 	push	ds	;@2bf6
@@ -1235,9 +1235,9 @@ L2bf5:
 	pop	ds	;@2c05
 	clc	;@2c06
 	iret	;@2c07
-_fn_124f_2bf5	endp
-	public	_fn_124f_2c08
-_fn_124f_2c08	proc	far
+_break_handler	endp
+	public	_restore_break_handlers
+_restore_break_handlers	proc	far
 L2c08:
 	cmp	byte ptr cs:[L2bf4],0	;@2c08
 	jz	L2c26	;@2c0e
@@ -1251,6 +1251,6 @@ L2c08:
 	pop	ds	;@2c25
 L2c26:
 	retf	;@2c26
-_fn_124f_2c08	endp
+_restore_break_handlers	endp
 SYS_TEXT	ends
 	end

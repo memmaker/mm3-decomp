@@ -1,0 +1,16 @@
+-xc
+--target=i386-pc-none-elf
+-std=gnu89
+-fno-blocks
+-fasm-blocks
+-Dasm=__asm
+-D__attribute=__attrib
+-include
+../tools/clangd/bcc.h
+-nostdinc
+-isystem
+../tools/clangd/include
+-isystem
+../toolchain/bcpp20/install
+-Wno-everything
+-ferror-limit=0

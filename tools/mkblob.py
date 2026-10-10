@@ -118,6 +118,7 @@ wanted = {}    # blob module -> [(sym, segname, off)] imported by C OBJs
 
 def owner(sym):
     """(module, segname, offset) of a symbol a C OBJ imports from a blob, None for RTL names"""
+    from names import orig; sym = orig(sym)
     mm = re.match(r'_g_([0-9a-f]{4})$', sym)
     if mm:
         a = int(mm.group(1), 16)
@@ -142,7 +143,8 @@ def pubsort(buf):
     while i < len(buf):
         n = struct.unpack_from('<H', buf, i + 1)[0]; recs.append(buf[i:i + 3 + n]); i += 3 + n
     idx = [k for k, r in enumerate(recs) if r[0] == 0x90]
-    key = lambda r: r[6:6 + r[5]]
+    from names import orig
+    key = lambda r: orig(r[6:6 + r[5]].decode()).encode()   # address name: _ovr_SSSS_OOOO sorts by stub offset
     for k, r in zip(idx, sorted((recs[k] for k in idx), key=key, reverse=True)): recs[k] = r
     return b''.join(recs)
 

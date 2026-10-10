@@ -7,16 +7,21 @@ import re, sys, glob, struct
 img = open('orig/MM3.EXE', 'rb').read()[3584 + 0x186f0:]
 src, A, B = sys.argv[1], int(sys.argv[2], 16), int(sys.argv[3], 16)
 cuts = {A: None}
-for f in glob.glob('src/*.[ch]') + glob.glob('src/*.asm'):
-    for h in re.findall(r'(?<![0-9A-Za-z])g_([0-9a-f]{4})\b', open(f).read()):
-        if A <= int(h, 16) < B: cuts[int(h, 16)] = 'g_' + h
+sys.path.insert(0, 'tools'); from names import table
+ren = table()   # renamed globals keep their address via results/names.tsv
+srcs = ''.join(open(f).read() for f in glob.glob('src/*.[ch]') + glob.glob('src/*.asm'))
+for h in re.findall(r'(?<![0-9A-Za-z])g_([0-9a-f]{4})\b', srcs):
+    if A <= int(h, 16) < B: cuts[int(h, 16)] = 'g_' + h
+for k, v in ren.items():
+    mm = re.match(r'g_([0-9a-f]{4})$', k)
+    if mm and A <= int(mm.group(1), 16) < B: cuts[int(mm.group(1), 16)] = v
 for kv in sys.argv[4:]:
     k, v = kv.split('='); cuts[int(v, 16)] = k
 SIZE = {'char': 1, 'u8': 1, 'unsigned char': 1, 'int': 2, 'unsigned': 2, 'unsigned int': 2, 'long': 4, 'unsigned long': 4}
 decl = {}   # name -> (type, dims suffix)
 for t, names in re.findall(r'extern\s+(unsigned char|unsigned int|unsigned long|unsigned|char|u8|int|long)\s+([^;(]*);', open(src).read() + (open(src[:-2] + '.h').read() if __import__('os').path.exists(src[:-2] + '.h') else '')):
     for n in names.split(','):
-        m = re.match(r'\s*(g_[0-9a-f]{4})((?:\[\w*\])*)\s*$', n)
+        m = re.match(r'\s*(\w+)((?:\[\w*\])*)\s*$', n)
         if m: decl[m.group(1)] = (t, m.group(2))
 for k, v in [('_stklen', 'unsigned'), ('_ovrbuffer', 'unsigned')]: decl.setdefault(k, (v, ''))
 pts = sorted(cuts)
@@ -24,7 +29,7 @@ out = []
 ASM = __import__('os').environ.get('ASM')   # ASM=1: TASM db definitions to include in an asm module's _DATA
 BSS = __import__('os').environ.get('BSS')   # BSS=1: TASM _BSS module (BCC emits uninitialized globals in hash order)
 def emit(a, b):
-    n = cuts.get(a) or 'g_%04x' % a
+    n = cuts.get(a) or ren.get('g_%04x' % a, 'g_%04x' % a)
     if BSS: out.append('\tpublic\t_%s\n_%s\tdb\t%d dup(?)' % (n, n, b - a)); return
     if ASM:   # TASM db lines (for an asm module's own _DATA)
         out.append('\tpublic\t_%s\n_%s' % (n, n) + ''.join('\tdb\t' + ','.join('%03xh' % c for c in img[i:min(i + 16, b)]) + '\n' for i in range(a, b, 16)).rstrip('\n')); return

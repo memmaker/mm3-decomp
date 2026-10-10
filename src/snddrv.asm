@@ -6,13 +6,13 @@ DGROUP	group	_DATA
 _DATA	segment word public 'DATA'
 _DATA	ends
 
-	extrn	_fn_124f_0250:far
+	extrn	_cc_load_file_raw:far
 
 SNDDRV_TEXT	segment word public 'CODE'
 	assume	cs:SNDDRV_TEXT, ds:DGROUP
 
-	public	_fn_168b_000e
-_fn_168b_000e	proc	far
+	public	_load_sound_driver
+_load_sound_driver	proc	far
 L000e:
 	push	bp	;@000e
 	mov	bp,sp	;@000f
@@ -25,7 +25,7 @@ L000e:
 	mov	ax,word ptr cs:[bx+L0037]	;@001a
 	mov	bx,cs	;@001f
 	sub	cx,cx	;@0021
-	call	far ptr _fn_124f_0250	;@0023
+	call	far ptr _cc_load_file_raw	;@0023
 	mov	word ptr cs:[L008d],bx	;@0028
 	mov	ax,bx	;@002d
 	pop	di	;@002f
@@ -54,9 +54,9 @@ L0037:
 	db	0,0,0
 L008d:
 	db	0,0	;@008d
-_fn_168b_000e	endp
-	public	_fn_168b_008f
-_fn_168b_008f	proc	far
+_load_sound_driver	endp
+	public	_snd_init
+_snd_init	proc	far
 L008f:
 	cmp	word ptr cs:[L008d],0	;@008f
 	jnz	L0098	;@0095
@@ -66,9 +66,9 @@ L0098:
 	mov	ax,0	;@009d
 	push	ax	;@00a0
 	retf	;@00a1
-_fn_168b_008f	endp
-	public	_fn_168b_00a2
-_fn_168b_00a2	proc	far
+_snd_init	endp
+	public	_snd_shutdown
+_snd_shutdown	proc	far
 L00a2:
 	cmp	word ptr cs:[L008d],0	;@00a2
 	jnz	L00ab	;@00a8
@@ -78,9 +78,9 @@ L00ab:
 	mov	ax,3	;@00b0
 	push	ax	;@00b3
 	retf	;@00b4
-_fn_168b_00a2	endp
-	public	_fn_168b_00b5
-_fn_168b_00b5	proc	far
+_snd_shutdown	endp
+	public	_snd_play_music
+_snd_play_music	proc	far
 L00b5:
 	cmp	word ptr cs:[L008d],0	;@00b5
 	jnz	L00be	;@00bb
@@ -90,9 +90,9 @@ L00be:
 	mov	ax,6	;@00c3
 	push	ax	;@00c6
 	retf	;@00c7
-_fn_168b_00b5	endp
-	public	_fn_168b_00c8
-_fn_168b_00c8	proc	far
+_snd_play_music	endp
+	public	_snd_timer
+_snd_timer	proc	far
 L00c8:
 	cmp	word ptr cs:[L008d],0	;@00c8
 	jnz	L00d1	;@00ce
@@ -102,9 +102,9 @@ L00d1:
 	mov	ax,9	;@00d6
 	push	ax	;@00d9
 	retf	;@00da
-_fn_168b_00c8	endp
-	public	_fn_168b_00db
-_fn_168b_00db	proc	far
+_snd_timer	endp
+	public	_snd_play_sample
+_snd_play_sample	proc	far
 L00db:
 	cmp	word ptr cs:[L008d],0	;@00db
 	jnz	L00e4	;@00e1
@@ -114,6 +114,6 @@ L00e4:
 	mov	ax,0ch	;@00e9
 	push	ax	;@00ec
 	retf	;@00ed
-_fn_168b_00db	endp
+_snd_play_sample	endp
 SNDDRV_TEXT	ends
 	end
