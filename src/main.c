@@ -330,12 +330,33 @@ l3d2:
 	asm mov bp,sp
 	asm mov word ptr [bp+2],177h
 	asm pop bp
-	asm db 0f5h,0d3h,0d7h,0feh,0c1h,081h,0c3h,082h,03fh,056h,081h,0e7h,1,3,0a6h,0e8h
-	asm db 01bh,0,037h,098h,043h,05ah,090h,06dh,06dh,033h,02eh,065h,078h,065h,0,0b8h
-	asm db 0b4h,017h,09dh,01bh,074h,053h,070h,065h,01ch,034h,02eh,083h,071h,070h,05bh,023h
-	asm db 088h,0e0h,0ddh,0eah,0c8h,04bh,037h,093h,1,096h,0a1h,05ah,098h,0ddh,091h,0e5h
-	asm db 04fh,0dfh,0dbh,017h,0f0h,0fch,0d9h,0ffh,0d4h,096h,09ah,0d7h,0e1h,9,0dch,0feh
-	asm db 0c4h,098h,08bh,03eh,0b1h,0dah,059h
+	/* 05bd: filler, then "mm3.exe" (checksummed at 03be) and the "tSpe" marker. After a correct answer timer.drv
+	   finds the marker and XORs the next 0x27 bytes with 27h, 26h, ..., 01h: they are written here decrypted and
+	   re-encrypted by the assembler. The decrypted code leaves cx = 0 for a correct answer and an unmodified
+	   MM3.EXE; 0614/0631 add/subtract cx to the game loop's call at 01a2 and jump at 01ab, so anything else breaks
+	   the loop. */
+	asm db 0f5h,0d3h,0d7h,0feh,0c1h,81h,0c3h,82h,3fh,56h,81h,0e7h,1,3,0a6h,0e8h,1bh,0,37h,98h,43h,5ah,90h
+	asm db 6dh,6dh,33h,2eh,65h,78h,65h,0,0b8h,0b4h,17h,9dh,1bh,74h,53h,70h,65h
+	asm db 3bh xor 27h,12h xor 26h	/* cmp dx,[bp+si] */
+	asm db 0bh xor 25h,0a7h xor 24h,52h xor 23h,52h xor 22h	/* or sp,[bx+0x5252] */
+	asm db 7ah xor 21h,3 xor 20h	/* jpe 0x5f0 */
+	asm db 97h xor 1fh	/* xchg ax,di */
+	asm db 0feh xor 1eh,0c0h xor 1dh	/* inc al */
+	asm db 0f6h xor 1ch,0d3h xor 1bh	/* not bl */
+	asm db 51h xor 1ah	/* push cx */
+	asm db 2eh xor 19h,8bh xor 18h,16h xor 17h,80h xor 16h,0b4h xor 15h	/* mov dx,[cs:0xb480] */
+	asm db 4eh xor 14h	/* dec si */
+	asm db 8bh xor 13h,0cfh xor 12h	/* mov cx,di */
+	asm db 80h xor 11h,0f5h xor 10h,40h xor 0fh	/* xor ch,0x40 */
+	asm db 0d1h xor 0eh,0d6h xor 0dh	/* rcl si,1 */
+	asm db 1bh xor 0ch,0fbh xor 0bh	/* sbb di,bx */
+	asm db 0f6h xor 0ah,0d0h xor 9	/* not al */
+	asm db 0f7h xor 8,0d3h xor 7	/* not bx */
+	asm db 90h xor 6	/* nop */
+	asm db 9fh xor 5	/* lahf */
+	asm db 0d3h xor 4,0e2h xor 3	/* shl dx,cl */
+	asm db 0bh xor 2,0ddh xor 1	/* or bx,bp */
+	asm db 0feh,0c4h,98h,8bh,3eh,0b1h,0dah,59h
 	asm add word ptr cs:[1a2h],cx
 	free_graphic(p);
 	asm pop cx

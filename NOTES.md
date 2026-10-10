@@ -296,3 +296,12 @@
 - DATA layout: gamedata.c (f1c-1710, view/events/scene data; other modules index into the middle of scene's tables, so
   not split) is linked right after SCENE with -zCSCENE_TEXT; itemname 1710-1724, stattext 1724-174f (odd end, no pad),
   sys.asm `_DATA segment byte` 174f-1e2e (sysd.inc, `ASM=1 mkdata.py`) - a word-aligned C module could not start at 174f.
+
+## Copy protection (main.c), decoded
+- Question: a 128-word table at main+0484 (indexed by a register/time/date mix) yields seed → page/line/word, text from
+  `copy.bin` in MM3.CC. `timer.drv` (also MM3.CC, LZHUF-compressed like most CC entries: `tools/cc.py`) hashes the typed
+  word from the seed, looks the hash up in its own table, and on a hit finds "tSpe" at main+05e1 and XORs the next 0x27
+  bytes with 27h..01h. That code (now plaintext in main.c, re-encrypted by `db x xor k`) yields cx = 0 only for a right
+  answer and an unmodified MM3.EXE (main also checksums its own file, 0x5801 4-byte reads); main+0614/0631 add/subtract
+  cx to the game loop's `call game_main_loop` (01a2) and `jz` (01ab). The file holds the correct loop bytes; the
+  protection only damages them on failure. Nothing of the game is hidden by it.
