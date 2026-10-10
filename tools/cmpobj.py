@@ -4,6 +4,16 @@ Mask 1 = external fixup (ignored); mask 2 = offset into own segment (compared af
 import sys, struct, re; sys.path.insert(0, __file__.rsplit('/', 1)[0])
 from omf import modules
 NAMED = {'_main': '0003'}  # functions whose name cannot carry the orig offset
+def orig_off(name):
+    """orig offset of a function from its name: fn_SSSS_OOOO / loc_SSSS_OOOO -> OOOO; ovr_SSSS_OOOO -> overlay code
+    offset of stub entry OOOO (tools/ovr.py); NAMED for the rest. None if unknown."""
+    if name in NAMED: return int(NAMED[name], 16)
+    mm = re.match(r'[_@](fn|loc|ovr)_([0-9a-f]{4})_([0-9a-f]{4})(\$.*)?$', name)
+    if not mm: return None
+    if mm.group(1) == 'ovr':
+        from ovr import stub_to_code
+        return stub_to_code(int(mm.group(2), 16), int(mm.group(3), 16))
+    return int(mm.group(3), 16)
 obj, exe, segoff = sys.argv[1], sys.argv[2], int(sys.argv[3], 16)
 slack = int(sys.argv[4], 16) if len(sys.argv) > 4 else 0
 img = open(exe, 'rb').read()[3584:]
@@ -18,15 +28,14 @@ for si, s in enumerate(m['segs']):
     while i < len(d):
         if k[i] == 2:
             f = [(po, pn) for po, pn in pubs if po <= i]
-            mm = f and re.match(r'[_@]fn_[0-9a-f]{4}_([0-9a-f]{4})(\$.*)?$', f[-1][1])
-            delta = int(mm.group(1), 16) - f[-1][0] if mm else slack
+            mm = f and orig_off(f[-1][1])
+            delta = mm - f[-1][0] if mm is not None else slack
             struct.pack_into('<H', d, i, (struct.unpack_from('<H', d, i)[0] + delta) & 0xffff); i += 2
         else: i += 1
     dump = bytearray(d)
     for (o, n), (o2, _) in zip(pubs, pubs[1:] + [(len(d), '')]):
-        mm = re.match(r'[_@]fn_[0-9a-f]{4}_([0-9a-f]{4})(\$.*)?$', n)
-        if not mm and n not in NAMED: print(f'{n}: no orig offset in name'); continue
-        oo = int(mm.group(1) if mm else NAMED[n], 16)
+        oo = orig_off(n)
+        if oo is None: print(f'{n}: no orig offset in name'); continue
         ref = img[segoff + oo:segoff + oo + (o2 - o)]
         for j in range(o, o2):
             if k[j] == 1: dump[j] = ref[j - o]
@@ -38,7 +47,11 @@ for si, s in enumerate(m['segs']):
                 to = oo + j + 1 + struct.unpack_from('<h', ref, j)[0]
                 tj = o + j + 1 + struct.unpack_from('<h', d, o + j)[0]
                 f = [(po, pn) for po, pn in pubs if po <= tj]
-                if f and int(re.match(r'[_@]fn_[0-9a-f]{4}_([0-9a-f]{4})(\$.*)?$', f[-1][1]).group(1), 16) + tj - f[-1][0] == to: j += 2; continue
+                if f and orig_off(f[-1][1]) is not None and orig_off(f[-1][1]) + tj - f[-1][0] == to: j += 2; continue
+            # TLINK rewrites intra-overlay far calls `9A off seg` to `0E E8 rel 90`: accept if the targets agree
+            if d[o + j] == 0x9a and j + 4 < o2 - o and ref[j] == 0x0e and ref[j + 1] == 0xe8 and ref[j + 4] == 0x90:
+                if struct.unpack_from('<H', d, o + j + 1)[0] == (oo + j + 4 + struct.unpack_from('<h', ref, j + 2)[0]) & 0xffff:
+                    dump[o + j:o + j + 5] = ref[j:j + 5]; j += 5; continue
             break
         total += 1
         if j == o2 - o: ok += 1; print(f'{n}: OK ({o2 - o} bytes)')

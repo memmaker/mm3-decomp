@@ -176,3 +176,9 @@
 - IDA Free 5.0 (DOS-era disassembler with Borland FLIRT signatures, could name RTL calls): https://downloads.scummvm.org/frs/extras/IDA/idafree50.exe
 - MM3 resources (file formats, tools): https://www.jeffludwig.com/mm3/resources.php
 - ScummVM MM engines: https://github.com/scummvm/scummvm/tree/master/engines/mm — `xeen/scripts.cpp` (`Scripts::execute`, `doOpcode`, `scripts.h` OP_* enum) is a *rewrite* of the MM3/Xeen event-script interpreter (fn_0903_05d8): good for opcode names and semantics (our `case n` = OP n+1; case 0 = OP_Display0x01, case 31 = OP_WhoWill), not for the original control-flow shape. `mm1/` is MM1, unrelated to the MM3 engine.
+
+## VROOMM overlays (learned on OVR_17f2 = init.c)
+- `tools/ovr.py` parses the FBOV header (file 165568) + exeinfo seg table (img 0x18ba0): `overlays()`, `segtable()`, `stub_to_code(stubseg, stuboff)`. Entry names are `ovr_SSSS_<stuboff>` (stub off = 0x20+5k); cmpobj/fndiff map them to code offsets automatically.
+- Overlay fixup seg words hold a table key = index*8 (0x38→CODE_7 124f, 0x40→CODE_8 1511, 0xd0→stub 180c, 0→RTL). The memory-dump table mixes relocated/unrelocated segs: seg<0x1000 → +0x1000. Ghidra mis-resolves these as FUN_1000_xxxx → use `tools/ovrasm.py SSSS [START END]` for call targets.
+- TLINK rewrites intra-overlay far calls `9A off seg` → `0E E8 rel 90` (push cs; call near; nop). BCC emits its own `push cs; call near` (no nop) for earlier-defined same-file functions → file order must follow address order. cmpobj accepts both.
+- Compare an overlay OBJ against its code image: `python3 -I tools/cmpobj.py run/build/INIT.OBJ orig/MM3.EXE 278d0 0` (img off from ovr.py, slack 0).
