@@ -3,6 +3,7 @@ Functions are named fn_SSSS_OOOO (OOOO = offset in the original segment); each i
 Mask 1 = external fixup (ignored); mask 2 = offset into own segment (compared after adding SLACK)."""
 import sys, struct, re; sys.path.insert(0, __file__.rsplit('/', 1)[0])
 from omf import modules
+NAMED = {'_main': '0003'}  # functions whose name cannot carry the orig offset
 obj, exe, segoff = sys.argv[1], sys.argv[2], int(sys.argv[3], 16)
 slack = int(sys.argv[4], 16) if len(sys.argv) > 4 else 0
 img = open(exe, 'rb').read()[3584:]
@@ -24,8 +25,8 @@ for si, s in enumerate(m['segs']):
     dump = bytearray(d)
     for (o, n), (o2, _) in zip(pubs, pubs[1:] + [(len(d), '')]):
         mm = re.match(r'[_@]fn_[0-9a-f]{4}_([0-9a-f]{4})(\$.*)?$', n)
-        if not mm: print(f'{n}: no orig offset in name'); continue
-        oo = int(mm.group(1), 16)
+        if not mm and n not in NAMED: print(f'{n}: no orig offset in name'); continue
+        oo = int(mm.group(1) if mm else NAMED[n], 16)
         ref = img[segoff + oo:segoff + oo + (o2 - o)]
         for j in range(o, o2):
             if k[j] == 1: dump[j] = ref[j - o]

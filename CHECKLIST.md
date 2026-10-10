@@ -33,7 +33,8 @@ Tick items as they are done. Keep lessons in NOTES.md.
   - [x] CODE_4 scene.c -> src/scene.c + scene.h (14 functions, 14/14 byte-exact incl. the 6.5 KB tile scan 0b35 that Ghidra cannot decompile). Compare: `python3 -I tools/cmpobj.py run/build/SCENE.OBJ orig/MM3.EXE b660 9`
   - [x] CODE_3 events.c -> src/events.c + events.h (13 functions, 12/13 byte-exact; the 7 KB script interpreter 05d8 differs only by one 47-byte tail merge BCC performs in our build but not in the original; BCC's -O tail-merge pass was reverse-engineered and simulated (NOTES.md), no source spelling found that reproduces the original's merge history — parked). Compare: `python3 -I tools/cmpobj.py run/build/EVENTS.OBJ orig/MM3.EXE 9030 8`; per-function `python3 -I tools/fndiff.py run/build/EVENTS.OBJ 9030 OOOO`
   - [x] CODE_8 mazeio.c -> src/mazeio.c + mazeio.h (29 functions, 29/29 byte-exact: clock strings, key/mouse input loop 03aa, roster + save-slot file I/O). Compare: `python3 -I tools/cmpobj.py run/build/MAZEIO.OBJ orig/MM3.EXE 15110 7`; per-function `python3 -I tools/fndiff.py run/build/MAZEIO.OBJ 15110 OOOO`
-  - [ ] Next: CODE_1 main.c, then overlays (results/modules.tsv)
+  - [x] CODE_1 main.c -> src/main.c (1 function, byte-exact incl. tables: main() with the copy-protection/self-check inline asm; compiled with `-B` through TASM 2.51; the 0x190-byte encrypted block and the junk instructions are `asm db`). Compare: `python3 -I tools/cmpobj.py run/build/MAIN.OBJ orig/MM3.EXE 4be0 3`
+  - [ ] Next: overlays (results/modules.tsv), then the remaining root segments
   - [ ] Parked: events.c 05d8 tail merge (47 bytes); view.c 01ba/1d81 switch selector (2 bytes each)
 - [ ] Track progress: scripts/progress.py reporting matched bytes / total
 - [ ] Link everything with original segment order; compare full EXE (header, relocs, overlay) == orig/MM3.EXE

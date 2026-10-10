@@ -117,6 +117,18 @@
 - A string literal containing hex escapes followed by hex digits must be split: `"\13" "000"`.
 - Ghidra MCP: decompile with GET `localhost:8091/decompile_function?address=2511:0007` (POST forms are rejected). `DAT_3145_X` -> `g_(X+0x8d60)`.
 
+## Inline asm modules (main.c, BCC -B + TASM 2.51)
+- Tell-tales of a `-B` module: data/strings inside the code segment, `jmp near` followed by `nop` (TASM pads a forward `jmp` it later finds short), `cs:` stores, 8086-style `push ax; push bp; mov bp,sp; mov [bp+2],imm; pop bp` (= push imm).
+- BCC's own codegen is unchanged under `-B` (it writes the same asm text it would assemble itself), so C parts are matched the normal way; the asm parts are copied verbatim as `asm` lines (one instruction per line, no braces in BCC 2.0) and undecodable bytes as `asm db`.
+- Memory operands with a plain number need `word ptr ds:[584h]`, `word ptr cs:[bx+484h]`; a bare `[584h]` is "Illegal immediate" in TASM.
+- Inline asm that touches si/di stops BCC from using register variables for the whole function (main's `i` lives at [bp-0xe]).
+- BCC drops code after `break`/`return` ("Unreachable code") *unless* an `asm` statement follows (even an empty `asm ;`); it then keeps the asm and everything after it. The game uses this for code entered only through a pushed return address.
+- Every `asm` line, even an empty one, adds to BCC's jump-distance estimate: two `asm ;` lines flipped a `ja short default` into `jna short; jmp default` (which TASM then pads with `nop`). Count of empty lines matters (1 too few, 4 too many).
+- Jumps into the middle of an instruction (`jz label+1`) and 66h/61h prefixes are written as `asm db`.
+- `f(c ? "a" : "b")` (one push ds hoisted) differs from `if (c) f("a"); else f("b");` (push ds + mov ax per branch, rest tail-merged).
+- `_OvrInitExt(0x200000L, 0L)`: a long constant is loaded ax=high, dx=low then `push ax; push dx`.
+- tools/cmpobj.py + fndiff.py map `_main` to offset 0003 via the NAMED table (the only function whose name cannot carry the orig offset).
+
 ## BCC 2.0 -O tail merge, reverse-engineered (BCC.EXE overlay ovr_0dc3)
 - Finding it: run BCC twice in DOSBox-X (GDB stub `gdbserver=true`, QMP `debug-break-on-exec`), snapshot DS at the
   first `open("t9.c")` with and without `-O`, diff → flag byte DS:1703 (-O0/1/2 table at image 0xf9ee; `-O` == `-O1`,
