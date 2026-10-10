@@ -3,8 +3,9 @@
 ; Builds byte-identical with TASM 2.51: TASM /mx SYS.ASM
 
 DGROUP	group	_DATA
-_DATA	segment word public 'DATA'
+_DATA	segment byte public 'DATA'	; byte aligned: starts at odd DS 174f right after stattext's data
 	extrn	_g_f086:byte
+	include	sysd.inc	; DGROUP 174f-1e2e (ASM=1 tools/mkdata.py src/sys.asm 174f 1e2e)
 _DATA	ends
 
 	extrn	_fn_168b_00a2:far

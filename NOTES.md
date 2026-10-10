@@ -289,5 +289,10 @@
 - BCC emits uninitialized globals in hash order (not definition order) → the game BSS is TASM (src/gbss.asm, `BSS=1 mkdata.py`).
 - A data-only C module still emits an empty MOD_TEXT segment, which costs a TLINK segment slot (shifts every segment by 1);
   `-zCSYS_TEXT` merges it into the preceding SYS_TEXT. Likewise empty9 is TASM because BCC code segments are byte aligned.
-- gamedata holds view..sys data in one range; per-module ownership (scene 12c8-170f, itemname 1710-1724, stattext 1724-174e,
-  sys 174e-1e2e) is a possible refinement, not needed for the match.
+- Relocation ORDER is evidence: TLINK writes relocs in OBJ fixup order; BCC emits each FIXUPP record's entries in
+  descending offset order, TASM ascending. EXEPACK keeps the order inside each 64K bank, so the original order survives
+  in orig/MM3.EXE. That showed itemname/stattext were C (now itemname.c / stattext.c), while sys/snddrv are real asm.
+  cmpexe now checks the order and the whole file (relocs rewritten to EXEPACK bank:offset form, minalloc from orig).
+- DATA layout: gamedata.c (f1c-1710, view/events/scene data; other modules index into the middle of scene's tables, so
+  not split) is linked right after SCENE with -zCSCENE_TEXT; itemname 1710-1724, stattext 1724-174f (odd end, no pad),
+  sys.asm `_DATA segment byte` 174f-1e2e (sysd.inc, `ASM=1 mkdata.py`) - a word-aligned C module could not start at 174f.
