@@ -43,6 +43,102 @@ int far input_text(char *, int, int);
 void far close_windows(int);
 void far free_graphic(char far *);
 
+#ifdef NOPROTECT
+/* Non-parity build (NOPROTECT=1 tools/build.sh): main() without the copy protection and the self-checksum; the same
+   start-up, then straight into the game loop. timer.drv is still loaded: load_video_driver() is handed its segment. */
+int far main(int argc, char **argv)
+{
+	char far *timer_drv;
+	int i, again;
+
+	cputs(!_OvrInitEms(0, 0, 16) ? "\nUsing Expanded Memory..." : !_OvrInitExt(0x200000L, 0L) ? "\nUsing Extended Memory..." : "");
+	for (i = 1; i < argc; i++) {
+		switch (toupper(argv[i][0])) {
+		case 'C':
+			g_cmdline_c_flag = 0;
+			break;
+		case 'S':
+			g_no_sound = 0;
+			break;
+		}
+	}
+	if (argc != 1) {
+		directvideo = 0;
+		cputs("\r\nMight and Magic ]I[ - Version 1.0\n\n");
+		exit(1);
+	}
+	check_config_and_disk();
+	install_break_handlers();
+	reset_session_timer();
+	g_archive_open = 0;
+	switch (g_cfg_video) {
+	case 0: g_video_mode = 0; break;
+	case 1: g_video_mode = 4; break;
+	case 2: g_video_mode = 3; break;
+	case 3: g_video_mode = 1; break;
+	case 4: g_video_mode = 5; break;
+	default: fatal_missing_file(0);
+	}
+	switch (g_cfg_sound) {
+	case 0: g_snd_dev_0 = 1; break;
+	case 1: g_snd_dev_1 = 1; break;
+	case 2: g_snd_dev_2 = 1; break;
+	case 3: g_snd_dev_3 = 1; break;
+	case 4: g_snd_dev_4 = 1; break;
+	case 5: g_snd_dev_5 = 1; break;
+	case 6: g_snd_dev_6 = 1; break;
+	default: fatal_missing_file(0);
+	}
+	open_cc_archive();
+	timer_drv = load_cc_file("timer.drv");
+	load_video_driver(g_video_mode, timer_drv);
+	g_music_enabled = g_snd_dev_6 || g_snd_dev_0 || g_snd_dev_2 || g_snd_dev_1 || g_snd_dev_4 || g_snd_dev_3;
+	if (g_no_sound)
+		g_music_enabled = 0;
+	else {
+		load_sound_driver(g_cfg_sound);
+		snd_init(g_cfg_sound_port_lo + (g_cfg_sound_port_hi << 8));
+	}
+	g_music_buf = mem_alloc(0x1890);
+	g_music_on = g_sfx_on = 1;
+	play_intro();
+	show_raw_picture(g_cfg_video == 4 ? "logy5.raw" : "control.raw");
+	fade_screen(1, 4);
+	(void)"copy.bin";	/* unused, but keeps the string pool (and so every DGROUP address) as in the original */
+	g_portrait_click_on = 0;
+	g_roster = 0;
+	g_maze_script = g_map_text = 0;
+	g_mouse_cursor = load_graphic("mouse.icn");
+	load_monster_tables();
+	strcpy(g_cur_music, "mm3theme.m");
+	flush_input();
+	free_graphic(timer_drv);
+	again = 0;
+	set_mouse_cursor(0, g_mouse_cursor);
+	for (;;) {
+		options_menu(again);
+		again = 1;
+		do
+			inn_roster_screen();
+		while (game_main_loop() == 2);
+	}
+}
+
+/* vga.drv is the other half of the protection. Its init scans the caller's code segment (main's) for "afts" and
+   checksums the next 0x340 bytes (skipping far-call operands); the sum is added to its int 10h mode set and must be
+   01bbh (fe58h + 01bbh = mode 13h). Its window code scans the same segment from 0200h for "Iket" and checksums 0x48
+   bytes; the sum must be a323h (it sizes the writes to the window swap file MM3.$$$). In the protected main both
+   markers sit in its junk code. Here: one block that gives both sums (filler + two adjust bytes each, found by
+   emulating the two loops), so the stock MM3.CC drivers run unchanged.
+   ponytail: the trailing zeros pad MAIN_TEXT to its original 0x652 bytes so every later segment keeps its address:
+   sys.asm and snddrv.asm still use cs-relative offsets as plain numbers (mov dx,66ah). Symbolize those to drop it. */
+void far vga_drv_keys(void)
+{
+	asm db 'afts', 'Iket', 55 dup (3), 15 dup (0), 2, 84h	/* "Iket" sum a323h */
+	asm db 113 dup (1), 641 dup (0), 0d9h, 7fh	/* "afts" sum 01bbh */
+	asm db 61 dup (0)
+}
+#else
 int far main(int argc, char **argv)
 {
 	char far *p;
@@ -370,3 +466,4 @@ l631:
 	asm sub word ptr cs:[1abh],cx
 	asm retf
 }
+#endif

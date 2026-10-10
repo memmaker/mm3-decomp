@@ -305,3 +305,13 @@
   answer and an unmodified MM3.EXE (main also checksums its own file, 0x5801 4-byte reads); main+0614/0631 add/subtract
   cx to the game loop's `call game_main_loop` (01a2) and `jz` (01ab). The file holds the correct loop bytes; the
   protection only damages them on failure. Nothing of the game is hidden by it.
+- vga.drv (MM3.CC) is the other half: its init finds "afts" in its caller's code segment (main) and checksums 0x340
+  bytes after it (skipping `9a` far-call operands) into its int 10h mode set (fe58h + 01bbh = 13h); its window code
+  finds "Iket" (from main+0200) and checksums 0x48 bytes (must be a323h) into the size of its MM3.$$$ swap writes; it
+  also checksums timer.drv into the row-offset table (bp must be 320). Stripping main's protection therefore hangs
+  (endless "afts" scan) or draws no windows.
+- `NOPROTECT=1 tools/build.sh`: main.c's clean main (straight into the game loop) + `vga_drv_keys()`, a crafted block
+  with both markers whose sums match (filler + two adjust bytes each, found by emulating the two loops), padded so
+  MAIN_TEXT stays 0x652 bytes: sys.asm/snddrv.asm still hold cs-relative offsets as numbers (SYS_TEXT starts at
+  124F:0004, its `mov dx,66ah` style constants assume that), and the "copy.bin" literal is kept so DGROUP is unchanged.
+  `tools/smoke.py` play-tests a build (intro, new game, walk) with host input disabled.
