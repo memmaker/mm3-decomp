@@ -282,7 +282,13 @@
 ## Full build from source (no blobs)
 - `tools/build.sh`: copies src/ to run/build, BUILD.BAT compiles every module (overlays/view/scene/events/mazeio plain BCC,
   main/init `-B`, gamedata `-zCSYS_TEXT`, asm with `TASM /mx`), then tools/relink.sh links run/build/*.OBJ → MATCH.
-  mkblob then only copies the OBJs (and sorts overlay _ovr_ PUBDEFs); nothing is taken from orig.
+  tools/prelink.py copies the OBJs (and sorts overlay _ovr_ PUBDEFs); tools/mkblob.py is gone (git history). The build
+  never reads orig/MM3.EXE; relink.sh only compares with it when it exists.
+- Data tables: src/*.inc were converted once to readable C (`tools/mkdata.py SKELETON`: a skeleton of bare declarations,
+  values read in order from orig's DGROUP). Two layout facts it had to reproduce: struct initializers fill fields in
+  order with no padding (BCC -a off), and BCC -d merges `""` into the NUL of the previous pooled literal (shop.c's ""
+  entries all point at 0x5b4a, the end of the first string), so a pointer into an already emitted literal is that
+  literal's tail.
 - cmpobj stops at the first diff per function: the "parked" view switch selector and events 05d8 tail merge were real
   source errors (swapped case labels, misplaced statements) further down. view: `switch (_AX = x)` gives `mov ax,X; mov bx,ax`.
 - events case 31 `(*(int *)0xecb4)++`: an absolute DS address has no fixup, so BCC's tail merge cannot pair it; same bytes.

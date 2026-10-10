@@ -43,6 +43,8 @@ Tick items as they are done. Keep lessons in NOTES.md.
 - [x] Full relink pipeline: tools/relink.sh (blobs for not-yet-C modules + C OBJs, TLINK, postlink, cmpexe). All-blob link and
   main+scene+mazeio+init from C → MATCH (image, relocs, overlays; header minalloc is an EXEPACK artifact)
 - [x] Link everything from C/ASM sources (no blobs) == orig/MM3.EXE: `tools/build.sh` → MATCH: whole 280032-byte file identical to orig/MM3.EXE once our relocation table is written in EXEPACK's bank:offset form (order checked) and minalloc taken from orig (both destroyed by EXEPACK). Tag raw-decompile-1.0
+- [x] Build independent of the original: no blobs, no orig/MM3.EXE, no game data files (fresh copy without orig/gog/run/game → identical EXE); data tables are readable C in src/*.inc
+- [x] NOPROTECT=1 build: playable drop-in MM3.EXE without copy protection (tools/smoke.py)
 
 ## Phase 4 — reproduce the shipped file (optional)
 - [ ] EXEPACK the linked EXE (needs the original EXEPACK version)

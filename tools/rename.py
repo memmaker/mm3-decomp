@@ -5,7 +5,7 @@ SPEC: a global/function name (g_ec36, fn_1523_0238, ovr_1800_0034, or an already
       | struct.field (pc.f10: the field in the first header that defines `struct pc`)
       | file.c:LINE:name (a local/parameter, by any line where it occurs).
 All edits are computed against the unmodified tree, checked (each range must hold the old name) and applied at once.
-Renamed address names (fn_/ovr_/g_) are recorded in results/names.tsv so cmpobj/mkdata/mkblob keep their addresses.
+Renamed address names (fn_/ovr_/g_) are recorded in results/names.tsv so cmpobj/mkdata/prelink keep their addresses.
 -n: dry run (print edit counts only). Afterwards run tools/build.sh: it must still print MATCH."""
 import json, os, re, subprocess, sys, glob, threading
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

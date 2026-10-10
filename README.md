@@ -73,15 +73,21 @@ compiler, assembler, linker and the stock Borland libraries.
 
 Every byte of the game's code and data comes from `src/`. The runtime library (`C0M.OBJ`, `CM.LIB`, `OVERLAY.LIB`) is
 the stock Borland C++ 2.0 one, linked as it was in 1991, and is byte-identical to the RTL in the game. Early in the
-project, modules not yet rewritten were linked as "blobs" cut from the original (`tools/mkblob.py`). None are left:
-`mkblob.py` now only copies the compiled OBJs and orders the overlay entry symbols.
+project, modules not yet rewritten were linked as "blobs" cut from the original (`tools/mkblob.py`, still in the git
+history). None are left. The build doesn't read `orig/MM3.EXE` at all; it is only the reference for the final
+comparison, which is skipped when the file is missing.
+
+The initialized data tables (`src/*.inc`) were extracted from the original once with `tools/mkdata.py`. They are
+readable C now, typed from the module headers (structs, `char *` string tables, `long`s, 2-D arrays), and they are
+edited like any other source.
 
 ## Building
 
 Requirements:
 
-- Your own copy of the game (GOG). `gog/` holds the installer contents and `orig/MM3.EXE` is unpacked from it as
-  shown above. Neither is in the repository.
+- To play: the game's data files from your own copy (GOG): `MM3.CC`, which also holds the video, timer and sound
+  drivers, plus the other files of the game directory. To check parity: `orig/MM3.EXE`, unpacked as shown above. It
+  is optional. Neither is in the repository.
 - Borland C++ 2.0 for DOS installed into `toolchain/bcpp20/install` (BCC 2.0, TASM 2.51, TLINK 4.0, headers,
   `C0M.OBJ`, `CM.LIB`, `OVERLAY.LIB`).
 - [DOSBox-X](https://dosbox-x.com/) to run the DOS toolchain (path set in `tools/build.sh` / `tools/dosrun.sh`).
@@ -93,8 +99,20 @@ tools/build.sh
 ```
 
 The script copies `src/` to `run/build/`, runs `BUILD.BAT` in DOSBox-X, links all OBJs in `run/link/` (`LINK.RSP`
-fixes the module order), applies the post-link patch and prints `MATCH` or the first differences. A full build takes
-about 10 seconds.
+fixes the module order), applies the post-link patch and prints `MATCH` or the first differences. Without
+`orig/MM3.EXE` it only prints where the EXE was written. A full build takes about 10 seconds.
+
+### A playable EXE without the copy protection
+
+```bash
+NOPROTECT=1 tools/build.sh
+```
+
+This builds `main.c` without the copy-protection question and without the EXE self-check, so it is not byte-identical
+by design. Copy `run/link/MM3.EXE` over the game's `MM3.EXE` (keep a backup) and the game starts straight at the title
+screen. The video driver in `MM3.CC` checksums three marker blocks in `main`'s code segment and won't set the video
+mode without them, so the clean build keeps a small crafted block that satisfies those checksums. `NOTES.md` has the
+details. `tools/smoke.py` boots a build in DOSBox-X, starts a new game, walks a step and checks the screen changed.
 
 Compiler settings that reproduce the original:
 
@@ -109,7 +127,7 @@ Compiler settings that reproduce the original:
 
 | Segment | Source | Language | Functions | What it is |
 |---|---|---|---:|---|
-| 14be | `main.c` | C + inline asm | 1 | `main()`: copy-protection and self-check (encrypted block kept as `asm db`) |
+| 14be | `main.c` | C + inline asm | 1 | `main()`: startup, copy protection and self-check (the XOR-encrypted block is in plaintext; TASM re-encrypts it). `NOPROTECT` builds a clean `main()` |
 | 1523 | `view.c` | C | 24 | UI and renderer primitives, character helpers |
 | 1903 | `events.c` | C | 13 | map event script interpreter, game loop pieces |
 | 1b66 | `scene.c` | C | 14 | 3D maze view: tile scan and draw-list building |
@@ -121,7 +139,7 @@ Compiler settings that reproduce the original:
 | 17f2 ovl | `init.c` | C | 27 | startup, errors, intro, character creation |
 | 17fd ovl | `ending.c` | C | 2 | end-game cinematics |
 | 1800 ovl | `misc1.c` | C | 11 | event helpers (give/take/compare, learn spell, pick lock) |
-| 1806 ovl | `town.c` | C | 11 | town interactions, arena, jester |
+| 1806 ovl | `town.c` | C | 11 | the game main loop, town interactions, arena, jester |
 | 180c ovl | `charinfo.c` | C | 23 | awards, quests, character screens |
 | 1816 ovl | `cpanel.c` | C | 28 | control panel: rest, save, load, quit |
 | 1821 ovl | `mazeload.c` | C | 20 | map loading, party management |
@@ -132,15 +150,15 @@ Compiler settings that reproduce the original:
 | 1861 ovl | `items.c` | C | 12 | use / equip / discard / sell |
 | 1867 ovl | `shop.c` | C | 18 | shops, identify, buy |
 
-Initialized data lives in each module's own `_DATA`, either globals generated as `*.inc` by `tools/mkdata.py` or
-string literals in the code. `gamedata.c` holds the view/events/scene tables, which other modules index into, and
+Initialized data lives in each module's own `_DATA`, either the tables in the module's `*.inc` or string literals in
+the code. `gamedata.c` holds the view/events/scene tables, which other modules index into, and
 `gbss.asm` holds the game's BSS. BCC lays out uninitialized globals in hash order, so the BSS has to be assembler.
 
 Other directories:
 
 - `tools/`: unpackers, OMF reader and writer, per-function comparer (`cmpobj.py`, `fndiff.py`), data generator
-  (`mkdata.py`), link pipeline (`mkblob.py`, `relink.sh`, `postlink.py`, `cmpexe.py`), rename tooling (`rename.py`,
-  `names.py`).
+  (`mkdata.py`), link pipeline (`prelink.py`, `relink.sh`, `postlink.py`, `cmpexe.py`), CC archive extractor
+  (`cc.py`), smoke test (`smoke.py`), rename tooling (`rename.py`, `names.py`).
 - `results/`: segment map, RTL fingerprint matches and symbols, and `names.tsv` (address name → readable name).
 - `ghidra/scripts/`: the FBOV overlay loader used for the Ghidra project.
 - `NOTES.md`: lessons learned: packers, toolchain fingerprints, BCC 2.0 code generation quirks and how each module was
@@ -172,7 +190,7 @@ globals, then struct fields and locals.
   `src/compile_flags.txt` and `tools/clangd/` let clang parse the Borland dialect (`far`, `_AX`, `asm`) for
   navigation only.
 - `results/names.tsv` records *address name → readable name*, so the tools that derive addresses from names
-  (`cmpobj.py`, `mkdata.py`, overlay stub ordering in `mkblob.py`) keep working.
+  (`cmpobj.py`, `mkdata.py`, overlay stub ordering in `prelink.py`) keep working.
 - After every batch of renames, `tools/build.sh` must still print `MATCH`. Names don't change the generated code,
   and the build proves it.
 
