@@ -9,7 +9,7 @@ int far do_item_action(register struct chr *c, int cat, register int slot, int b
 	int a, n, f48, f64, f63;
 	long price;
 
-	if (!c->adc[0]) return 0;
+	if (!c->item_id[0]) return 0;
 	g_portrait_click_on = 0;
 	if ((slot < 0 || slot > 0x11) && act != 1) {
 		int s[10];
@@ -34,7 +34,7 @@ int far do_item_action(register struct chr *c, int cat, register int slot, int b
 			if (slot >= 0x31 && slot <= 0x39) slot -= 0x2a;
 			if (slot >= 7 && slot <= 0xf) {
 				slot = slot + base - 7;
-				if (!c->adc[slot]) continue;
+				if (!c->item_id[slot]) continue;
 				break;
 			}
 		}
@@ -48,20 +48,20 @@ int far do_item_action(register struct chr *c, int cat, register int slot, int b
 	}
 	switch (act) {
 	case 0: case 8:
-		if (c->adc[slot]) {
+		if (c->item_id[slot]) {
 			switch (cat) {
 			case 0:
-				if (c->adc[slot] > 0x47) {
-					sprintf(g_text_buf2, "%s is not equippable!", g_item_names[c->adc[slot]]);
+				if (c->item_id[slot] > 0x47) {
+					sprintf(g_text_buf2, "%s is not equippable!", g_item_names[c->item_id[slot]]);
 					show_message(g_text_buf2);
 				} else
 					equip_item(c, slot);
 				break;
 			case 1:
-				if (c->a90[slot] & 0x40)
+				if (c->item_flags[slot] & 0x40)
 					show_message("\x03""cYou cannot remove a cursed item!");
 				else
-					c->a7d[slot] = 0;
+					c->item_eq[slot] = 0;
 				break;
 			case 2:
 				if (!g_map_num) {
@@ -80,18 +80,18 @@ int far do_item_action(register struct chr *c, int cat, register int slot, int b
 						g_portrait_click_on = 1;
 						break;
 					}
-					f48 = c->adc[slot] == 0x48;
-					f64 = c->adc[slot] == 0x64;
-					f63 = c->adc[slot] == 0x63;
-					if ((c->a7d[slot] || c->adc[slot] == 0x63 || (c->adc[slot] >= 0x46 && c->adc[slot] <= 0x48) || f64)
-					    && !(c->a90[slot] & 0xc0)) {
-						if (c->aef[slot] || f48 || f64 || f63) {
-							n = c->a90[slot] & 0x3f;
-							if (c->adc[slot] == 0x63) n = 2;
-							c->a90[slot] = --n;
+					f48 = c->item_id[slot] == 0x48;
+					f64 = c->item_id[slot] == 0x64;
+					f63 = c->item_id[slot] == 0x63;
+					if ((c->item_eq[slot] || c->item_id[slot] == 0x63 || (c->item_id[slot] >= 0x46 && c->item_id[slot] <= 0x48) || f64)
+					    && !(c->item_flags[slot] & 0xc0)) {
+						if (c->item_power[slot] || f48 || f64 || f63) {
+							n = c->item_flags[slot] & 0x3f;
+							if (c->item_id[slot] == 0x63) n = 2;
+							c->item_flags[slot] = --n;
 							g_cur_char = c;
 							close_windows(g_game_mode == 2 ? 2 : 3);
-							use_item_power(f48 ? 1 : f64 ? 0x4c : f63 ? 0x4d : c->aef[slot]);
+							use_item_power(f48 ? 1 : f64 ? 0x4c : f63 ? 0x4d : c->item_power[slot]);
 							if (n < 1) {
 								clear_item_slot(c, slot);
 								compact_backpack(c);
@@ -108,13 +108,13 @@ int far do_item_action(register struct chr *c, int cat, register int slot, int b
 				}
 				break;
 			case 3:
-				if (!is_quest_item(c->adc[slot]) && !(c->a90[slot] & 0x40)) {
+				if (!is_quest_item(c->item_id[slot]) && !(c->item_flags[slot] & 0x40)) {
 					sprintf(g_text_buf, "Permanently discard %s?", format_item_name(c, slot, g_tmp_text, 0));
 					if (!ask_yes_no(g_text_buf, 0)) break;
 					clear_item_slot(c, slot);
 					compact_backpack(c);
 					if (act == 8) return 2;
-				} else if (c->a90[slot] & 0x40)
+				} else if (c->item_flags[slot] & 0x40)
 					show_message("\x03""cYou cannot discard a cursed item!");
 				else {
 					sprintf(g_text_buf, "The %s is necessary and cannot be discarded!", format_item_name(c, slot, g_tmp_text, 0));
@@ -125,11 +125,11 @@ int far do_item_action(register struct chr *c, int cat, register int slot, int b
 		}
 		break;
 	case 2:
-		if (c->adc[slot]) {
+		if (c->item_id[slot]) {
 			switch (cat) {
 			case 0:
-				if ((c->adc[slot] < 0x46 && !(c->a90[slot] & 0x40)) || c->adc[slot] == 0x4b || c->adc[slot] == 0x52) {
-					price = get_item_price(c, slot, act, !c->f2f | 0x80);
+				if ((c->item_id[slot] < 0x46 && !(c->item_flags[slot] & 0x40)) || c->item_id[slot] == 0x4b || c->item_id[slot] == 0x52) {
+					price = get_item_price(c, slot, act, !c->sk_merchant | 0x80);
 					sprintf(g_text_buf, "Sell %s for %lu gold?", format_item_name(c, slot, g_tmp_text, 0), price);
 					if (!ask_yes_no(g_text_buf, 0)) break;
 					clear_item_slot(c, slot);
@@ -141,14 +141,14 @@ int far do_item_action(register struct chr *c, int cat, register int slot, int b
 				}
 				break;
 			case 1:
-				if (!(c->a90[slot] & 0x80)) {
+				if (!(c->item_flags[slot] & 0x80)) {
 					show_message("That item is not broken!");
 					break;
 				}
 				price = fix_identify_prompt(c, slot, act, 0, cat);
 				if (!ask_yes_no(g_text_buf, 0)) break;
 				if (!pay_cost(0, price, 0)) break;
-				c->a90[slot] &= 0x7f;
+				c->item_flags[slot] &= 0x7f;
 				break;
 			case 2:
 				price = fix_identify_prompt(c, slot, act, 1, cat);
@@ -167,8 +167,8 @@ int far do_item_action(register struct chr *c, int cat, register int slot, int b
 		}
 		break;
 	case 1:
-		if (c->adc[slot]) {
-			if (g_cur_char->adc[0x11]) {
+		if (c->item_id[slot]) {
+			if (g_cur_char->item_id[0x11]) {
 				sprintf(g_tmp_text, "\x03""c%s's backpack is full.", g_cur_char);
 				show_message(g_tmp_text);
 				break;
@@ -177,27 +177,27 @@ int far do_item_action(register struct chr *c, int cat, register int slot, int b
 			sprintf(g_text_buf, "Buy %s for %lu gold?", format_item_name(c, slot, g_tmp_text, 0), price);
 			if (!ask_yes_no(g_text_buf, 0)) break;
 			if (!pay_cost(0, price, 0)) break;
-			g_cur_char->a90[0x11] = c->a90[slot];
-			g_cur_char->aa3[0x11] = c->aa3[slot];
-			g_cur_char->ab6[0x11] = c->ab6[slot];
-			g_cur_char->ac9[0x11] = c->ac9[slot];
-			g_cur_char->adc[0x11] = c->adc[slot];
-			g_cur_char->aef[0x11] = c->aef[slot];
+			g_cur_char->item_flags[0x11] = c->item_flags[slot];
+			g_cur_char->item_elem[0x11] = c->item_elem[slot];
+			g_cur_char->item_mat[0x11] = c->item_mat[slot];
+			g_cur_char->item_attr[0x11] = c->item_attr[slot];
+			g_cur_char->item_id[0x11] = c->item_id[slot];
+			g_cur_char->item_power[0x11] = c->item_power[slot];
 			clear_item_slot(c, slot);
 			compact_backpack(c);
 			compact_backpack(g_cur_char);
 		}
 		break;
 	case 4:
-		if (c->adc[slot]) {
-			if (c->adc[slot] > 0x47) goto norech;
-			if (c->aef[slot]) {
+		if (c->item_id[slot]) {
+			if (c->item_id[slot] > 0x47) goto norech;
+			if (c->item_power[slot]) {
 				a = random_range(1, 6);
 				play_sfx(0x14);
-				if ((c->a90[slot] & 0xbf) + a > 0x3f)
-					c->a90[slot] |= 0x3f;
+				if ((c->item_flags[slot] & 0xbf) + a > 0x3f)
+					c->item_flags[slot] |= 0x3f;
 				else
-					c->a90[slot] += a;
+					c->item_flags[slot] += a;
 			} else {
 norech:
 				play_sfx(0x15);
@@ -207,13 +207,13 @@ norech:
 		}
 		break;
 	case 5:
-		if (c->adc[slot]) {
-			if (c->adc[0x11]) {
+		if (c->item_id[slot]) {
+			if (c->item_id[0x11]) {
 				sprintf(g_tmp_text, "\x03""cBackpack Full.  %s", g_msg_spell_failed);
 				show_message(g_tmp_text);
 				break;
 			}
-			switch (c->ac9[slot]) {
+			switch (c->item_attr[slot]) {
 			case 9: case 10: case 0x11: case 0x12: case 0x19: case 0x1a: case 0x21: case 0x22: case 0x27: case 0x28:
 			case 0x2d: case 0x2e: case 0x32: case 0x33: case 0x38: case 0x39: case 0x3d: case 0x3e: case 0x47: case 0x48:
 			toopow:
@@ -222,35 +222,35 @@ norech:
 				show_message(g_tmp_text);
 				break;
 			default:
-				switch (c->aa3[slot]) {
+				switch (c->item_elem[slot]) {
 				case 7: case 8: case 14: case 15: case 19: case 20: case 24: case 25: case 32: case 33: case 36:
 					goto toopow;
 				}
-				if (c->ab6[slot] > 0x11 || c->aef[slot] > 0x37 || c->adc[slot] > 0x48) goto toopow;
-				c->a90[0x11] = c->a90[slot] & 0xc0;
-				c->aa3[0x11] = c->aa3[slot];
-				c->ab6[0x11] = c->ab6[slot];
-				c->ac9[0x11] = c->ac9[slot];
-				c->adc[0x11] = c->adc[slot];
-				c->aef[0x11] = c->aef[slot];
+				if (c->item_mat[slot] > 0x11 || c->item_power[slot] > 0x37 || c->item_id[slot] > 0x48) goto toopow;
+				c->item_flags[0x11] = c->item_flags[slot] & 0xc0;
+				c->item_elem[0x11] = c->item_elem[slot];
+				c->item_mat[0x11] = c->item_mat[slot];
+				c->item_attr[0x11] = c->item_attr[slot];
+				c->item_id[0x11] = c->item_id[slot];
+				c->item_power[0x11] = c->item_power[slot];
 				compact_backpack(c);
 				play_sfx(0x14);
 			}
 		}
 		break;
 	case 6:
-		if (c->adc[slot]) {
-			if (c->aa3[slot] || c->ab6[slot] || c->ac9[slot] || c->aef[slot] || c->adc[slot] > 0x47) {
+		if (c->item_id[slot]) {
+			if (c->item_elem[slot] || c->item_mat[slot] || c->item_attr[slot] || c->item_power[slot] || c->item_id[slot] > 0x47) {
 				sprintf(g_tmp_text, "\x03""cNot Enchantable.  %s", g_msg_spell_failed);
 				play_sfx(0x15);
 				show_message(g_tmp_text);
 				break;
 			}
-			a = c->adc[slot];
+			a = c->item_id[slot];
 			f63 = random_range(1, get_char_level(g_cur_char) / 10 + 1);
 			if (f63 > 5) f63 = 5;
 			generate_random_item(f63, c, slot);
-			c->adc[slot] = a;
+			c->item_id[slot] = a;
 			play_sfx(0x14);
 		}
 		break;
@@ -276,47 +276,47 @@ void far format_item_info(register int slot, register struct chr *c)
 	out = g_draw_list;
 	memset(s0, 0, 0x28);
 	for (i = k = 0; i <= 9; i++)
-		if (class_can_use_item(i, c->adc[slot], 1)) {
+		if (class_can_use_item(i, c->item_id[slot], 1)) {
 			s0[k++] = g_class_names[i][0];
 			s0[k++] = g_class_names[i][1];
 			s0[k++] = ' ';
 		}
-	if (is_quest_item(c->adc[slot]))
+	if (is_quest_item(c->item_id[slot]))
 		strcpy(s0, "None");
 	else if (k == 0x1e)
 		strcpy(s0, "All");
-	v30 = g_weapon_dice_count[c->adc[slot]] + g_material_dmg_bonus[c->ab6[slot]];
-	v26 = g_weapon_dice_count[c->adc[slot]] * g_weapon_die_sides[c->adc[slot]] + g_material_dmg_bonus[c->ab6[slot]];
-	v28 = g_elem_dmg_bonus[c->aa3[slot]];
-	v2a = g_elem_resist_bonus[c->aa3[slot]];
-	v2c = g_attrib_bonus_values[c->ac9[slot]];
-	v2e = (c->adc[slot] < 0x22 ? 0 : g_material_ac_bonus[c->ab6[slot]]) + g_item_ac_values[c->adc[slot]];
-	if (c->adc[slot] > 0x49) {
-		strcpy(s1, c->adc[slot] == 0x64 ? "+5 Might" : "None");
+	v30 = g_weapon_dice_count[c->item_id[slot]] + g_material_dmg_bonus[c->item_mat[slot]];
+	v26 = g_weapon_dice_count[c->item_id[slot]] * g_weapon_die_sides[c->item_id[slot]] + g_material_dmg_bonus[c->item_mat[slot]];
+	v28 = g_elem_dmg_bonus[c->item_elem[slot]];
+	v2a = g_elem_resist_bonus[c->item_elem[slot]];
+	v2c = g_attrib_bonus_values[c->item_attr[slot]];
+	v2e = (c->item_id[slot] < 0x22 ? 0 : g_material_ac_bonus[c->item_mat[slot]]) + g_item_ac_values[c->item_id[slot]];
+	if (c->item_id[slot] > 0x49) {
+		strcpy(s1, c->item_id[slot] == 0x64 ? "+5 Might" : "None");
 		strcpy(s2, "None");
 		strcpy(s3, "None");
 		strcpy(s4, "None");
 		strcpy(s5, "None");
 		strcpy(s6, "None");
 	} else {
-		sprintf(s1, "%+d %s", v2c, g_attrib_names[get_bonus_stat_index(c->ac9[slot])]);
-		sprintf(s2, "%+d %s Damage", v28, g_damage_type_names[i = get_element_index(c->aa3[slot])]);
+		sprintf(s1, "%+d %s", v2c, g_attrib_names[get_bonus_stat_index(c->item_attr[slot])]);
+		sprintf(s2, "%+d %s Damage", v28, g_damage_type_names[i = get_element_index(c->item_elem[slot])]);
 		sprintf(s3, "%+d %s", v2a, g_damage_type_names[i]);
 		sprintf(s4, "%d to %d", v30 < 1 ? 0 : v30, v26);
-		sprintf(s5, "%+d", g_material_to_hit[c->ab6[slot]]);
+		sprintf(s5, "%+d", g_material_to_hit[c->item_mat[slot]]);
 		sprintf(s6, "%+d", v2e);
 	}
 	sprintf(out, "Proficient Classes\t132:\t140%s\nto Hit Modifier\t132:\t140%s\nPhysical Damage\t132:\t140%s\n"
 		"Elemental Damage\t132:\t140%s\nElemental Resistance\t132:\t140%s\nArmor Class Bonus\t132:\t140%s\n"
 		"Attribute Bonus\t132:\t140%s\nSpecial Power\t132:\t140%s",
 		s0,
-		g_material_to_hit[c->ab6[slot]] && c->adc[slot] < 0x22 ? s5 : "None",
-		c->adc[slot] && c->adc[slot] < 0x22 && v26 > 0 ? s4 : "None",
-		c->aa3[slot] && c->adc[slot] < 0x22 ? s2 : "None",
+		g_material_to_hit[c->item_mat[slot]] && c->item_id[slot] < 0x22 ? s5 : "None",
+		c->item_id[slot] && c->item_id[slot] < 0x22 && v26 > 0 ? s4 : "None",
+		c->item_elem[slot] && c->item_id[slot] < 0x22 ? s2 : "None",
 		v2a ? s3 : "None",
-		v2e && c->adc[slot] > 0x21 ? s6 : "None",
+		v2e && c->item_id[slot] > 0x21 ? s6 : "None",
 		v2c ? s1 : "None",
-		g_spell_names[g_power_spell_ids[c->aef[slot]]]);
+		g_spell_names[g_power_spell_ids[c->item_power[slot]]]);
 }
 
 /* 0db3: quest item that can't be discarded */
@@ -343,11 +343,11 @@ int far get_thievery(register struct chr *c)
 	v = get_char_level(c) << 1;
 	if (c->cls == 6) v += 0xf;
 	else if (c->cls == 5) v += 0x1e;
-	if (c->f11 == 1 || c->f11 == 3) v += 10;
-	else if (c->f11 == 2) v += 5;
-	else if (c->f11 == 4) v -= 10;
+	if (c->race == 1 || c->race == 3) v += 10;
+	else if (c->race == 2) v += 5;
+	else if (c->race == 4) v -= 10;
 	v = v + get_item_stat_bonus(c, 10);
-	if (!c->f27) v = 0;
+	if (!c->sk_thievery) v = 0;
 	return v < 1 ? 0 : v;
 }
 
@@ -641,7 +641,7 @@ int far cast_spell_dialog(int arg)
 		key = g_combat_actor;
 	else if (g_cast_char < 0 || (u8)g_cast_char >= g_party_count) {
 		for (key = g_party_count - 1; key >= 0; key--)
-			if (g_party[key].f7a) {
+			if (g_party[key].caster) {
 				g_cast_char = key;
 				break;
 			}
@@ -649,20 +649,20 @@ int far cast_spell_dialog(int arg)
 		key = g_cast_char;
 	p = &g_party[mode == 2 ? g_combat_order[key] : key];
 	highlight_portrait(key);
-	sp = p->f7b == 0xff ? 0x4d : p->f7b;
+	sp = p->ready_spell == 0xff ? 0x4d : p->ready_spell;
 	sprintf(g_text_buf, "\r\x05%p\x02\x03""c\x0b""122\t013\x0c""27C\x0c""dast\t040\x0c""27N\x0c""dew\t067ESC\x01\t000\x0b""000\x03""cCast Spell\n\n%s\x03l\n\nSpell Ready:\x03""c\n\n\x0c""12%s\x0c""d\x02\x03l\n\x0b""082Cost\x03r\t077%u/%u\x03l\nCur SP\x03r\t077%u\x01",
-		g_bank_sprites, p, g_spell_names[sp], spell_sp_cost(sp, get_char_level(p)), g_spell_gem_costs[sp], p->f127);
+		g_bank_sprites, p, g_spell_names[sp], spell_sp_cost(sp, get_char_level(p)), g_spell_gem_costs[sp], p->sp);
 	open_text_window(0xe2, 0, 0x5d, 0x92, 0, 0x96, 4, 6, g_text_buf);
 	do {
 		switch (key = get_input()) {
 		case 0: case 'C':
-			if (p->f7b >= 0 && p->f7b < 0x4d && !char_cannot_act(p)) {
+			if (p->ready_spell >= 0 && p->ready_spell < 0x4d && !char_cannot_act(p)) {
 cast:
-				if ((r = spell_pay_cost(p, p->f7b)) == 0) {
+				if ((r = spell_pay_cost(p, p->ready_spell)) == 0) {
 					res = 1;
 					g_cur_char = p;
 					g_game_mode = mode;
-					switch (p->f7b) {
+					switch (p->ready_spell) {
 					case 0x0: spell_light(); break;
 					case 0x1: spell_awaken(); break;
 					case 0x2: spell_first_aid(); break;
@@ -682,10 +682,10 @@ cast:
 					case 0x10: spell_turn_undead(); break;
 					case 0x11:
 						if (mode == 2) {
-							spell_refund_cost(g_cur_char, p->f7b);
+							spell_refund_cost(g_cur_char, p->ready_spell);
 							res = 0;
 							if (arg) goto out;
-							show_cant_cast_engaged(p->f7b);
+							show_cant_cast_engaged(p->ready_spell);
 						} else
 							spell_jump();
 						break;
@@ -696,10 +696,10 @@ cast:
 					case 0x16: spell_levitate(); break;
 					case 0x17:
 						if (mode == 2) {
-							spell_refund_cost(g_cur_char, p->f7b);
+							spell_refund_cost(g_cur_char, p->ready_spell);
 							res = 0;
 							if (arg) goto out;
-							show_cant_cast_engaged(p->f7b);
+							show_cant_cast_engaged(p->ready_spell);
 						} else
 							spell_wizard_eye();
 						break;
@@ -714,10 +714,10 @@ cast:
 					case 0x20: spell_frost_bite(); break;
 					case 0x21:
 						if (mode == 2) {
-							spell_refund_cost(g_cur_char, p->f7b);
+							spell_refund_cost(g_cur_char, p->ready_spell);
 							res = 0;
 							if (arg) goto out;
-							show_cant_cast_engaged(p->f7b);
+							show_cant_cast_engaged(p->ready_spell);
 						} else
 							spell_lloyds_beacon();
 						break;
@@ -730,10 +730,10 @@ cast:
 					case 0x28: spell_cure_disease(); break;
 					case 0x29:
 						if (mode == 2) {
-							spell_refund_cost(g_cur_char, p->f7b);
+							spell_refund_cost(g_cur_char, p->ready_spell);
 							res = 0;
 							if (arg) goto out;
-							show_cant_cast_engaged(p->f7b);
+							show_cant_cast_engaged(p->ready_spell);
 						} else
 							spell_natures_gate();
 						break;
@@ -742,10 +742,10 @@ cast:
 					case 0x2c: spell_deadly_swarm(); break;
 					case 0x2d:
 						if (mode == 2) {
-							spell_refund_cost(g_cur_char, p->f7b);
+							spell_refund_cost(g_cur_char, p->ready_spell);
 							res = 0;
 							if (arg) goto out;
-							show_cant_cast_engaged(p->f7b);
+							show_cant_cast_engaged(p->ready_spell);
 						} else
 							spell_teleport();
 						break;
@@ -755,10 +755,10 @@ cast:
 					case 0x31: spell_dragon_breath(); break;
 					case 0x32:
 						if (mode == 2) {
-							spell_refund_cost(g_cur_char, p->f7b);
+							spell_refund_cost(g_cur_char, p->ready_spell);
 							res = 0;
 							if (arg) goto out;
-							show_cant_cast_engaged(p->f7b);
+							show_cant_cast_engaged(p->ready_spell);
 						} else
 							spell_super_shelter();
 						break;
@@ -766,10 +766,10 @@ cast:
 					case 0x34: spell_create_food(); break;
 					case 0x35:
 						if (mode == 2) {
-							spell_refund_cost(g_cur_char, p->f7b);
+							spell_refund_cost(g_cur_char, p->ready_spell);
 							res = 0;
 							if (arg) goto out;
-							show_cant_cast_engaged(p->f7b);
+							show_cant_cast_engaged(p->ready_spell);
 						} else
 							spell_town_portal();
 						break;
@@ -782,10 +782,10 @@ cast:
 					case 0x3c: spell_half_for_me(); break;
 					case 0x3d:
 						if (mode == 2) {
-							spell_refund_cost(g_cur_char, p->f7b);
+							spell_refund_cost(g_cur_char, p->ready_spell);
 							res = 0;
 							if (arg) goto out;
-							show_cant_cast_engaged(p->f7b);
+							show_cant_cast_engaged(p->ready_spell);
 						} else
 							spell_etherealize();
 						break;
@@ -807,7 +807,7 @@ cast:
 					}
 				} else {
 					if (arg) goto out;
-					show_not_enough_to_cast(p->f7b, r);
+					show_not_enough_to_cast(p->ready_spell, r);
 				}
 				g_game_mode = 3;
 			}
@@ -828,9 +828,9 @@ cast:
 			highlight_portrait(key);
 			g_cast_char = key;
 show:
-			sp = p->f7b == 0xff ? 0x4d : p->f7b;
+			sp = p->ready_spell == 0xff ? 0x4d : p->ready_spell;
 			sprintf(g_text_buf, "\r\x05%p\x02\x03""c\x0b""122\t013\x0c""27C\x0c""dast\t040\x0c""27N\x0c""dew\t067ESC\x01\t000\x0b""000\x03""cCast Spell\n\n%s\x03l\n\nSpell Ready:\x03""c\n\n\x0c""12%s\x0c""d\x02\x03l\n\x0b""082Cost\x03r\t077%u/%u\x03l\nCur SP\x03r\t077%u\x01",
-				g_bank_sprites, p, g_spell_names[sp], spell_sp_cost(sp, get_char_level(p)), g_spell_gem_costs[sp], p->f127);
+				g_bank_sprites, p, g_spell_names[sp], spell_sp_cost(sp, get_char_level(p)), g_spell_gem_costs[sp], p->sp);
 			print_window_text(g_text_buf);
 			g_game_mode = 3;
 			break;

@@ -86,7 +86,7 @@ void far quickfight_options(register struct chr *c)
 	g_btn_hs = g_train_btn_hs;
 redraw:
 	sprintf(g_text_buf, "\r\x05%p\x03" "c\x0b" "000\t000QuickFight Options\n\n%s\x03l\n\nCurrent\x03r\n\t077%s\x02\x03" "c\x0b" "122\t021\x0c" "27N\x0c" "dext\t060Exit\x01",
-		&g_train_sprites, c, g_quickfight_names[c->f7c]);
+		&g_train_sprites, c, g_quickfight_names[c->quickfight]);
 	if (drawn)
 		print_window_text(g_text_buf);
 	else {
@@ -99,7 +99,7 @@ redraw:
 			key = 0x1b;
 			break;
 		case 1: case 0x4e:
-			c->f7c = ++c->f7c % 4;
+			c->quickfight = ++c->quickfight % 4;
 			goto redraw;
 		case 0xc9: case 0xca: case 0xcb: case 0xcc: case 0xcd: case 0xce: case 0xcf: case 0xd0:
 			key -= 0xc9;
@@ -154,7 +154,7 @@ int far build_spell_list(struct chr *c, int mode)
 		}
 		for (i = off = 0; i < lim; i++) {
 			for (j = 0; j < g_spells_per_level[kind][i]; j++)
-				if (!c->sp[off + j] || (mode & 0x80)) {
+				if (!c->spells[off + j] || (mode & 0x80)) {
 					sprintf(g_spell_rows + n * 0x32, "\x03l%s\x03r\t148%u", g_spell_names[g_class_spells[kind][off + j]],
 						spell_gold_cost(g_class_spells[kind][off + j], flag));
 					g_spell_row_idx[n] = off + j;
@@ -176,7 +176,7 @@ int far build_spell_list(struct chr *c, int mode)
 		if (calc_max_sp(c)) {
 			for (i = off = 0; i < lim; i++) {
 				for (j = 0; j < g_spells_per_level[kind][i]; j++)
-					if (c->sp[off + j]) {
+					if (c->spells[off + j]) {
 						sprintf(g_spell_rows + n * 0x32, "\x03l%s\x03r\t148%u/%u", g_spell_names[g_class_spells[kind][off + j]],
 							spell_sp_cost(g_class_spells[kind][off + j], lvl), g_spell_gem_costs[g_class_spells[kind][off + j]]);
 						g_spell_row_idx[n] = off + j;
@@ -229,7 +229,7 @@ again:
 		sel[top + 4], g_spell_rows + (top + 4) * 0x32, sel[top + 5], g_spell_rows + (top + 5) * 0x32,
 		sel[top + 6], g_spell_rows + (top + 6) * 0x32, sel[top + 7], g_spell_rows + (top + 7) * 0x32,
 		sel[top + 8], g_spell_rows + (top + 8) * 0x32, sel[top + 9], g_spell_rows + (top + 9) * 0x32,
-		mode ? "Spell Pts" : "Gold", mode ? (long)c->f127 : g_party_gold);
+		mode ? "Spell Pts" : "Gold", mode ? (long)c->sp : g_party_gold);
 	if (drawn)
 		print_window_text(g_text_buf);
 	else {
@@ -289,7 +289,7 @@ again:
 				sprintf(g_text_buf2, "%s  Do you wish to purchase \x0c" "12%s\x0c" "d for %u?", g_tmp_text, g_spell_names[g_class_spells[kind][idx]], cost);
 			if (!ask_yes_no(g_text_buf2, omode + 1)) break;
 			if (!pay_cost(0, cost, 0, 0)) break;
-			c->sp[idx]++;
+			c->spells[idx]++;
 		recount:
 			cnt = build_spell_list(c, omode);
 			if (top + 10 > cnt)
@@ -330,7 +330,7 @@ again:
 	close_windows(1);
 	pop_icons();
 	pop_buttons();
-	if (mode && cur != -1) c->f7b = g_class_spells[kind][g_spell_row_idx[cur]];
+	if (mode && cur != -1) c->ready_spell = g_class_spells[kind][g_spell_row_idx[cur]];
 	return c;
 	}
 }
@@ -341,7 +341,7 @@ int far pick_stat_exchange(int n)
 	int key;
 	register int sel, done;
 	{
-	struct pick s;
+	struct spr1 s;
 
 	done = 0;
 	g_create_hot_xs[7] = -1;
@@ -445,45 +445,45 @@ int far finish_create_char(u8 cls, u8 race, u8 align, u8 sex, register char *st,
 	if (!n) return 0;
 	_fmemset(c, 0, 0x12f);
 	for (i = 0; i < n; i++) c->name[i] = name[i];
-	c->f123 = g_inn_map;
+	c->inn = g_inn_map;
 	c->sex = sex;
 	c->race = race;
 	c->cls = cls;
 	c->align = align;
-	c->st[0][0] = st[0];
-	c->st[1][0] = st[1];
-	c->st[2][0] = st[2];
-	c->st[3][0] = st[3];
-	c->st[4][0] = st[4];
-	c->st[5][0] = st[5];
-	c->st[6][0] = st[6];
-	c->f23 = 1;
+	c->stats[0][0] = st[0];
+	c->stats[1][0] = st[1];
+	c->stats[2][0] = st[2];
+	c->stats[3][0] = st[3];
+	c->stats[4][0] = st[4];
+	c->stats[5][0] = st[5];
+	c->stats[6][0] = st[6];
+	c->level = 1;
 	c->res[5][0] = g_race_magic_res[race];
 	c->res[0][0] = g_race_fire_res[race];
 	c->res[2][0] = g_race_elec_res[race];
 	c->res[1][0] = g_race_cold_res[race];
 	c->res[4][0] = g_race_energy_res[race];
 	c->res[3][0] = g_race_poison_res[race];
-	c->f129 = g_year - 0x12;
-	c->f25 = g_day;
+	c->birth_year = g_year - 0x12;
+	c->birth_day = g_day;
 	switch (cls) {
 	case 3: case 4: case 8:
-		c->f7a = 1;
-		for (n = 0; n < 4; n++) c->sp[n] = 1;
-		c->f7b = 0;
+		c->caster = 1;
+		for (n = 0; n < 4; n++) c->spells[n] = 1;
+		c->ready_spell = 0;
 		break;
 	case 1: case 2: case 9:
-		c->f7a = c->sp[0] = 1;
-		c->f7b = 0;
+		c->caster = c->spells[0] = 1;
+		c->ready_spell = 0;
 		break;
 	default:
-		c->f7b = 0xff;
+		c->ready_spell = 0xff;
 	}
 	if ((k = g_class_start_skill[cls]) != 0xff) c->skill[k] = 1;
 	if ((k = g_race_start_skill[race]) != 0xff) c->skill[k] = 1;
-	if ((m = g_class_start_spell[cls]) != 0xff) c->sp[m] = 1;
-	c->f125 = calc_max_hp(c);
-	c->f127 = calc_max_sp(c);
+	if ((m = g_class_start_spell[cls]) != 0xff) c->spells[m] = 1;
+	c->hp = calc_max_hp(c);
+	c->sp = calc_max_sp(c);
 	return 1;
 }
 
@@ -566,7 +566,7 @@ void far create_characters(void)
 	char st[7], ok[10];
 	char far *img;
 	{
-	struct pick spr1, spr2;
+	struct spr1 spr1, spr2;
 	u8 list[0x1e];
 	char buf[0x190];
 

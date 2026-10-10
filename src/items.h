@@ -8,18 +8,18 @@ typedef unsigned char u8;
 
 struct chr {
 	char name[0x11];
-	u8 f11, f12, cls;	/* 0x13 */
+	u8 race, align, cls;	/* 0x13 */
 	u8 f14[0x13];
-	u8 f27;
+	u8 sk_thievery;
 	u8 f28[7];
-	u8 f2f;
+	u8 sk_merchant;
 	u8 f30[0x4a];
-	char f7a;
-	u8 f7b;			/* 0x7b: ready spell */
-	u8 f7c;
-	u8 a7d[0x13], a90[0x13], aa3[0x13], ab6[0x13], ac9[0x13], adc[0x13], aef[0x13];	/* item slots */
+	char caster;
+	u8 ready_spell;			/* 0x7b: ready spell */
+	u8 quickfight;
+	u8 item_eq[0x13], item_flags[0x13], item_elem[0x13], item_mat[0x13], item_attr[0x13], item_id[0x13], item_power[0x13];	/* item slots */
 	u8 f102[0x25];
-	unsigned f127;
+	unsigned sp;
 	u8 f129[6];
 };
 

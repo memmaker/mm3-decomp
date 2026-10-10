@@ -13,7 +13,7 @@ int far damage_fx_size(unsigned n)
 }
 
 /* 002b: deal damage to the current monster g_target_mon */
-void far damage_monster(struct chr *c, unsigned dmg, int kind)
+void far damage_monster(struct chrat *c, unsigned dmg, int kind)
 {
 	int t, killed = 0, v;
 	u8 e;
@@ -34,7 +34,7 @@ void far damage_monster(struct chr *c, unsigned dmg, int kind)
 		dmg += (v = elem_bonus_damage(kind));
 		if (v > 0) {
 			g_mon_elem_fx[g_target_slot] = get_element_index(g_atk_element) + 1;
-			g_c480[g_target_slot] = damage_fx_size(v);
+			g_mon_elem_sizes[g_target_slot] = damage_fx_size(v);
 		} else if (kind != 3)
 			g_mon_elem_fx[g_target_slot] = 0;
 		if (kind && monster_saving_throw(g_mon_type[g_target_mon]))
@@ -55,22 +55,22 @@ void far damage_monster(struct chr *c, unsigned dmg, int kind)
 	if (killed) {
 		play_sfx(0);
 		play_sfx(3);
-		award_experience(g_f06e[g_mon_type[g_target_mon]]);
+		award_experience(g_mon_exp[g_mon_type[g_target_mon]]);
 		if (g_map_num != 0x6a) {
-			g_loot_gold += g_f032[g_mon_type[g_target_mon]];
-			g_loot_gems += g_f036[g_mon_type[g_target_mon]];
+			g_loot_gold += g_mon_gold[g_mon_type[g_target_mon]];
+			g_loot_gems += g_mon_gems[g_mon_type[g_target_mon]];
 			if ((e = g_mon_treasure[g_mon_type[g_target_mon]]) != 0 && random_range(1, 100) <= g_treasure_drop_pct[e - 1]) {
-				register struct chr *p;
+				register struct chrat *p;
 
 				if (++g_loot_count > 10) g_loot_count = 10;
 				p = &g_party[8];
 				generate_random_item(g_mon_treasure[g_mon_type[g_target_mon]], p, 0);
-				g_loot_flags[g_loot_count - 1] = p->f90[0];
-				g_loot_element[g_loot_count - 1] = p->fa3[0];
-				g_loot_material[g_loot_count - 1] = p->fb6[0];
-				g_loot_attrib[g_loot_count - 1] = p->fc9[0];
-				g_loot_ids[g_loot_count - 1] = p->id[0];
-				g_loot_charges[g_loot_count - 1] = p->fef[0];
+				g_loot_flags[g_loot_count - 1] = p->item_flags[0];
+				g_loot_element[g_loot_count - 1] = p->item_elem[0];
+				g_loot_material[g_loot_count - 1] = p->item_mat[0];
+				g_loot_attrib[g_loot_count - 1] = p->item_attr[0];
+				g_loot_ids[g_loot_count - 1] = p->item_id[0];
+				g_loot_charges[g_loot_count - 1] = p->item_power[0];
 			}
 		}
 		g_mon_y[g_target_mon] = g_mon_x[g_target_mon] = 0x80;
@@ -102,7 +102,7 @@ void far damage_monster(struct chr *c, unsigned dmg, int kind)
 void far award_experience(unsigned long xp)
 {
 	int n, cnt, pass, i;
-	struct chr *p;
+	struct chrat *p;
 
 	n = g_game_mode == 2 ? g_combat_party_n : g_party_count;
 	for (pass = cnt = 0; pass < 2; pass++)
@@ -110,7 +110,7 @@ void far award_experience(unsigned long xp)
 			p = &g_party[g_game_mode == 2 ? g_combat_order[i] : i];
 			switch (get_worst_condition(p)) { }
 			if (pass == 0) cnt++;
-			else p->f12b += xp / cnt;
+			else p->exp += xp / cnt;
 		}
 }
 
@@ -148,7 +148,7 @@ int far elem_bonus_damage(int kind)
 }
 
 /* 05d0: character attacks (kind 0 = melee) or casts on the monsters */
-void far party_attack_monster(struct chr *c, int kind)
+void far party_attack_monster(struct chrat *c, int kind)
 {
 	int d;
 	unsigned n, i;
@@ -293,7 +293,7 @@ void far compact_combat_order(void)
 }
 
 /* 0acc: saving throw (kind 0 = generic, 1..6 = element) */
-int far char_saving_throw(struct chr *c, int kind)
+int far char_saving_throw(struct chrat *c, int kind)
 {
 	register int r, roll;
 
@@ -315,14 +315,14 @@ int far char_saving_throw(struct chr *c, int kind)
 }
 
 /* 0c19: monster mt hits party member c (slot) */
-void far monster_hit_char(struct chr *c, int slot, int mt)
+void far monster_hit_char(struct chrat *c, int slot, int mt)
 {
 	int elem, snd;
 	register int i, dmg;
 
-	c->f11b = 0;
-	for (i = elem = dmg = 0; i < g_f06a[mt]; i++)
-		dmg += random_range(1, g_f076[mt]);
+	c->asleep = 0;
+	for (i = elem = dmg = 0; i < g_mon_dmg_dice[mt]; i++)
+		dmg += random_range(1, g_mon_dmg_sides[mt]);
 	snd = 4;
 	if ((i = g_mon_dmg_type[mt]) != 0) {
 		if (char_saving_throw(c, 0)) dmg >>= 1;
@@ -338,82 +338,82 @@ void far monster_hit_char(struct chr *c, int slot, int mt)
 	}
 	play_sfx(snd);
 	draw_icon(g_charpow_sprites, elem, slot * 0x26 + 0xb, 0x95, 0);
-	dmg -= c->f103;
+	dmg -= c->shield;
 	if (dmg < 1) dmg = 0;
 	if (dmg && g_mon_special[mt] && !char_saving_throw(c, 0))
 		switch (g_mon_special[mt]) {
 		case 1:
-			if (!++c->f116) c->f116 = 0xff;
+			if (!++c->poisoned) c->poisoned = 0xff;
 			play_sfx(0x11);
 			break;
 		case 2:
-			if (!++c->f11b) c->f11b = 0xff;
+			if (!++c->asleep) c->asleep = 0xff;
 			play_sfx(0x35);
 			break;
 		case 3:
-			if (!++c->f118) c->f118 = 0xff;
+			if (!++c->insane) c->insane = 0xff;
 			play_sfx(0x35);
 			break;
 		case 4:
-			if (!++c->f117) c->f117 = 0xff;
+			if (!++c->diseased) c->diseased = 0xff;
 			play_sfx(0x11);
 			break;
 		case 5:
-			if (!++c->f11d) c->f11d = 0xff;
+			if (!++c->confused) c->confused = 0xff;
 			play_sfx(0x35);
 			break;
 		case 6:
-			if (!++c->f113) c->f113 = 0xff;
+			if (!++c->cursed) c->cursed = 0xff;
 			play_sfx(0x35);
 			break;
 		case 7:
 			for (i = 0; i < 0x12; i++)
-				if (c->id[i] >= 0x22 && c->id[i] <= 0x29 && c->eq[i]) {
-					c->f90[i] |= 0x80;
+				if (c->item_id[i] >= 0x22 && c->item_id[i] <= 0x29 && c->item_eq[i]) {
+					c->item_flags[i] |= 0x80;
 					break;
 				}
 			play_sfx(0x35);
 			break;
 		case 8:
-			if (!++c->f115) c->f115 = 0xff;
+			if (!++c->weak) c->weak = 0xff;
 			play_sfx(0x35);
 			break;
 		case 9:
-			c->f127 = 0;
+			c->sp = 0;
 			play_sfx(0x35);
 			break;
 		case 10:
-			if (!++c->f11e) c->f11e = 0xff;
+			if (!++c->paralyzed) c->paralyzed = 0xff;
 			play_sfx(0x35);
 			break;
 		case 11:
-			c->f26 += 5;
+			c->age_mod += 5;
 			play_sfx(0x35);
 			break;
 		case 12:
-			if (!++c->f11f) c->f11f = 0xff;
+			if (!++c->unconscious) c->unconscious = 0xff;
 			play_sfx(0x35);
-			if (c->f125 > 0) c->f125 = 0;
+			if (c->hp > 0) c->hp = 0;
 			break;
 		case 13:
-			if (!++c->f122) c->f122 = 0xff;
+			if (!++c->eradicated) c->eradicated = 0xff;
 			break_all_items(c);
 			play_sfx(0x35);
-			if (c->f125 > 0) c->f125 = 0;
+			if (c->hp > 0) c->hp = 0;
 			break;
 		case 14:
-			if (!++c->f121) c->f121 = 0xff;
+			if (!++c->stone) c->stone = 0xff;
 			play_sfx(0x35);
-			if (c->f125 > 0) c->f125 = 0;
+			if (c->hp > 0) c->hp = 0;
 			break;
 		case 15:
-			if (!++c->f120) c->f120 = 0xff;
+			if (!++c->dead) c->dead = 0xff;
 			play_sfx(0x35);
-			if (c->f125 > 0) c->f125 = 0;
+			if (c->hp > 0) c->hp = 0;
 			break;
 		case 16:
 			for (i = 0; i < 0x12; i++)
-				if (c->id[i] < 0x46) c->f90[i] |= 0x40;
+				if (c->item_id[i] < 0x46) c->item_flags[i] |= 0x40;
 			play_sfx(0x35);
 			break;
 		}
@@ -426,7 +426,7 @@ void far monster_hit_char(struct chr *c, int slot, int mt)
 void far monster_turn(int mt)
 {
 	int m, n, st, k, flag;
-	struct chr *p;
+	struct chrat *p;
 	int list[8];
 	register int i, target;
 
@@ -439,7 +439,7 @@ void far monster_turn(int mt)
 		if (g_mon_status[m] != 0 && g_mon_status[m] != 1) return;
 		mt = g_mon_type[m];
 	}
-	for (k = flag = 0; k < g_f056[mt]; k++) {
+	for (k = flag = 0; k < g_mon_num_attacks[mt]; k++) {
 		target = -1;
 		if (g_mon_attack_pref[mt] != 1) {
 		switch (g_mon_attack_pref[mt]) {
@@ -459,7 +459,7 @@ void far monster_turn(int mt)
 				case 3: if (p->cls == 4) { target = i; goto hit; } break;
 				case 4: if (p->cls == 8) { target = i; goto hit; } break;
 				case 5: if (p->cls == 1) { target = i; goto hit; } break;
-				case 6: if (p->f11 == 2) { target = i; goto hit; } break;
+				case 6: if (p->race == 2) { target = i; goto hit; } break;
 				}
 				break;
 			case 11: case 12: case 13: case 14: case 15:
@@ -513,7 +513,7 @@ void far monster_turn(int mt)
 		}
 	hit:
 		p = &g_party[g_combat_order[target]];
-		if (g_mon_dmg_type[mt] || p->f11b) {
+		if (g_mon_dmg_type[mt] || p->asleep) {
 		att:
 			monster_hit_char(p, target, mt);
 		} else {
@@ -595,10 +595,10 @@ top:
 /* 15d4: party member g_combat_actor acts on its chosen action */
 void far do_quickfight_action(void)
 {
-	register struct chr *p;
+	register struct chrat *p;
 
 	p = &g_party[g_combat_order[g_combat_actor]];
-	switch (p->f7c) {
+	switch (p->quickfight) {
 	case 0:
 		party_attack_monster(p, 0);
 		break;
@@ -614,7 +614,7 @@ void far do_quickfight_action(void)
 }
 
 /* 1634: to-hit roll of c against the current monster */
-int far roll_to_hit(struct chr *c, int kind)
+int far roll_to_hit(struct chrat *c, int kind)
 {
 	int ac;
 	register int v, d;
@@ -630,35 +630,35 @@ int far roll_to_hit(struct chr *c, int kind)
 	}
 	v = v + get_char_level(c) / d;
 	do v += (d = random_range(1, 20)); while (d == 20);
-	v -= c->f113;
+	v -= c->cursed;
 	if (g_mon_status[g_target_mon]) v += 20;
 	ac = 10;
-	ac += g_f07e[g_mon_type[g_target_mon]];
+	ac += g_mon_ac[g_mon_type[g_target_mon]];
 	return v >= ac;
 }
 
 /* 1723: weapon stats of c into the attack globals */
-void far load_attack_weapon(struct chr *c, int kind)
+void far load_attack_weapon(struct chrat *c, int kind)
 {
 	int k;
 	int i;
 
 	g_atk_element = g_atk_weapon_fef = g_atk_hit_bonus = g_atk_damage = g_atk_dice_n = g_atk_die_sides = 0;
 	for (i = 0; i < 0x12; i++)
-		if (kind ? c->eq[i] == 4 : c->eq[i] == 1 || c->eq[i] == 13) {
-			g_atk_element = c->fa3[i];
-			g_atk_weapon_fef = c->fef[i];
-			g_atk_hit_bonus = g_material_to_hit[c->fb6[i]] + c->f105;
-			g_atk_damage = g_material_dmg_bonus[c->fb6[i]] + c->f104;
-			g_atk_dice_n = g_weapon_dice_count[c->id[i]];
-			g_atk_die_sides = g_weapon_die_sides[c->id[i]];
+		if (kind ? c->item_eq[i] == 4 : c->item_eq[i] == 1 || c->item_eq[i] == 13) {
+			g_atk_element = c->item_elem[i];
+			g_atk_weapon_fef = c->item_power[i];
+			g_atk_hit_bonus = g_material_to_hit[c->item_mat[i]] + c->hero;
+			g_atk_damage = g_material_dmg_bonus[c->item_mat[i]] + c->holy;
+			g_atk_dice_n = g_weapon_dice_count[c->item_id[i]];
+			g_atk_die_sides = g_weapon_die_sides[c->item_id[i]];
 			for (k = 0; k < g_atk_dice_n; k++) g_atk_damage += random_range(1, g_atk_die_sides);
 		}
 	if (g_atk_damage < 1) g_atk_damage = 0;
 }
 
 /* 181c: damage roll */
-int far roll_damage(struct chr *c)
+int far roll_damage(struct chrat *c)
 {
 	register int v;
 
@@ -677,7 +677,7 @@ int far monster_saving_throw(int lvl)
 /* 1871: party member g_combat_actor tries to run */
 void far combat_try_run(void)
 {
-	if (random_range(1, 100) < g_c85b[g_map_quadrant][0]) {
+	if (random_range(1, 100) < g_maps_run_chance[g_map_quadrant][0]) {
 		g_combat_order[g_combat_actor] = 0xff;
 		g_combat_party_n--;
 		compact_combat_order();
@@ -939,7 +939,7 @@ done:
 			for (i = 0; i < g_party_count; i++)
 				switch (get_worst_condition(&g_party[i])) {
 				case 8: case 11: case 12: case 14: case 15:
-					g_party[i].f120 = 1;
+					g_party[i].dead = 1;
 				}
 		}
 	}

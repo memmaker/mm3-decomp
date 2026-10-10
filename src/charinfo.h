@@ -9,15 +9,15 @@ typedef unsigned char u8;
 
 struct chr {
 	char name[0x10];
-	u8 sex, race, f12, cls, f14[0xf], lvl, f24, age, f26, skill[0x12];
-	u8 st[0x44];
-	u8 eq[0x13], f90[0x13], fa3[0x13], fb6[0x13], fc9[0x13], id[0x13], fef[0x13];
-	u8 bless, shield, holy, hero, f106, res[12], cond[16];
-	int f123, hp, sp, born;
-	u8 f12b[4];
+	u8 sex, race, align, cls, f14[0xf], level, level_tmp, birth_day, age_mod, skill[0x12];
+	u8 award[0x44];
+	u8 item_eq[0x13], item_flags[0x13], item_elem[0x13], item_mat[0x13], item_attr[0x13], item_id[0x13], item_power[0x13];
+	u8 bless, shield, holy, hero, donated, res[12], cond[16];
+	int inn, hp, sp, birth_year;
+	u8 exp[4];
 };
-struct s14 { int f0; long img; int x, y, f8, fa; };
-struct btn { int f0; char far *img; int x, y, fa, fc, fe, f10, f12; };
+struct spr { int flag; long img; int x, y, attr, frame; };
+struct spr1 { int flag; char far *img; int x, y, attr, frame, end, end_img_off, end_img_seg; };
 
 extern u8 g_charsheet_field_x[], g_charsheet_field_y[];
 extern u8 g_charsheet_popup_x[], g_charsheet_popup_y[], g_class_attack_levels[];
@@ -29,7 +29,7 @@ extern char far *g_global_icons, far *g_gargoyle_gfx, far *g_grabber_gfx, far *g
 	far *g_charpow_sprites;
 extern char g_stat_cursor, g_icon_stack_top, g_btn_stack_top, g_dim_level, g_party_btn_y_esc, g_party_btn_w_esc, g_party_btn_h_esc;
 extern u8 g_party_count, g_party_count_saved, g_party_ids[], g_inn_map, g_map_num, g_game_mode, g_portrait_click_on, g_wizeye_shown, g_save_slot, g_new_day_pending, g_hireling_avail[];
-extern long g_mouse_cursor, g_party_faces[], g_c52e, g_roster_faces[], g_inn_icons;
+extern long g_mouse_cursor, g_party_faces[], g_dse_face_gfx, g_roster_faces[], g_inn_icons;
 extern unsigned g_minutes, g_food;
 extern unsigned long g_bank_gold, g_bank_gems, g_party_gold, g_party_gems;
 extern int *g_btn_xs, *g_btn_ys, *g_btn_ws, *g_btn_hs, *g_btn_stack_x[], *g_btn_stack_y[], *g_btn_stack_w[], *g_btn_stack_h[];
@@ -37,7 +37,7 @@ extern int g_maze_btn_x[], g_main_btn_y[], g_main_btn_w[], g_main_btn_h[], g_any
 	g_party_btn_h[];
 extern int g_party_btn_x_esc, g_roster_slot_btn_x[];
 extern struct chr g_party[], far *g_roster;
-extern struct s14 g_roster_face_sprites[], g_roster_frame_sprite;
+extern struct spr g_roster_face_sprites[], g_roster_frame_sprite;
 
 unsigned far get_char_stat(struct chr far *, int, int);
 int far get_char_age(struct chr far *, int);

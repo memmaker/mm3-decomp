@@ -5,10 +5,10 @@
 #include <mem.h>
 typedef unsigned char u8;
 
-struct spr { int flag; char far *img; int x, y, f6, frame; };
+struct spr { int flag; char far *img; int x, y, attr, frame; };
 
 extern struct spr g_anim_sprites[16];             /* draw list, viewed as int[] by the clear loops */
-extern int g_20fc[];
+extern int g_unused_20fc[];
 extern int g_walk_frames[], g_walk_img_swap[];
 extern unsigned long g_score_digit_weights[];            /* 1e9 .. 1: score digit weights */
 extern unsigned g_song_cue_times[][0x1b];           /* song cue times */

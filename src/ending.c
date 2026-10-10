@@ -343,8 +343,8 @@ int far play_ending(unsigned long score)
 	g_cine_img_8 = load_graphic("fda1.vga");
 	g_cine_img_9 = load_graphic("fdb1.vga");
 	S[0].flag = S[1].flag = S[2].flag = S[3].flag = S[4].flag = S[5].flag = -1;
-	S[0].x = S[0].f6 = S[0].frame = S[1].x = S[1].f6 = S[1].frame = S[2].x = S[2].f6 = S[2].frame =
-		S[3].f6 = S[3].frame = S[4].f6 = S[4].frame = FP_OFF(S[5].img) = FP_SEG(S[5].img) = 0;
+	S[0].x = S[0].attr = S[0].frame = S[1].x = S[1].attr = S[1].frame = S[2].x = S[2].attr = S[2].frame =
+		S[3].attr = S[3].frame = S[4].attr = S[4].frame = FP_OFF(S[5].img) = FP_SEG(S[5].img) = 0;
 	S[0].y = S[2].y = S[3].y = 4;
 	S[1].y = 0x2b;
 	S[4].x = 0x7a;
@@ -415,7 +415,7 @@ int far play_ending(unsigned long score)
 	g_cine_img_3 = load_graphic("topj.vga");
 	g_cine_img_4 = load_graphic("topk.vga");
 	S[0].img = g_cine_img_0;
-	j = c4 = S[0].x = S[0].f6 = S[0].frame = FP_OFF(S[1].img) = FP_SEG(S[1].img) = S[1].y = S[1].f6 =
+	j = c4 = S[0].x = S[0].attr = S[0].frame = FP_OFF(S[1].img) = FP_SEG(S[1].img) = S[1].y = S[1].attr =
 		S[1].frame = FP_OFF(S[2].img) = FP_SEG(S[2].img) = 0;
 	S[0].y = 0x82;
 	S[1].x = 0x87;
@@ -448,7 +448,7 @@ int far play_ending(unsigned long score)
 	g_cine_img_4 = load_graphic("lyts2.vga");
 	g_cine_img_5 = load_graphic("lyts3.vga");
 	g_cine_img_6 = load_graphic("lyts4.vga");
-	S[0].x = S[0].y = S[0].f6 = S[0].frame = S[1].y = S[1].f6 = FP_OFF(S[2].img) = FP_SEG(S[2].img) = 0;
+	S[0].x = S[0].y = S[0].attr = S[0].frame = S[1].y = S[1].attr = FP_OFF(S[2].img) = FP_SEG(S[2].img) = 0;
 	S[1].x = 0x4b;
 	S[0].img = g_cine_img_0;
 	S[1].img = g_cine_img_3;
@@ -562,7 +562,7 @@ int far play_ending(unsigned long score)
 		TICK()
 	} while (j);
 	S[14].img = g_cine_img_4;
-	S[14].x = S[14].f6 = S[14].frame = FP_OFF(S[15].img) = FP_SEG(S[15].img) = 0;
+	S[14].x = S[14].attr = S[14].frame = FP_OFF(S[15].img) = FP_SEG(S[15].img) = 0;
 	S[14].y = 0x6e;
 	S[15].flag = -1;
 	flush_input();

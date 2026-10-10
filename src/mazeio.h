@@ -22,7 +22,7 @@ extern u8 g_party_count, g_msg_delay;
 extern char far *g_roster;                  /* roster buffer (0x2382 bytes) */
 extern u8 g_draw_list[];                       /* 4000-byte copy buffer */
 extern char g_archive_open, g_music_load_pending, g_debug_overlay, g_party_defeated, g_combat_actor, g_combat_btn_held, g_mouse_buttons, g_mon_scan_pending, g_boss_key_busy, g_mon_d0c_2, g_stat_cursor;
-extern u8 g_spell_anim_active, g_mon_d0c_3, g_portrait_click_on, g_abac, g_combat_order[], g_party[][0x12f];
+extern u8 g_spell_anim_active, g_mon_d0c_3, g_portrait_click_on, g_obj_anim_tick, g_combat_order[], g_party[][0x12f];
 extern int g_user_break, g_key_lshift, g_key_rshift, g_key_alt, g_key_ctrl, g_key_extended;
 extern u8 g_game_mode;
 extern int *g_btn_xs;
@@ -33,12 +33,12 @@ extern int g_party_btn_x[], g_maze_btn_x[], g_anyclick_btn_xs[], g_itemscr_hot_x
 extern int g_inn_btn_sprs[][4];
 extern char g_party_btn_y[], g_main_btn_y[], g_equip_list_btn_y[], g_equip_list_btn_h[], g_keypad_keymap[];
 extern u8 g_equip_list_btn_w[], g_combat_hit_x[], g_combat_hit_w[], g_quadrant_maps[];
-struct obj { int w0, w2; u8 pad[8]; };
-extern struct obj g_objects_1based[];
-struct map { u8 b[0x340]; };
+struct anim { int frame, type; u8 pad[8]; };
+extern struct anim g_objects_1based[];
+struct map { u8 raw[0x340]; };
 extern struct map g_maps[];
-extern char far *g_mon_max_hp, far *g_f07e, far *g_mon_speed, far *g_f06a, far *g_f076, far *g_f056, far *g_f06e, far *g_mon_dmg_type,
-	far *g_mon_attack_pref, far *g_mon_special, far *g_f03a, far *g_mon_hit_bonus, far *g_mon_treasure, far *g_f032, far *g_f036, far *g_mon_res_magic,
+extern char far *g_mon_max_hp, far *g_mon_ac, far *g_mon_speed, far *g_mon_dmg_dice, far *g_mon_dmg_sides, far *g_mon_num_attacks, far *g_mon_exp, far *g_mon_dmg_type,
+	far *g_mon_attack_pref, far *g_mon_special, far *g_mon_ranged, far *g_mon_hit_bonus, far *g_mon_treasure, far *g_mon_gold, far *g_mon_gems, far *g_mon_res_magic,
 	far *g_mon_res_fire, far *g_mon_res_elec, far *g_mon_res_cold, far *g_mon_res_acid, far *g_mon_res_energy, far *g_mon_res_phys;
 
 void far set_mouse_cursor(int, long);

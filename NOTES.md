@@ -321,3 +321,13 @@
   MAIN_TEXT stays 0x652 bytes: sys.asm/snddrv.asm still hold cs-relative offsets as numbers (SYS_TEXT starts at
   124F:0004, its `mov dx,66ah` style constants assume that), and the "copy.bin" literal is kept so DGROUP is unchanged.
   `tools/smoke.py` play-tests a build (intro, new game, walk) with host input disabled.
+
+## Renaming struct fields with clangd
+- clangd identifies a field by USR `c:@S@<tag>@FI@<field>`, so `struct chr { ... st ... }` in guild.h and in charinfo.h
+  are one symbol across translation units: renaming one renames (or conflicts with) the other. Fix: make the tags
+  unique per defining header first (`struct chr` -> `struct chr__guild` in the header, its TUs and their .inc), run
+  tools/rename.py, strip the suffix again. Use perl, not BSD sed, for `\b`.
+- Renaming a field to a name another field of the same struct still has (`f127 -> sp` while `sp -> spells` is
+  pending) is refused by clangd: apply renames of already-named fields in a first pass.
+- clangd skips macro bodies that are never expanded with that field (charinfo.c `ST(k)`): fix by hand, the build
+  catches it.

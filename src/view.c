@@ -39,7 +39,7 @@ void far advance_clock(int ticks)
 			g_day -= 100;
 			g_year++;
 			for (i = 0x6f; i < 0x76; i++)
-				fn_1523_0238(g_game_flags, i, 0);
+				set_bit(g_game_flags, i, 0);
 		}
 	}
 	if ((g_day % 10 == 1 || ticks > 1440) && g_day != prev) {
@@ -63,7 +63,7 @@ int far party_has_skill(int cond)
 {
 	int i, n;
 	for (i = n = 0; i < g_party_count; i++) {
-		if (g_b9fd[i * 303 + cond]) {
+		if (g_party_skills[i * 303 + cond]) {
 			n++;
 			switch (_AX = cond)   /* selector through ax: mov ax,cx; mov bx,ax */ {
 			case 0: case 1: case 2: case 3: case 4: case 6: case 7: case 8:
@@ -83,7 +83,7 @@ int far party_has_skill(int cond)
 	return 0;
 }
 
-void far fn_1523_0238(u8 *p, u16 bit, int set)
+void far set_bit(u8 *p, u16 bit, int set)
 {
 	register int byt = bit >> 3;
 	int b = bit & 7;
@@ -187,7 +187,7 @@ void far draw_wizard_eye(int force)
 		return;
 	memset(g_draw_list, 0, 4000);
 	g_draw_list[0] = -1;
-	g_d670 = g_tileset_gfx;
+	g_draw_list_img = g_tileset_gfx;
 	if (g_outdoors) {
 		draw_wizard_eye_outdoor();
 		return;
@@ -564,18 +564,18 @@ int far stat_bonus(u16 v)
 	return g_stat_bonus_values[i];
 }
 
-int far get_char_age(struct mon far *m, int flag)
+int far get_char_age(struct chr far *m, int flag)
 {
 	register int d;
-	d = g_year - m->w129;
+	d = g_year - m->birth_year;
 	if (d > 0xfe)
 		d = 0xfe;
 	if (flag)
 		return d;
-	return d + m->b26;
+	return d + m->age_mod;
 }
 
-u8 far get_worst_condition(struct mon *m)
+u8 far get_worst_condition(struct chr *m)
 {
 	int i;
 	for (i = 15; i >= 0; i--)
@@ -584,35 +584,35 @@ u8 far get_worst_condition(struct mon *m)
 	return 16;
 }
 
-int far get_item_stat_bonus(struct mon far *m, int kind)
+int far get_item_stat_bonus(struct chr far *m, int kind)
 {
 	int v;
 	register int i, sum;
 	for (i = sum = 0; i < 18; i++) {
-		if (m->b7d[i] && !(m->b90[i] & 0xc0)) {
-			if (kind < 11 && kind != 3 && m->bc9[i]) {
-				v = get_bonus_stat_index(m->bc9[i]);
+		if (m->item_eq[i] && !(m->item_flags[i] & 0xc0)) {
+			if (kind < 11 && kind != 3 && m->item_attr[i]) {
+				v = get_bonus_stat_index(m->item_attr[i]);
 				if (v > 2)
 					v++;
 				if (v == kind)
-					sum += g_attrib_bonus_values[m->bc9[i]];
+					sum += g_attrib_bonus_values[m->item_attr[i]];
 			}
-			if (kind > 10 && m->ba3[i]) {
-				v = get_element_index(m->ba3[i]) + 11;
+			if (kind > 10 && m->item_elem[i]) {
+				v = get_element_index(m->item_elem[i]) + 11;
 				if (v == kind)
-					sum += g_elem_resist_bonus[m->ba3[i]];
+					sum += g_elem_resist_bonus[m->item_elem[i]];
 			}
 			if (kind == 9) {
-				sum += g_item_ac_values[m->bdc[i]];
-				if (m->bb6[i]) {
-					if (m->bdc[i] == 0x2a)
+				sum += g_item_ac_values[m->item_id[i]];
+				if (m->item_mat[i]) {
+					if (m->item_id[i] == 0x2a)
 						goto add;
-					switch (m->b7d[i]) {
+					switch (m->item_eq[i]) {
 					case 1: case 4: case 13:
 						continue;
 					}
 add:
-					sum += g_material_ac_bonus[m->bb6[i]];
+					sum += g_material_ac_bonus[m->item_mat[i]];
 				}
 			}
 		}
@@ -620,27 +620,27 @@ add:
 	return sum;
 }
 
-int far get_char_level(struct mon far *m)
+int far get_char_level(struct chr far *m)
 {
 	int v;
-	if ((v = m->b23 + m->b24) < 0)
+	if ((v = m->level + m->level_tmp) < 0)
 		return 0;
 	return v;
 }
 
-unsigned far get_char_stat(struct mon far *m, int kind, int flag)
+unsigned far get_char_stat(struct chr far *m, int kind, int flag)
 {
 	int a, j, t;
 	register int v, w;
 	t = 0;
 	switch (_AX = kind) {   /* mov ax,[kind]; mov bx,ax */
-	case 0: v = m->b14; w = m->b15; break;
-	case 1: v = m->b16; w = m->b17; t = 1; break;
-	case 2: v = m->b18; w = m->b19; t = 1; break;
-	case 3: v = m->b1a; w = m->b1b; break;
-	case 4: v = m->b1c; w = m->b1d; break;
-	case 5: v = m->b1e; w = m->b1f; break;
-	case 6: v = m->b20; w = m->b21; t = 2; break;
+	case 0: v = m->might; w = m->might_tmp; break;
+	case 1: v = m->intel; w = m->intel_tmp; t = 1; break;
+	case 2: v = m->pers; w = m->pers_tmp; t = 1; break;
+	case 3: v = m->endur; w = m->endur_tmp; break;
+	case 4: v = m->speed; w = m->speed_tmp; break;
+	case 5: v = m->acc; w = m->acc_tmp; break;
+	case 6: v = m->luck; w = m->luck_tmp; t = 2; break;
 	}
 	if (t < 2) {
 		a = get_char_age(m, 0);
@@ -663,7 +663,7 @@ void far draw_party_portraits(void)
 	int x, flag, t, idx;
 	char buf[10];
 	long pos;
-	struct mon *p;
+	struct chr *p;
 	register int *o, i;
 	flag = g_game_mode == 2;
 	sprintf(buf, g_fmt_portraits, g_draw_list);
@@ -673,7 +673,7 @@ void far draw_party_portraits(void)
 		p = &g_party[idx];
 		t = g_cond_portrait_faces[get_worst_condition(&g_party[idx])];
 		if (t > 4 && !g_roster_faces)
-			pos = g_c52e;
+			pos = g_dse_face_gfx;
 		else
 			pos = g_party_faces[idx];
 		if (t > 4)
@@ -687,30 +687,30 @@ void far draw_party_portraits(void)
 		*o++ = 0x95;
 		*o++ = 0;
 		*o++ = t;
-		if (p->b102 || p->b103 || p->b104 || p->b105) {
+		if (p->bless || p->shield || p->holy || p->hero) {
 			*o++ = -1;
 			*(long *)o = g_protect_icons;
 			o++;
 		o++;
-			if (p->b102) {
+			if (p->bless) {
 				*o++ = x + 0x20;
 				*o++ = 0x96;
 				*o++ = 0;
 				*o++ = 2;
 			}
-			if (p->b103) {
+			if (p->shield) {
 				*o++ = x + 0xc;
 				*o++ = 0xa8;
 				*o++ = 0;
 				*o++ = 1;
 			}
-			if (p->b104) {
+			if (p->holy) {
 				*o++ = x + 0xc;
 				*o++ = 0x96;
 				*o++ = 0;
 				*o++ = 3;
 			}
-			if (p->b105) {
+			if (p->hero) {
 				*o++ = x + 0x1e;
 				*o++ = 0xa6;
 				*o++ = 0;
@@ -741,13 +741,13 @@ void far draw_party_portraits(void)
 			*o++ = 0;
 			p = &g_party[flag ? g_combat_order[i] : i];
 			t = calc_max_hp(p);
-			if (p->w125 < 1)
+			if (p->hp < 1)
 				*o = 4;
-			else if (p->w125 > t)
+			else if (p->hp > t)
 				*o = 3;
-			else if (p->w125 == t)
+			else if (p->hp == t)
 				*o = 0;
-			else if ((t >> 2) > p->w125)
+			else if ((t >> 2) > p->hp)
 				*o = 2;
 			else
 				*o = 1;
@@ -773,52 +773,52 @@ int *far add_view_sprites_d3(register int *o)
 	if (g_obj_d3c) {
 		k = g_obj_d3c - 1;
 		*++o = -1;
-		*(long *)++o = g_obj_sprites[g_map_objects[k].w4];
+		*(long *)++o = g_obj_sprites[g_map_objects[k].sprite];
 		o++;
 		*++o = 0x67;
 		*++o = 0x36;
-		*++o = 0x300 | g_map_objects[k].w10;
-		*++o = g_map_objects[k].p6[0x13b];
+		*++o = 0x300 | g_map_objects[k].attr;
+		*++o = g_map_objects[k].frame[0x13b];
 	}
 	if (g_obj_d3l1) {
 		k = g_obj_d3l1 - 1;
 		*++o = -1;
-		*(long *)++o = g_obj_sprites[g_map_objects[k].w4];
+		*(long *)++o = g_obj_sprites[g_map_objects[k].sprite];
 		o++;
 		*++o = 0x2f;
 		*++o = 0x36;
-		*++o = 0x300 | g_map_objects[k].w10;
-		*++o = g_map_objects[k].p6[0x13b];
+		*++o = 0x300 | g_map_objects[k].attr;
+		*++o = g_map_objects[k].frame[0x13b];
 	}
 	if (g_obj_d3r1) {
 		k = g_obj_d3r1 - 1;
 		*++o = -1;
-		*(long *)++o = g_obj_sprites[g_map_objects[k].w4];
+		*(long *)++o = g_obj_sprites[g_map_objects[k].sprite];
 		o++;
 		*++o = 0x9f;
 		*++o = 0x36;
-		*++o = 0x300 | g_map_objects[k].w10;
-		*++o = g_map_objects[k].p6[0x13b];
+		*++o = 0x300 | g_map_objects[k].attr;
+		*++o = g_map_objects[k].frame[0x13b];
 	}
 	if (g_obj_d3l2) {
 		k = g_obj_d3l2 - 1;
 		*++o = -1;
-		*(long *)++o = g_obj_sprites[g_map_objects[k].w4];
+		*(long *)++o = g_obj_sprites[g_map_objects[k].sprite];
 		o++;
 		*++o = 0xfff7;
 		*++o = 0x36;
-		*++o = 0x300 | g_map_objects[k].w10 | 2;
-		*++o = g_map_objects[k].p6[0x13b];
+		*++o = 0x300 | g_map_objects[k].attr | 2;
+		*++o = g_map_objects[k].frame[0x13b];
 	}
 	if (g_obj_d3r2) {
 		k = g_obj_d3r2 - 1;
 		*++o = -1;
-		*(long *)++o = g_obj_sprites[g_map_objects[k].w4];
+		*(long *)++o = g_obj_sprites[g_map_objects[k].sprite];
 		o++;
 		*++o = 0xd7;
 		*++o = 0x36;
-		*++o = 0x300 | g_map_objects[k].w10 | 2;
-		*++o = g_map_objects[k].p6[0x13b];
+		*++o = 0x300 | g_map_objects[k].attr | 2;
+		*++o = g_map_objects[k].frame[0x13b];
 	}
 	if (g_mon_d3l1_1) {
 		k = g_mon_d3l1_1 - 1;
@@ -1033,32 +1033,32 @@ int *far add_view_sprites_d2(register int *o)
 	if (g_obj_d2c) {
 		k = g_obj_d2c - 1;
 		*++o = -1;
-		*(long *)++o = g_obj_sprites[g_map_objects[k].w4];
+		*(long *)++o = g_obj_sprites[g_map_objects[k].sprite];
 		o++;
 		*++o = 0x58;
 		*++o = 0x29;
-		*++o = 0x200 | g_map_objects[k].w10;
-		*++o = g_map_objects[k].p6[0x13b];
+		*++o = 0x200 | g_map_objects[k].attr;
+		*++o = g_map_objects[k].frame[0x13b];
 	}
 	if (g_obj_d2l1) {
 		k = g_obj_d2l1 - 1;
 		*++o = -1;
-		*(long *)++o = g_obj_sprites[g_map_objects[k].w4];
+		*(long *)++o = g_obj_sprites[g_map_objects[k].sprite];
 		o++;
 		*++o = 8;
 		*++o = 0x29;
-		*++o = 0x200 | g_map_objects[k].w10;
-		*++o = g_map_objects[k].p6[0x13b];
+		*++o = 0x200 | g_map_objects[k].attr;
+		*++o = g_map_objects[k].frame[0x13b];
 	}
 	if (g_obj_d2r1) {
 		k = g_obj_d2r1 - 1;
 		*++o = -1;
-		*(long *)++o = g_obj_sprites[g_map_objects[k].w4];
+		*(long *)++o = g_obj_sprites[g_map_objects[k].sprite];
 		o++;
 		*++o = 0xa8;
 		*++o = 0x29;
-		*++o = 0x200 | g_map_objects[k].w10;
-		*++o = g_map_objects[k].p6[0x13b];
+		*++o = 0x200 | g_map_objects[k].attr;
+		*++o = g_map_objects[k].frame[0x13b];
 	}
 	if (g_mon_d2l1_1) {
 		k = g_mon_d2l1_1 - 1;
@@ -1221,32 +1221,32 @@ int *far add_view_sprites_d1(register int *o)
 	if (g_obj_d1c) {
 		k = g_obj_d1c - 1;
 		*++o = -1;
-		*(long *)++o = g_obj_sprites[g_map_objects[k].w4];
+		*(long *)++o = g_obj_sprites[g_map_objects[k].sprite];
 		o++;
 		*++o = 0x46;
 		*++o = 0x17;
-		*++o = 0x100 | g_map_objects[k].w10;
-		*++o = g_map_objects[k].p6[0x13b];
+		*++o = 0x100 | g_map_objects[k].attr;
+		*++o = g_map_objects[k].frame[0x13b];
 	}
 	if (g_obj_d1l1) {
 		k = g_obj_d1l1 - 1;
 		*++o = -1;
-		*(long *)++o = g_obj_sprites[g_map_objects[k].w4];
+		*(long *)++o = g_obj_sprites[g_map_objects[k].sprite];
 		o++;
 		*++o = 0xffea;
 		*++o = 0x17;
-		*++o = 0x100 | g_map_objects[k].w10 | 2;
-		*++o = g_map_objects[k].p6[0x13b];
+		*++o = 0x100 | g_map_objects[k].attr | 2;
+		*++o = g_map_objects[k].frame[0x13b];
 	}
 	if (g_obj_d1r1) {
 		k = g_obj_d1r1 - 1;
 		*++o = -1;
-		*(long *)++o = g_obj_sprites[g_map_objects[k].w4];
+		*(long *)++o = g_obj_sprites[g_map_objects[k].sprite];
 		o++;
 		*++o = 0xa2;
 		*++o = 0x17;
-		*++o = 0x100 | g_map_objects[k].w10 | 2;
-		*++o = g_map_objects[k].p6[0x13b];
+		*++o = 0x100 | g_map_objects[k].attr | 2;
+		*++o = g_map_objects[k].frame[0x13b];
 	}
 	if (g_mon_d1l1) {
 		k = g_mon_d1l1 - 1;
@@ -1390,12 +1390,12 @@ int *far add_view_sprites_d0(register int *o)
 	if (g_obj_d0c && g_last_move_dir == g_party_dir) {
 		k = g_obj_d0c - 1;
 		*++o = -1;
-		*(long *)++o = g_obj_sprites[g_map_objects[k].w4];
+		*(long *)++o = g_obj_sprites[g_map_objects[k].sprite];
 		o++;
 		*++o = 0x2f;
 		*++o = 8;
-		*++o = g_map_objects[k].w10;
-		*++o = g_map_objects[k].p6[0x13b];
+		*++o = g_map_objects[k].attr;
+		*++o = g_map_objects[k].frame[0x13b];
 	}
 	if (g_mon_d0c_2) {
 		k = g_mon_d0c_2 - 1;
@@ -1431,7 +1431,7 @@ int *far add_view_sprites_d0(register int *o)
 			if (g_mon_elem_fx_d0c_2) {
 				*++o = xo + g_splash_dx[g_mon_hit_size_d0c_2] + 10;
 				*++o = g_splash_dy[g_mon_hit_size_d0c_2] + 0x35;
-				*++o = g_splash_flags[g_c482];
+				*++o = g_splash_flags[g_mon_elem_size_d0c_2];
 				*++o = g_mon_elem_fx_d0c_2;
 			}
 		}
@@ -1464,7 +1464,7 @@ int *far add_view_sprites_d0(register int *o)
 			if (g_mon_elem_fx_d0c_3) {
 				*++o = g_splash_dx[g_mon_hit_size_d0c_3] + 0x62;
 				*++o = g_splash_dy[g_mon_hit_size_d0c_3] + 0x35;
-				*++o = g_splash_flags[g_c484];
+				*++o = g_splash_flags[g_mon_elem_size_d0c_3];
 				*++o = g_mon_elem_fx_d0c_3;
 			}
 		}
@@ -1503,7 +1503,7 @@ int *far add_view_sprites_d0(register int *o)
 			if (g_mon_elem_fx) {
 				*++o = xo + g_splash_dx[g_mon_hit_sizes] + 10;
 				*++o = g_splash_dy[g_mon_hit_sizes] + 0x35;
-				*++o = g_splash_flags[g_c480];
+				*++o = g_splash_flags[g_mon_elem_sizes];
 				*++o = g_mon_elem_fx;
 			}
 		}

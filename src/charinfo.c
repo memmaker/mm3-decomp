@@ -1,7 +1,7 @@
 #include "charinfo.h"
 #include "charid.inc"
 
-#define ST(k) (c->st[k] ? get_char_stat_text(c, k, p + (k) * 0x22) : "")
+#define ST(k) (c->award[k] ? get_char_stat_text(c, k, p + (k) * 0x22) : "")
 
 /* 0000: info popup for character-sheet field sel */
 void far show_charsheet_popup(int sel, struct chr *c)
@@ -30,13 +30,13 @@ void far show_charsheet_popup(int sel, struct chr *c)
 		n = get_char_age(c, 0);
 		j = get_char_age(c, 1);
 		sprintf(g_text_buf, "\x02\x03" "c%s\nCurrent / Natural\n\x03r\t057%u\x03l\t061/ %u\n\x03" "cBorn: %u / %u\x01",
-			g_charsheet_labels[sel], n, j, c->age, c->born);
+			g_charsheet_labels[sel], n, j, c->birth_day, c->birth_year);
 		w = 0x35;
 		break;
 	case 8:
 		if ((j = get_char_level(c) / g_class_attack_levels[c->cls] + 1) == 1) s = "";
 		sprintf(g_text_buf, "\x02\x03" "c%s\nCurrent / Maximum\n\x03r\t054%u\x03l\t058/ %u\n\x03" "c%u Attack%s/Round\x01",
-			g_charsheet_labels[sel], get_char_level(c), c->lvl, j, s);
+			g_charsheet_labels[sel], get_char_level(c), c->level, j, s);
 		w = 0x35;
 		break;
 	case 9:
@@ -186,7 +186,7 @@ void far free_party_faces(void)
 	int i;
 
 	for (i = 0; i < 8; i++) free_and_null(&g_party_faces[i]);
-	free_and_null(&g_c52e);
+	free_and_null(&g_dse_face_gfx);
 }
 
 /* 0c4f */
@@ -355,7 +355,7 @@ void far compact_party_faces(void)
 /* 1045 */
 void far clear_item_slot(struct chr far *c, int slot)
 {
-	c->fa3[slot] = c->fb6[slot] = c->fc9[slot] = c->id[slot] = c->fef[slot] = c->eq[slot] = c->f90[slot] = 0;
+	c->item_elem[slot] = c->item_mat[slot] = c->item_attr[slot] = c->item_id[slot] = c->item_power[slot] = c->item_eq[slot] = c->item_flags[slot] = 0;
 }
 
 /* 1076: close gaps in the backpack */
@@ -364,17 +364,17 @@ void far compact_backpack(struct chr *c)
 	register int i, j;
 
 	for (i = 0; i < 0x12; i++)
-		if (c->id[i] == 0) {
+		if (c->item_id[i] == 0) {
 			clear_item_slot(c, i);
 			for (j = i + 1; j <= 0x12; j++)
-				if (c->id[j]) {
-					c->fa3[i] = c->fa3[j];
-					c->fb6[i] = c->fb6[j];
-					c->fc9[i] = c->fc9[j];
-					c->id[i] = c->id[j];
-					c->fef[i] = c->fef[j];
-					c->eq[i] = c->eq[j];
-					c->f90[i] = c->f90[j];
+				if (c->item_id[j]) {
+					c->item_elem[i] = c->item_elem[j];
+					c->item_mat[i] = c->item_mat[j];
+					c->item_attr[i] = c->item_attr[j];
+					c->item_id[i] = c->item_id[j];
+					c->item_power[i] = c->item_power[j];
+					c->item_eq[i] = c->item_eq[j];
+					c->item_flags[i] = c->item_flags[j];
 					clear_item_slot(c, j);
 					break;
 				}
@@ -440,13 +440,13 @@ int far pick_roster_char(int mode, u8 *list, int start)
 {
 	int save, v;
 	char far *icn;
-	struct btn b;
+	struct spr1 b;
 	register int k;
 
 	icn = 0;
 	if (g_cur_icons) icn = g_cur_icons;
 	memset(&b, 0, sizeof(b));
-	b.f0 = b.fe = -1;
+	b.flag = b.end = -1;
 	b.x = 0xb1;
 	g_cur_icons = load_graphic("esc.icn");
 	b.img = g_cur_icons;
@@ -559,9 +559,9 @@ top:
 	memset(list, 0xff, 0x1e);
 	n = 0;
 	for (i = 0x14; i < 0x1e; i++)
-		if (g_roster[i].name[0] && g_roster[i].f123 == g_inn_map && g_hireling_avail[i]) list[n++] = i;
+		if (g_roster[i].name[0] && g_roster[i].inn == g_inn_map && g_hireling_avail[i]) list[n++] = i;
 	for (i = 0; i < 0x14; i++)
-		if (g_roster[i].name[0] && g_roster[i].f123 == g_inn_map) list[n++] = i;
+		if (g_roster[i].name[0] && g_roster[i].inn == g_inn_map) list[n++] = i;
 	g_text_buf2[0] = 0;
 	pg = 0;
 	g_portrait_click_on = 1;
@@ -608,7 +608,7 @@ loop:
 			if (v < 0x14) {
 				_fstrncpy(g_tmp_text, (char far *)pc, 0x10);
 				for (i = 0; i < 0x12; i++)
-					if (is_quest_item(pc->id[i])) {
+					if (is_quest_item(pc->item_id[i])) {
 						sprintf(g_text_buf2, "%s cannot be deleted because %she is holding special items!", g_tmp_text,
 							pc->sex ? "s" : "");
 						show_message(g_text_buf2);
@@ -620,9 +620,9 @@ loop:
 				memset(list, 0xff, 0x1e);
 				n = 0;
 				for (i = 0x14; i < 0x1e; i++)
-					if (g_roster[i].name[0] && g_roster[i].f123 == g_inn_map && g_hireling_avail[i]) list[n++] = i;
+					if (g_roster[i].name[0] && g_roster[i].inn == g_inn_map && g_hireling_avail[i]) list[n++] = i;
 				for (i = 0; i < 0x14; i++)
-					if (g_roster[i].name[0] && g_roster[i].f123 == g_inn_map) list[n++] = i;
+					if (g_roster[i].name[0] && g_roster[i].inn == g_inn_map) list[n++] = i;
 				for (j = 0; j < g_party_count; j++)
 					if (g_party_ids[j] == v) {
 						i = j + 0xc9;
@@ -688,7 +688,7 @@ loop:
 					sprintf(g_text_buf, "\x03" "c%s speaks: My cost is %lu per day.  Do you accept?", g_tmp_text,
 						cost * cost * 0x14);
 					if (!ask_yes_no(g_text_buf, 0)) break;
-					if (!pay_cost(0, (unsigned long)g_roster[list[i + pg - 7]].lvl * 100, 0)) break;
+					if (!pay_cost(0, (unsigned long)g_roster[list[i + pg - 7]].level * 100, 0)) break;
 				} else if (count_party_non_hirelings() > 5) {
 					show_message("\x0b" "007You can only have six characters but you may add more hirelings!");
 					break;

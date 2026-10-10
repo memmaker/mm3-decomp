@@ -20,7 +20,7 @@ void far add_ui_gadget_sprites(void)
 {
 	register int *o;
 
-	o = g_acd4;
+	o = g_border_sprites_m1;
 	*++o = -1;
 	*(long *)++o = g_global_icons;
 	o++;
@@ -103,8 +103,8 @@ void far set_party_map_start(void)
 	case 2: xo = 0; yo = 0x10; break;
 	default: xo = 0x10; yo = 0x10;
 	}
-	g_party_x = (g_maps[g_start_map_idx].b313 & 0xf) + xo;
-	g_party_y = (g_maps[g_start_map_idx].b313 >> 4) + yo;
+	g_party_x = (g_maps[g_start_map_idx].start_pos & 0xf) + xo;
+	g_party_y = (g_maps[g_start_map_idx].start_pos >> 4) + yo;
 }
 
 int far find_loaded_map(register u16 v)
@@ -127,16 +127,16 @@ void far mark_cell_visited(register int x, register int y)
 	if (x < 0 || y < 0 || x > 0x1f || y > 0x1f)
 		return;
 	if (y > 0xf) {
-		idx = find_loaded_map(g_maps[idx].b308);
+		idx = find_loaded_map(g_maps[idx].north);
 		if (idx == 0x1111)
 			return;
 	}
 	if (x > 0xf) {
-		idx = find_loaded_map(g_maps[idx].b309);
+		idx = find_loaded_map(g_maps[idx].east);
 		if (idx == 0x1111)
 			return;
 	}
-	fn_1523_0238(g_maps[idx].b320, (y & 0xf) * 16 + (x & 0xf), 1);
+	set_bit(g_maps[idx].visited, (y & 0xf) * 16 + (x & 0xf), 1);
 }
 
 int far is_cell_visited(register int x, register int y)
@@ -148,11 +148,11 @@ int far is_cell_visited(register int x, register int y)
 	y += g_quad_y_offsets[g_map_quadrant];
 	if ((unsigned)x > 0x1f || (unsigned)y > 0x1f)
 		return 0;
-	if (y > 0xf && (idx = find_loaded_map(g_maps[idx].b308)) == 0x1111)
+	if (y > 0xf && (idx = find_loaded_map(g_maps[idx].north)) == 0x1111)
 		return 0;
-	if (x > 0xf && (idx = find_loaded_map(g_maps[idx].b309)) == 0x1111)
+	if (x > 0xf && (idx = find_loaded_map(g_maps[idx].east)) == 0x1111)
 		return 0;
-	return test_bit(g_maps[idx].b320, (y & 0xf) * 16 + (x & 0xf));
+	return test_bit(g_maps[idx].visited, (y & 0xf) * 16 + (x & 0xf));
 }
 
 int far get_cell_walls(register int x, register int y, u16 mask)
@@ -165,12 +165,12 @@ int far get_cell_walls(register int x, register int y, u16 mask)
 	if (x < 0 || y < 0 || x > 0x1f || y > 0x1f)
 		return g_outdoors ? 0 : 0x1111;
 	if (y > 0xf) {
-		idx = find_loaded_map(g_maps[idx].b308);
+		idx = find_loaded_map(g_maps[idx].north);
 		if (idx == 0x1111)
 			return g_outdoors ? 0 : 0x1111;
 	}
 	if (x > 0xf) {
-		idx = find_loaded_map(g_maps[idx].b309);
+		idx = find_loaded_map(g_maps[idx].east);
 		if (idx == 0x1111)
 			return g_outdoors ? 0 : 0x1111;
 	}
@@ -187,12 +187,12 @@ int far get_cell_walls_region(register int x, register int y, u16 mask)
 	if (x < 0 || y < 0 || x > 0x1f || y > 0x1f)
 		return g_outdoors ? 0 : 0x1111;
 	if (y > 0xf) {
-		idx = find_loaded_map(g_maps[idx].b308);
+		idx = find_loaded_map(g_maps[idx].north);
 		if (idx == 0x1111)
 			return g_outdoors ? 0 : 0x1111;
 	}
 	if (x > 0xf) {
-		idx = find_loaded_map(g_maps[idx].b309);
+		idx = find_loaded_map(g_maps[idx].east);
 		if (idx == 0x1111)
 			return g_outdoors ? 0 : 0x1111;
 	}
@@ -221,16 +221,16 @@ int far get_cell_flags(register int x, int y, u16 mask)
 	if (x < 0 || y < 0 || x > 0x1f || y > 0x1f)
 		return g_outdoors ? 0 : 0x1111;
 	if (y > 0xf) {
-		idx = find_loaded_map(g_maps[idx].b308);
+		idx = find_loaded_map(g_maps[idx].north);
 		if (idx == 0x1111)
 			return g_outdoors ? 0 : 0x1111;
 	}
 	if (x > 0xf) {
-		idx = find_loaded_map(g_maps[idx].b309);
+		idx = find_loaded_map(g_maps[idx].east);
 		if (idx == 0x1111)
 			return g_outdoors ? 0 : 0x1111;
 	}
-	return g_maps[idx].b200[y & 0xf][x & 0xf] & mask;
+	return g_maps[idx].cell_flags[y & 0xf][x & 0xf] & mask;
 }
 
 void far set_cell_wall(register int x, int y, int k, int v)
@@ -239,9 +239,9 @@ void far set_cell_wall(register int x, int y, int k, int v)
 
 	idx = g_map_quadrant;
 	if (y > 0xf)
-		idx = find_loaded_map(g_maps[idx].b308);
+		idx = find_loaded_map(g_maps[idx].north);
 	if (x > 0xf)
-		idx = find_loaded_map(g_maps[idx].b309);
+		idx = find_loaded_map(g_maps[idx].east);
 	g_maps[idx].cell[y & 0xf][x & 0xf] &= g_view_wall_masks[8][k];
 	g_maps[idx].cell[y & 0xf][x & 0xf] |= v << g_view_wall_shifts[k][2];
 }
@@ -266,7 +266,7 @@ void far update_darkness(void)
 		return;
 	if (get_cell_flags(g_party_x, g_party_y, 8) && g_light_count)
 		g_light_count--;
-	if (g_light_count || g_maps[g_map_quadrant].b30d)
+	if (g_light_count || g_maps[g_map_quadrant].lit)
 		g_dim_level = 0;
 	else
 		g_dim_level = 4;
@@ -940,7 +940,7 @@ void far scan_view_walls(void)
 		g_wall_d4r3_rside_t7++;
 		break;
 	}
-	g_party_cell_flag20 = g_maps[0].b200[py][px] & 0x20;
+	g_party_cell_flag20 = g_maps[0].cell_flags[py][px] & 0x20;
 	scan_view_objects();
 	if (g_monster_scan_delay && (g_game_mode == 1 || g_game_mode == 2) && !g_mon_missile_active && !g_light_changed) {
 		if (!(g_monster_scan_delay -= 1))
@@ -955,7 +955,7 @@ void far add_view_sprites_near(register int *o)
 	register int i;
 
 	*++o = -1;
-	*(long *)++o = g_c4ae;
+	*(long *)++o = g_wall_gfx_2;
 	o++;
 	if (!(g_wall_d0c && g_wall_d0l1) && !(g_wall_d0c && g_wall_d0c_lside) && !(g_wall_d1c_lside & g_wall_d0l1) && !(g_wall_d1c_lside && g_wall_d0c_lside)) {
 		if (g_wall_d1l1_locked) {

@@ -13,8 +13,9 @@ whole file identical 280032 (relocs in EXEPACK form, minalloc from B)
 MATCH
 ```
 
-Tag [`raw-decompile-1.0`](../../tree/raw-decompile-1.0) marks the first complete match. The sources still use address
-names (`fn_1523_0238`, `g_ec36`). Giving them readable names is the work in progress (see [Readability](#readability)).
+Tag [`raw-decompile-1.0`](../../tree/raw-decompile-1.0) marks the first complete match, still with address names
+(`fn_1523_0238`, `g_ec36`). Tag [`v1.1-reader-friendly`](../../tree/v1.1-reader-friendly) has readable names for all
+functions, globals and struct fields (see [Readability](#readability)), and it still matches.
 
 ## What "byte for byte" means here
 
@@ -182,8 +183,10 @@ Short version (details in `NOTES.md`):
 
 ## Readability
 
-The decompilation is complete but not yet readable. Work in progress: names for all ~420 functions and ~1000
-globals, then struct fields and locals.
+Every function and global has a readable name, and so does every struct field whose meaning is known. Fields still
+named by offset (`f25[0x102 - 0x25]`) cover byte ranges that nothing has decoded yet. The party character record
+(0x12f bytes) is declared in each module that uses it, in that module's own shape. The fields have the same names
+everywhere, and `results/character_record.md` documents the layout with evidence for each field.
 
 - Renames go through **clangd** (`tools/rename.py`), so every C reference (headers, `.inc` data, all translation
   units) changes together. The same rename is applied to the asm modules as a whole-token edit.
@@ -191,6 +194,8 @@ globals, then struct fields and locals.
   navigation only.
 - `results/names.tsv` records *address name → readable name*, so the tools that derive addresses from names
   (`cmpobj.py`, `mkdata.py`, overlay stub ordering in `prelink.py`) keep working.
+- Struct tags with the same name in different headers (`struct chr` in 11 of them) look like one symbol to clangd.
+  For field renames the tags are first made unique per header, then restored.
 - After every batch of renames, `tools/build.sh` must still print `MATCH`. Names don't change the generated code,
   and the build proves it.
 

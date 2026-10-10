@@ -72,7 +72,7 @@ void far break_all_items(struct chr *c)
 {
 	int i;
 	for (i = 0; i < 0x12; i++)
-		if (c->id[i] < 0x48) c->f90[i] |= 0x80;
+		if (c->item_id[i] < 0x48) c->item_flags[i] |= 0x80;
 }
 
 /* 02bd */
@@ -80,7 +80,7 @@ void far break_equipped_weapons(struct chr *c)
 {
 	int i;
 	for (i = 0; i < 0x12; i++)
-		if (c->id[i] < 0x1e && c->eq[i]) c->f90[i] |= 0x80;
+		if (c->item_id[i] < 0x1e && c->item_eq[i]) c->item_flags[i] |= 0x80;
 }
 
 /* 02e7 */
@@ -98,7 +98,7 @@ void far show_guild_message(void)
 {
 	push_buttons();
 	set_anykey_buttons();
-	_fstrncpy(g_text_buf, g_text_table + g_8dfa[g_map_num], 0x12c);
+	_fstrncpy(g_text_buf, g_text_table + g_guild_msg_text_offs[g_map_num], 0x12c);
 	open_text_window(0x5a, 0x2d, 0x82, 0x70, 0, 0x96, 4, 6, g_text_buf);
 	flush_input();
 	get_input();
@@ -160,7 +160,7 @@ char *far get_char_stat_text(struct chr *c, int sel, char *buf)
 		break;
 	case 7: case 8: case 9: case 11: case 12: case 13: case 14: case 18: case 21: case 22:
 		_fstrncpy(tmp, g_text_table + g_text_offsets[sel], 0x1c);
-		sprintf(buf, tmp, c->st[sel]);
+		sprintf(buf, tmp, c->award[sel]);
 		break;
 	}
 	return buf;
@@ -329,7 +329,7 @@ void far queue_ranged_attack(int c, int x, int y)
 			for (i = 0; i < 8; i++)
 				if (!g_missile_pos[i]) {
 					g_missile_pos[i] = g_ranged_dist_delays[r];
-					g_c516[i] = c;
+					g_missile_attackers[i] = c;
 					return;
 				}
 			return;
@@ -354,12 +354,12 @@ void far restock_shops(void)
 						g_shop_stock_powers_t1[i][j][k] = g_fixed_misc_powers[i][k];
 					}
 				} else {
-					generate_random_item(g_shop_item_levels[i], &g_c34e, 0);
+					generate_random_item(g_shop_item_levels[i], &g_scratch_char, 0);
 					g_shop_stock_ids_t1[i][j][k] = random_range(g_shop_cat_min_ids[j], g_shop_cat_max_ids[j]);
 					g_shop_stock_mats_t1[i][j][k] = g_shop_inv_materials;
 					g_shop_stock_powers_t1[i][j][k] = g_shop_inv_powers;
-					g_e988[i][j][k] = g_shop_inv_elems;
-					g_ea96[i][j][k] = g_shop_inv_attribs;
+					g_shop_stock_elems_t1[i][j][k] = g_shop_inv_elems;
+					g_shop_stock_attribs_t1[i][j][k] = g_shop_inv_attribs;
 					g_shop_stock_flags_t1[i][j][k] = g_shop_inv_flags;
 				}
 			}
@@ -456,14 +456,14 @@ void far play_intro(void)
 	free_and_null(&g_cine_img_1);
 	free_and_null(&g_cine_img_0);
 	g_cine_img_4 = load_graphic("itit4.vga");
-	g_anim_sprites[0].x = g_anim_sprites[0].y = g_anim_sprites[0].f6 = g_anim_sprites[0].frame = FP_OFF(g_anim_sprites[1].img) = FP_SEG(g_anim_sprites[1].img) = 0;
+	g_anim_sprites[0].x = g_anim_sprites[0].y = g_anim_sprites[0].attr = g_anim_sprites[0].frame = FP_OFF(g_anim_sprites[1].img) = FP_SEG(g_anim_sprites[1].img) = 0;
 	g_anim_sprites[0].img = g_cine_img_4;
 	fade_screen(0, 4);
 	play_sfx(0);
 	draw_sprites_2a(g_anim_sprites);
 	fade_screen(1, 4);
 	free_and_null(&g_cine_img_4);
-	g_anim_sprites[0].x = g_anim_sprites[0].y = g_anim_sprites[0].f6 = g_anim_sprites[0].frame = FP_OFF(g_anim_sprites[1].img) = FP_SEG(g_anim_sprites[1].img) = 0;
+	g_anim_sprites[0].x = g_anim_sprites[0].y = g_anim_sprites[0].attr = g_anim_sprites[0].frame = FP_OFF(g_anim_sprites[1].img) = FP_SEG(g_anim_sprites[1].img) = 0;
 	g_cine_img_1 = load_graphic("itit5.vga");
 	g_cine_img_2 = load_graphic("itit6.vga");
 	g_cine_img_3 = load_graphic("itit7.vga");
@@ -721,7 +721,7 @@ void far show_equip_conflict(struct chr *c, int a, int b)
 	if (b < 0)
 		sprintf(buf, "\x03" "c\x0b" "007You have equipped all the %ss you can!", b == -1 ? "ring" : "medal");
 	else
-		sprintf(buf, "\x03" "c\x0b" "007You must remove %sto equip %s\x08 !", g_item_names[c->id[b]], g_item_names[c->id[a]]);
+		sprintf(buf, "\x03" "c\x0b" "007You must remove %sto equip %s\x08 !", g_item_names[c->item_id[b]], g_item_names[c->item_id[a]]);
 	open_text_window(0x32, 0x4c, 0xd8, 0x30, 0, 0x96, 4, 6, buf);
 	flush_input();
 	get_input();
@@ -737,74 +737,74 @@ void far equip_item(struct chr *c, int slot)
 	int n;
 
 	for (i = 0; i < 0x12; i++)
-		if (c->fa3[slot] == c->fa3[i] && c->fb6[slot] == c->fb6[i] && c->fc9[slot] == c->fc9[i] &&
-		    c->id[slot] == c->id[i] && c->fef[slot] == c->fef[i] && i != slot && c->eq[i]) {
+		if (c->item_elem[slot] == c->item_elem[i] && c->item_mat[slot] == c->item_mat[i] && c->item_attr[slot] == c->item_attr[i] &&
+		    c->item_id[slot] == c->item_id[i] && c->item_power[slot] == c->item_power[i] && i != slot && c->item_eq[i]) {
 			show_message("You cannot equip two of the same items!");
 			return;
 		}
-	if (c->id[slot] <= 0x11) {
-		if (!class_can_use_item(c->cls, c->id[slot], 0)) return;
+	if (c->item_id[slot] <= 0x11) {
+		if (!class_can_use_item(c->cls, c->item_id[slot], 0)) return;
 		for (i = 0; i < 0x12; i++)
-			if (c->eq[i] == 13 || c->eq[i] == 1) { show_equip_conflict(c, slot, i); return; }
-		c->eq[slot] = 1;
-	} else if (c->id[slot] <= 0x1d) {
-		if (!class_can_use_item(c->cls, c->id[slot], 0)) return;
+			if (c->item_eq[i] == 13 || c->item_eq[i] == 1) { show_equip_conflict(c, slot, i); return; }
+		c->item_eq[slot] = 1;
+	} else if (c->item_id[slot] <= 0x1d) {
+		if (!class_can_use_item(c->cls, c->item_id[slot], 0)) return;
 		for (i = 0; i < 0x12; i++)
-			if (c->eq[i] == 1 || c->eq[i] == 2 || c->eq[i] == 13) { show_equip_conflict(c, slot, i); return; }
-		c->eq[slot] = 13;
-	} else if (c->id[slot] <= 0x21) {
-		if (!class_can_use_item(c->cls, c->id[slot], 0)) return;
+			if (c->item_eq[i] == 1 || c->item_eq[i] == 2 || c->item_eq[i] == 13) { show_equip_conflict(c, slot, i); return; }
+		c->item_eq[slot] = 13;
+	} else if (c->item_id[slot] <= 0x21) {
+		if (!class_can_use_item(c->cls, c->item_id[slot], 0)) return;
 		for (i = 0; i < 0x12; i++)
-			if (c->eq[i] == 4) { show_equip_conflict(c, slot, i); return; }
-		c->eq[slot] = 4;
-	} else if (c->id[slot] <= 0x29) {
-		if (!class_can_use_item(c->cls, c->id[slot], 0)) return;
+			if (c->item_eq[i] == 4) { show_equip_conflict(c, slot, i); return; }
+		c->item_eq[slot] = 4;
+	} else if (c->item_id[slot] <= 0x29) {
+		if (!class_can_use_item(c->cls, c->item_id[slot], 0)) return;
 		for (i = 0; i < 0x12; i++)
-			if (c->eq[i] == 3) { show_equip_conflict(c, slot, i); return; }
-		c->eq[slot] = 3;
-	} else if (c->id[slot] <= 0x2a) {
-		if (!class_can_use_item(c->cls, c->id[slot], 0)) return;
+			if (c->item_eq[i] == 3) { show_equip_conflict(c, slot, i); return; }
+		c->item_eq[slot] = 3;
+	} else if (c->item_id[slot] <= 0x2a) {
+		if (!class_can_use_item(c->cls, c->item_id[slot], 0)) return;
 		for (i = 0; i < 0x12; i++)
-			if (c->eq[i] == 2 || c->eq[i] == 13) { show_equip_conflict(c, slot, i); return; }
-		c->eq[slot] = 2;
-	} else if (c->id[slot] <= 0x2d) {
+			if (c->item_eq[i] == 2 || c->item_eq[i] == 13) { show_equip_conflict(c, slot, i); return; }
+		c->item_eq[slot] = 2;
+	} else if (c->item_id[slot] <= 0x2d) {
 		for (i = 0; i < 0x12; i++)
-			if (c->eq[i] == 5) { show_equip_conflict(c, slot, i); return; }
-		c->eq[slot] = 5;
-	} else if (c->id[slot] <= 0x2e) {
+			if (c->item_eq[i] == 5) { show_equip_conflict(c, slot, i); return; }
+		c->item_eq[slot] = 5;
+	} else if (c->item_id[slot] <= 0x2e) {
 		for (i = 0; i < 0x12; i++)
-			if (c->eq[i] == 6) { show_equip_conflict(c, slot, i); return; }
-		c->eq[slot] = 6;
-	} else if (c->id[slot] <= 0x2f) {
+			if (c->item_eq[i] == 6) { show_equip_conflict(c, slot, i); return; }
+		c->item_eq[slot] = 6;
+	} else if (c->item_id[slot] <= 0x2f) {
 		for (i = n = 0; i < 0x12; i++)
-			if (c->eq[i] == 8) n++;
+			if (c->item_eq[i] == 8) n++;
 		if (n > 9) { show_equip_conflict(c, slot, -1); return; }
-		c->eq[slot] = 8;
-	} else if (c->id[slot] <= 0x30) {
+		c->item_eq[slot] = 8;
+	} else if (c->item_id[slot] <= 0x30) {
 		for (i = 0; i < 0x12; i++)
-			if (c->eq[i] == 9) { show_equip_conflict(c, slot, i); return; }
-		c->eq[slot] = 9;
-	} else if (c->id[slot] <= 0x33) {
+			if (c->item_eq[i] == 9) { show_equip_conflict(c, slot, i); return; }
+		c->item_eq[slot] = 9;
+	} else if (c->item_id[slot] <= 0x33) {
 		for (i = 0; i < 0x12; i++)
-			if (c->eq[i] == 10) { show_equip_conflict(c, slot, i); return; }
-		c->eq[slot] = 10;
-	} else if (c->id[slot] <= 0x34) {
+			if (c->item_eq[i] == 10) { show_equip_conflict(c, slot, i); return; }
+		c->item_eq[slot] = 10;
+	} else if (c->item_id[slot] <= 0x34) {
 		for (i = 0; i < 0x12; i++)
-			if (c->eq[i] == 12) { show_equip_conflict(c, slot, i); return; }
-		c->eq[slot] = 12;
-	} else if (c->id[slot] <= 0x39) {
+			if (c->item_eq[i] == 12) { show_equip_conflict(c, slot, i); return; }
+		c->item_eq[slot] = 12;
+	} else if (c->item_id[slot] <= 0x39) {
 		for (i = n = 0; i < 0x12; i++)
-			if (c->eq[i] == 7) n++;
+			if (c->item_eq[i] == 7) n++;
 		if (n > 3) { show_equip_conflict(c, slot, -2); return; }
-		c->eq[slot] = 7;
-	} else if (c->id[slot] <= 0x3c) {
+		c->item_eq[slot] = 7;
+	} else if (c->item_id[slot] <= 0x3c) {
 		for (i = 0; i < 0x12; i++)
-			if (c->eq[i] == 11) { show_equip_conflict(c, slot, i); return; }
-		c->eq[slot] = 11;
+			if (c->item_eq[i] == 11) { show_equip_conflict(c, slot, i); return; }
+		c->item_eq[slot] = 11;
 	} else {
 		for (i = 0; i < 0x12; i++)
-			if (c->eq[i] == 2 || c->eq[i] == 13) { show_equip_conflict(c, slot, i); return; }
-		c->eq[slot] = 2;
+			if (c->item_eq[i] == 2 || c->item_eq[i] == 13) { show_equip_conflict(c, slot, i); return; }
+		c->item_eq[slot] = 2;
 	}
 	return;
 }

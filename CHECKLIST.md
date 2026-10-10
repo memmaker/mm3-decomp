@@ -24,7 +24,7 @@ Tick items as they are done. Keep lessons in NOTES.md.
 - [x] Ghidra project ghidra/proj/MM3 imported with ghidra/scripts/FbovLoader.java (13 overlays, 297 entries mapped, stubs patched to far jmps)
 - [x] Map segments → source files: results/modules.tsv (9 root modules + 13 overlays = 22 game modules; 5 of them asm). Names are provisional until functions are read
 - [x] Separate RTL functions from game code: RTL = CODE_0 + CODE_10 (OVRMAN) + FMEM* tail; game code = CODE_1..CODE_34 minus those + 13 overlays
-- [ ] Name game functions, recover structs (use OpenXeen / xeen.fandom CC format as reference for data layouts)
+- [x] Name game functions, globals and struct fields (v1.1-reader-friendly; character record: results/character_record.md)
 - [x] Identify ASM modules: CODE_5 itemnames, CODE_6 stattext, CODE_7 sys (CC I/O, video, input), CODE_9 snddrv, plus inline asm in main (CODE_1)
 
 ## Phase 3 — rewrite, module by module

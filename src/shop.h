@@ -7,26 +7,26 @@
 #include <mem.h>
 typedef unsigned char u8;
 
-struct spr { int flag; char far *img; int x, y, f6, frame; };
-struct hot { int flag; char far *img; int f6, y, mirror, frame, fe, f10, f12; };
+struct spr { int flag; char far *img; int x, y, attr, frame; };
+struct spr1 { int flag; char far *img; int x, y, mirror, frame, end, end_img_off, end_img_seg; };
 struct chr {
 	char name[0x10];
-	u8 f10, f11, f12, cls;		/* 10..13 */
-	u8 f14[0x22 - 0x14];
-	u8 f22, f23;			/* 22 */
+	u8 sex, race, align, cls;		/* 10..13 */
+	u8 stats[0x22 - 0x14];
+	u8 ac_tmp, level;			/* 22 */
 	u8 f24[3];
 	u8 skill[0x12];			/* 27 */
 	u8 award[0x1a];			/* 39 */
-	u8 f53[0x7a - 0x53];
-	u8 f7a, f7b[2];
-	u8 cat[0x13], flg[0x13], fa3[0x13], fb6[0x13], fc9[0x13], id[0x13], fef[0x13];	/* 7d..101 */
-	u8 res[0x11];			/* 102..112 */
+	u8 spells[0x7a - 0x53];
+	u8 caster, f7b[2];
+	u8 item_eq[0x13], item_flags[0x13], item_elem[0x13], item_mat[0x13], item_attr[0x13], item_id[0x13], item_power[0x13];	/* 7d..101 */
+	u8 bless_res[0x11];			/* 102..112 */
 	u8 f113[0x125 - 0x113];
-	int f125, f127;
+	int hp, sp;
 	u8 f129[0x12f - 0x129];
 };
 
-extern struct chr g_party[], g_c34e, *g_cur_char;
+extern struct chr g_party[], g_scratch_char, *g_cur_char;
 extern struct spr g_charscr_sprites[], g_itemscr_buttons[], g_charscr_sprites2[];
 extern char g_draw_list[][100], g_text_buf[], g_tmp_text[];
 extern char far *g_cur_icons;

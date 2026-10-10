@@ -10,4 +10,4 @@ u8 g_target_mon = 255;
 u8 g_combat_cursor_sprites[2] = {255, 255};
 unsigned char g_combat_menu_img[6] = {0, 0, 0, 0, 0, 0};
 int g_combat_cursor_y = 18;
-unsigned char g_4b87[10] = {0, 0, 18, 0, 255, 255, 0, 0, 0, 0};
+unsigned char g_unused_4b87[10] = {0, 0, 18, 0, 255, 255, 0, 0, 0, 0};

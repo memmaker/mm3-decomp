@@ -17,7 +17,7 @@ struct spr g_anim_sprites[16] = {
 	{-1, 0, 0, 0, 0, 0},
 	{-1, 0, 0, 0, 0, 0}
 };
-int g_20fc[3] = {-1, 0, 0};
+int g_unused_20fc[3] = {-1, 0, 0};
 int g_walk_frames[10] = {0, 1, 2, 0, 1, 2, 1, 0, 2, 1};
 int g_walk_img_swap[10] = {0, 0, 0, 1, 0, 0, 0, 0, 1, 0};
 unsigned long g_score_digit_weights[10] = {1000000000L, 100000000L, 10000000L, 1000000L, 100000L, 10000L, 1000L, 100L, 10L, 1L};

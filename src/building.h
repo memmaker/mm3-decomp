@@ -6,27 +6,27 @@
 #include <mem.h>
 typedef unsigned char u8;
 
-struct spr { int flag; char far *img; int x, y, f6, frame; };
+struct spr { int flag; char far *img; int x, y, attr, frame; };
 struct chr {
 	char name[0x15];
-	u8 f15, f16, f17, f18, f19, f1a, f1b, f1c, f1d, f1e, f1f, f20, f21, f22, lvl, f24;
+	u8 might_tmp, intel, intel_tmp, pers, pers_tmp, endur, endur_tmp, speed, speed_tmp, acc, acc_tmp, luck, luck_tmp, ac_tmp, level, level_tmp;
 	u8 f25[0x13];
 	u8 guild[7];		/* 0x38 */
-	u8 f3f;
+	u8 award6;
 	u8 f40[0x50];
-	u8 item[0x12];		/* 0x90 */
+	u8 item_flags[0x12];		/* 0x90 */
 	u8 fa2[0x60];
-	u8 f102, f103, f104, f105;
+	u8 bless, shield, holy, hero;
 	u8 f106[2];
-	u8 f108, f109, f10a, f10b, f10c, f10d, f10e, f10f, f110, f111, f112;
+	u8 fire_res_tmp, cold_res, cold_res_tmp, elec_res, elec_res_tmp, poison_res, poison_res_tmp, energy_res, energy_res_tmp, magic_res, magic_res_tmp;
 	u8 cond[0x10];		/* 0x113 */
-	int f123;
+	int inn;
 	unsigned hp;		/* 0x125 */
-	int f127;
-	u8 f129[2];
+	int sp;
+	u8 birth_year[2];
 	unsigned long exp;	/* 0x12b */
 };
-struct map { u8 b[0x340]; };
+struct map { u8 raw[0x340]; };
 
 /* own data (DGROUP 42e6-4b24) */
 extern char g_anim_training[], g_anim_guild[], g_anim_inn[], g_anim_tavern[], g_anim_temple[], g_anim_bank[];
@@ -44,7 +44,7 @@ extern char far *g_cur_icons, far *g_global_icons, far *g_map_text, far *g_text_
 extern char g_bldg_draw_str[], g_text_buf2[], g_text_buf[], g_tmp_text[];
 extern char *g_bldg_anim_seq, *g_bldg_out_names[], *g_bank_op_names[], *g_fmt_tavern_options;
 extern int g_bldg_anim_len, g_bldg_type, g_bldg_anim_pos, g_mouse_x, g_mouse_y, g_user_break, g_bank_btn0_y, g_bank_btn1_y, g_bank_btn2_y;
-extern int g_maze_text_offs, g_a6b8, g_a6ba, g_a6bc, g_a6be, g_a6c0, g_a6c2, g_8ee0[], g_text_offsets[];
+extern int g_maze_text_offs, g_smithy_text_offs, g_temple_text_offs, g_tavern_text_offs, g_inn_text_offs, g_guild_text_offs, g_bank_text_offs, g_tavern_food_text_offs[], g_text_offsets[];
 extern char g_music_load_pending, g_mouse_buttons, g_highlighted_char, g_map_quadrant;
 extern u8 g_game_mode, g_portrait_click_on, g_view_flip, g_map_num, g_party_x, g_party_y, g_party_dir, g_inn_map, g_party_count, g_is_night, g_cur_town, g_day, g_inn_positions[][2];
 extern unsigned g_minutes, g_food;
@@ -72,7 +72,7 @@ void far idle_frames(int);
 void far save_loaded_mazes(void);
 void far free_and_null(void *);
 void far advance_clock(int);
-void far fn_1523_0238(u8 *, unsigned, int);
+void far set_bit(u8 *, unsigned, int);
 void far draw_wizard_eye(int);
 unsigned far get_char_level(void far *);
 void far draw_party_portraits(void);

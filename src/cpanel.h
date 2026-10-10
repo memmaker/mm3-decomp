@@ -12,23 +12,23 @@ typedef unsigned char u8;
 struct chr {
 	char name[0x13];
 	u8 cls;			/* 13 */
-	u8 f14, f15, f16, f17, f18, f19, f1a, f1b, f1c, f1d, f1e, f1f, f20, f21, f22, lvl, f24;
+	u8 might, might_tmp, intel, intel_tmp, pers, pers_tmp, endur, endur_tmp, speed, speed_tmp, acc, acc_tmp, luck, luck_tmp, ac_tmp, level, level_tmp;
 	u8 f25[0x102 - 0x25];
-	u8 f102, f103, f104, f105, f106, f107, f108, f109, f10a, f10b, f10c, f10d, f10e, f10f, f110, f111, f112;
+	u8 bless, shield, holy, hero, donated, fire_res, fire_res_tmp, cold_res, cold_res_tmp, elec_res, elec_res_tmp, poison_res, poison_res_tmp, energy_res, energy_res_tmp, magic_res, magic_res_tmp;
 	u8 f113[0x11b - 0x113];
-	u8 f11b, f11c, f11d, f11e, f11f, f120, f121, f122;
-	int f123, f125, f127, f129;
+	u8 asleep, depressed, confused, paralyzed, unconscious, dead, stone, eradicated;
+	int inn, hp, sp, birth_year;
 	unsigned long exp;	/* 12b */
 };
 struct maze {
-	int map[16][16];
-	u8 f200[0xff];
-	u8 obj[9];		/* 2ff */
+	int cell[16][16];
+	u8 cell_flags[0xff];
+	u8 surface_m1[9];		/* 2ff */
 	u8 edge[4];		/* 308 */
-	u8 save, f30d, rest, f30f, f310, f311, f312, f313;
+	u8 save, lit, rest, f30f, tavern_tip, f311, lock_level, start_pos;
 	u8 f314[0x340 - 0x314];
 };
-struct sl { int mark; char far *img; int x, y, f4, frame, end, f10, f12; };
+struct spr1 { int flag; char far *img; int x, y, attr, frame, end, end_img_off, end_img_seg; };
 
 extern struct chr g_party[], far *g_roster;
 extern struct maze g_maps[];
@@ -38,8 +38,8 @@ extern char *g_msg_cant_act, *g_resource_names[], *g_purse_names[], *g_map_names
 	*g_tileset_files[], *g_outdoor_obj_files[], *g_str_sfx_state, *g_str_music_state;
 extern char *g_str_on_off[];
 extern int g_class_base_exp[], g_draw_list[], g_cpanel_sprites[], g_main_sprites[], g_confirm_sprites[], g_border_sprites[];
-extern char far *g_cur_icons, far *g_global_icons, far *g_cpanel_frame_img, far *g_cpanel_buttons_img, far *g_confirm_sprites_img, far *g_cpanel_sprites_img, far *g_d670, far *g_tileset_gfx,
-	far *g_music_buf, far *g_outdoor_obj_gfx[], far *g_mon_d1l1[], far *g_sky_gfx, far *g_water_gfx, far *g_party_faces[], far *g_roster_faces[], far *g_c52e,
+extern char far *g_cur_icons, far *g_global_icons, far *g_cpanel_frame_img, far *g_cpanel_buttons_img, far *g_confirm_sprites_img, far *g_cpanel_sprites_img, far *g_draw_list_img, far *g_tileset_gfx,
+	far *g_music_buf, far *g_outdoor_obj_gfx[], far *g_mon_d1l1[], far *g_sky_gfx, far *g_water_gfx, far *g_party_faces[], far *g_roster_faces[], far *g_dse_face_gfx,
 	far *g_obj_sprites[], far *g_mon_sprites[], far *g_maze_script, far *g_map_text;
 extern u8 g_party_count, g_party_count_saved, g_party_ids[], g_inn_map, g_party_dir, g_party_x, g_party_y, g_map_num, g_msg_delay, g_game_mode, g_portrait_click_on, g_cur_town, g_light_changed,
 	g_debug_overlay, g_save_count, g_save_slot, g_day, g_is_night, g_start_map_idx, g_quadrant_maps[], g_view_caption[], g_rev_coord16[], g_map_gfx_set_by_num[], g_map_gfx_sets[], g_wall_gfx_ids[],

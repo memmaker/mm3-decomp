@@ -156,18 +156,18 @@ int far get_input(void)
 		if (g_debug_overlay)
 			print_window_text(format_clock_status());
 		if (g_game_mode == 7 && g_obj_d0c) {
-			switch (g_objects_1based[g_obj_d0c].w2) {
+			switch (g_objects_1based[g_obj_d0c].type) {
 			case 4:
 			case 0xc:
 			case 0x12:
 			case 0x14:
 			case 0x17:
 			case 0x26:
-				g_objects_1based[g_obj_d0c].w0 = ++g_abac % 4 + 1;
+				g_objects_1based[g_obj_d0c].frame = ++g_obj_anim_tick % 4 + 1;
 				break;
 			case 0x21:
 			case 0x28:
-				g_objects_1based[g_obj_d0c].w0 = 1;
+				g_objects_1based[g_obj_d0c].frame = 1;
 				break;
 			}
 		}
@@ -716,20 +716,20 @@ void far find_save_files(char *pat)
 void far load_monster_tables(void)
 {
 	g_mon_max_hp = load_cc_file("MonHP.dat");
-	g_f07e = load_cc_file("MonAC.dat");
+	g_mon_ac = load_cc_file("MonAC.dat");
 	g_mon_speed = load_cc_file("MonSpd.dat");
-	g_f06a = load_cc_file("MonDmgN.dat");
-	g_f076 = load_cc_file("MonDmgS.dat");
-	g_f056 = load_cc_file("MonNumA.dat");
-	g_f06e = load_cc_file("MonExp.dat");
+	g_mon_dmg_dice = load_cc_file("MonDmgN.dat");
+	g_mon_dmg_sides = load_cc_file("MonDmgS.dat");
+	g_mon_num_attacks = load_cc_file("MonNumA.dat");
+	g_mon_exp = load_cc_file("MonExp.dat");
 	g_mon_dmg_type = load_cc_file("MonDmgT.dat");
 	g_mon_attack_pref = load_cc_file("MonAttP.dat");
 	g_mon_special = load_cc_file("MonSpec.dat");
-	g_f03a = load_cc_file("MonRang.dat");
+	g_mon_ranged = load_cc_file("MonRang.dat");
 	g_mon_hit_bonus = load_cc_file("MonHitB.dat");
 	g_mon_treasure = load_cc_file("MonTrea.dat");
-	g_f032 = load_cc_file("MonGold.dat");
-	g_f036 = load_cc_file("MonGems.dat");
+	g_mon_gold = load_cc_file("MonGold.dat");
+	g_mon_gems = load_cc_file("MonGems.dat");
 	g_mon_res_magic = load_cc_file("MonMagi.dat");
 	g_mon_res_fire = load_cc_file("MonFire.dat");
 	g_mon_res_elec = load_cc_file("MonElec.dat");

@@ -20,7 +20,7 @@ extern u8 g_spell_anim_active, g_mon_missile_active, g_hover_phase_1, g_hover_ph
 extern u8 g_missile_steps[], g_missile_pos[], g_mon_frame_counts[], g_obj_frame_counts[], g_step_sound_toggle[], g_class_hp_per_level[], g_sidewall_d1_t7_frames[];
 extern int g_mon_status[], g_mon_type[], g_missile_layers[], g_draw_list[];
 extern u16 g_mon_frames[];
-extern long g_sky_gfx, g_c4b6, g_c4b2, g_pow_icon;
+extern long g_sky_gfx, g_wall_gfx_4, g_wall_gfx_3, g_pow_icon;
 extern char g_view_caption[], g_text_buf[], g_border_sprites[];
 
 void far draw_maze_view(void);

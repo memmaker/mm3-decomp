@@ -6,27 +6,27 @@
 #include <mem.h>
 typedef unsigned char u8;
 
-struct spr { int flag; char far *img; int x, y, f6, frame; };
-struct pick { int flag; char far *img; int x, y, f6, frame, end, p1, p2; };     /* one-entry draw list */
+struct spr { int flag; char far *img; int x, y, attr, frame; };
+struct spr1 { int flag; char far *img; int x, y, attr, frame, end, end_img_off, end_img_seg; };     /* one-entry draw list */
 struct chr {
 	char name[0x10];
 	u8 sex, race, align, cls;            /* 10..13 */
-	u8 st[7][2];                         /* 14 */
-	u8 f22, f23, f24, f25, f26;
+	u8 stats[7][2];                         /* 14 */
+	u8 ac_tmp, level, level_tmp, birth_day, age_mod;
 	u8 skill[0x2c];                      /* 27 */
-	u8 sp[0x27];                         /* 53: spells known */
-	u8 f7a, f7b, f7c;
+	u8 spells[0x27];                         /* 53: spells known */
+	u8 caster, ready_spell, quickfight;
 	u8 f7d[0x8a];
 	u8 res[6][2];                        /* 107 */
-	u8 f113[0x10];
-	int f123, f125, f127, f129;
-	u8 f12b[4];
+	u8 cond[0x10];
+	int inn, hp, sp, birth_year;
+	u8 exp[4];
 };
 
 /* own data */
 extern u8 g_quest_flag_pairs[2][5], g_quest_order[], g_spells_per_level[3][0x11], g_class_spells[3][0x24], g_guild_max_spell_lvl[], g_die_widths[], g_die_heights[], g_dice_sprites[];
 extern char far *g_dice_sprites_img;
-extern int g_3cbb[], g_dice_pos[];
+extern int g_unused_3cbb[], g_dice_pos[];
 extern u8 g_class_start_skill[], g_race_start_skill[], g_class_start_spell[];
 
 extern struct chr g_party[], far *g_roster;

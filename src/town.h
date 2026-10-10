@@ -5,16 +5,16 @@
 #include <bios.h>
 typedef unsigned char u8;
 
-struct mon { u8 b0[0x23]; u8 lvl; u8 b24[0x4e - 0x24]; u8 b4e; u8 b4f[0x12b - 0x4f]; unsigned long gold; };
-struct mobj { int y, x, w4; u8 *p6; int id, w10; };
-struct dspr { int flag; char far *img; int w6, y, wa, wc, we, x, w12, w14, w16, w18, w1a; };
-extern struct mon g_party[];
+struct chr { u8 b0[0x23]; u8 level; u8 b24[0x4e - 0x24]; u8 arena_wins; u8 b4f[0x12b - 0x4f]; unsigned long exp; };
+struct mobj { int y, x, sprite; u8 *frame; int id, attr; };
+struct dspr { int flag; char far *img; int bot_x, bot_y, bot_attr, bot_frame, top_x, top_y, top_attr, top_frame, end, end_img_off, end_img_seg; };
+extern struct chr g_party[];
 extern struct mobj g_mon_hit_fx_d1c_2[];
 extern struct dspr g_death_spr;
 
 extern u8 g_party_ids[], g_game_mode, g_party_count, g_cur_town, *g_cur_char, g_mon_count, g_party_dir, g_party_x, g_party_y, g_map_num, g_obj_d0c, g_last_move_dir,
 	g_outdoors, g_party_defeated, g_game_flags[], g_mon_frame_counts[], g_facing_obj_ids[], g_quadrant_maps[], g_force_wave1_mons[], g_force_wave2_mons[], g_border_sprites[], g_bldg_face_sprites[],
-	g_c873, g_view_dirty, g_monster_scan_delay, g_view_bg_flip, g_view_flip, g_step_sound_toggle, g_map_surfaces_m1[][0x340], g_maps[][0x340];
+	g_maps_0_base_map, g_view_dirty, g_monster_scan_delay, g_view_bg_flip, g_view_flip, g_step_sound_toggle, g_map_surfaces_m1[][0x340], g_maps[][0x340];
 extern char g_walk_on_water, g_maze_gfx_index, g_snd_dev_0, g_text_buf2[], g_tmp_text[], g_text_buf[], g_force_zone1_entered, g_force_zone2_entered, g_highlighted_char, g_map_quadrant, g_music_enabled, g_view_caption[], g_dir_opposite[], g_view_dx[][46], g_view_dy[][46];
 extern char *g_mon_file_names[];
 extern unsigned long g_party_gold, g_bank_gold, g_bank_gems;
@@ -24,8 +24,8 @@ extern int far *g_mon_max_hp;
 extern long g_mouse_cursor;
 extern char far *g_party_faces[], far *g_text_table, far *g_map_text, far *g_cur_icons, far *g_bldg_face_imgs[], far *g_mon_sprites[],
 	far *g_global_icons, far *g_gargoyle_gfx, far *g_grabber_gfx, far *g_bat_gfx, far *g_prot_gems_gfx, far *g_hpbars_icons, far *g_charpow_sprites, far *g_restore_icons,
-	far *g_protect_icons, far *g_maze_script, far *g_f07e, far *g_mon_speed, far *g_f06a, far *g_f076, far *g_f056, far *g_f06e,
-	far *g_mon_dmg_type, far *g_mon_attack_pref, far *g_mon_special, far *g_f03a, far *g_mon_hit_bonus, far *g_mon_treasure, far *g_f032, far *g_f036,
+	far *g_protect_icons, far *g_maze_script, far *g_mon_ac, far *g_mon_speed, far *g_mon_dmg_dice, far *g_mon_dmg_sides, far *g_mon_num_attacks, far *g_mon_exp,
+	far *g_mon_dmg_type, far *g_mon_attack_pref, far *g_mon_special, far *g_mon_ranged, far *g_mon_hit_bonus, far *g_mon_treasure, far *g_mon_gold, far *g_mon_gems,
 	far *g_mon_res_magic, far *g_mon_res_fire, far *g_mon_res_elec, far *g_mon_res_cold, far *g_mon_res_acid, far *g_mon_res_energy, far *g_mon_res_phys;
 
 void far push_buttons(void);
@@ -62,7 +62,7 @@ void far building_wait_input(void);
 char far *far load_graphic(char far *);
 void far free_maze_gfx(void);
 void far free_maze_sprites(void);
-void far fn_1523_0238(u8 *, int, int);
+void far set_bit(u8 *, int, int);
 void far clear_party_attack_flags(void);
 void far load_faces(int);
 int far run_event_script(void);

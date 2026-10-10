@@ -43,7 +43,7 @@ void far index_event_script(void)
 	int k, max;
 	register int i, last;
 
-	g_event_count = g_d254 = i = 0;
+	g_event_count = g_event_aux_count = i = 0;
 	memset(g_events, 0x80, 0x13ba);
 	do {
 		g_events[g_event_count].x = g_maze_script[i + 1];
@@ -58,7 +58,7 @@ void far index_event_script(void)
 	if (g_map_text) {
 		k = 1;
 		i = max = last = 0;
-		for (; i < g_abbc; i++)
+		for (; i < g_map_text_size; i++)
 			if (!g_map_text[i]) {
 				g_maze_text_offs[k++] = i + 1;
 				last = i - last;
@@ -66,7 +66,7 @@ void far index_event_script(void)
 					max = last;
 				last = i;
 			}
-		g_a75c = k - 1;
+		g_maze_text_count = k - 1;
 	}
 	check_event_count();
 }
@@ -174,7 +174,7 @@ again:
 		}
 		for (i = 0; i < 0x24; i++)
 			if (g_class_spells[j][i] == spell) {
-				g_party[who].spl[i] = 1;
+				g_party[who].spells[i] = 1;
 				break;
 			}
 		sprintf(g_text_buf, "\x03""c\x0b""012%s learns a \x0c""12%s\x0c""d spell.", &g_party[who], g_spell_names[spell]);
@@ -244,35 +244,35 @@ int far event_take_give(int m1, unsigned long v1, int m2, unsigned long v2, int 
 		damage_party(v1, g_event_dmg_type, idx);
 		break;
 	case 9:
-		if (p->f7a) {
-			p->f127 -= v1;
-			if (p->f127 < 1)
-				p->f127 = 0;
+		if (p->caster) {
+			p->sp -= v1;
+			if (p->sp < 1)
+				p->sp = 0;
 		}
 		break;
 	case 10:
-		p->f22 -= v1;
+		p->ac_tmp -= v1;
 		break;
 	case 11:
-		p->f24 -= v1;
+		p->level_tmp -= v1;
 		break;
 	case 12:
-		p->f26 -= v1;
+		p->age_mod -= v1;
 		break;
 	case 13:
-		p->f27[v1] = 0;
+		p->skill[v1] = 0;
 		break;
 	case 15:
-		p->f39[v1] = 0;
+		p->award[v1] = 0;
 		break;
 	case 16:
-		p->f12b -= v1;
+		p->exp -= v1;
 		break;
 	case 17:
 		g_poison_resist -= v1;
 		break;
 	case 18:
-		p->f113[v1] = 0;
+		p->cond[v1] = 0;
 		break;
 	case 19:
 		switch (p->cls) {
@@ -288,16 +288,16 @@ int far event_take_give(int m1, unsigned long v1, int m2, unsigned long v2, int 
 		}
 		for (j = 0; j < 0x24; j++)
 			if (g_class_spells[g_mouse_x][j] == v1) {
-				p->spl[j] = 0;
+				p->spells[j] = 0;
 				break;
 			}
 		break;
 	case 20:
-		fn_1523_0238(g_game_flags, v1, 0);
+		set_bit(g_game_flags, v1, 0);
 		break;
 	case 21:
 		for (j = 0; j < 0x12; j++)
-			if (p->fdc[j] == v1) {
+			if (p->item_id[j] == v1) {
 				clear_item_slot(p, j);
 				compact_backpack(p);
 				goto give;
@@ -317,33 +317,33 @@ int far event_take_give(int m1, unsigned long v1, int m2, unsigned long v2, int 
 		if (!pay_cost(1, v1, 0))
 			return 1;
 		break;
-	case 37: p->f15 -= v1; break;
-	case 38: p->f17 -= v1; break;
-	case 39: p->f19 -= v1; break;
-	case 40: p->f1b -= v1; break;
-	case 41: p->f1d -= v1; break;
-	case 42: p->f1f -= v1; break;
-	case 43: p->f21 -= v1; break;
-	case 45: p->f14 -= v1; break;
-	case 46: p->f16 -= v1; break;
-	case 47: p->f18 -= v1; break;
-	case 48: p->f1a -= v1; break;
-	case 49: p->f1c -= v1; break;
-	case 50: p->f1e -= v1; break;
-	case 51: p->f20 -= v1; break;
-	case 52: p->f107 -= v1; break;
-	case 53: p->f10b -= v1; break;
-	case 54: p->f109 -= v1; break;
-	case 55: p->f10d -= v1; break;
-	case 56: p->f10f -= v1; break;
-	case 57: p->f111 -= v1; break;
-	case 58: p->f108 -= v1; break;
-	case 59: p->f10c -= v1; break;
-	case 60: p->f10a -= v1; break;
-	case 61: p->f10e -= v1; break;
-	case 62: p->f110 -= v1; break;
-	case 63: p->f112 -= v1; break;
-	case 64: p->f23 -= v1; break;
+	case 37: p->might_tmp -= v1; break;
+	case 38: p->intel_tmp -= v1; break;
+	case 39: p->pers_tmp -= v1; break;
+	case 40: p->endur_tmp -= v1; break;
+	case 41: p->speed_tmp -= v1; break;
+	case 42: p->acc_tmp -= v1; break;
+	case 43: p->luck_tmp -= v1; break;
+	case 45: p->might -= v1; break;
+	case 46: p->intel -= v1; break;
+	case 47: p->pers -= v1; break;
+	case 48: p->endur -= v1; break;
+	case 49: p->speed -= v1; break;
+	case 50: p->acc -= v1; break;
+	case 51: p->luck -= v1; break;
+	case 52: p->fire_res -= v1; break;
+	case 53: p->elec_res -= v1; break;
+	case 54: p->cold_res -= v1; break;
+	case 55: p->poison_res -= v1; break;
+	case 56: p->energy_res -= v1; break;
+	case 57: p->magic_res -= v1; break;
+	case 58: p->fire_res_tmp -= v1; break;
+	case 59: p->elec_res_tmp -= v1; break;
+	case 60: p->cold_res_tmp -= v1; break;
+	case 61: p->poison_res_tmp -= v1; break;
+	case 62: p->energy_res_tmp -= v1; break;
+	case 63: p->magic_res_tmp -= v1; break;
+	case 64: p->level -= v1; break;
 	case 65:
 		if (!pay_cost(2, v1, 0))
 			return 1;
@@ -365,35 +365,35 @@ int far event_take_give(int m1, unsigned long v1, int m2, unsigned long v2, int 
 	case 76:
 		rewind_clock(v1 * 1440);
 		break;
-	case 77: p->f22 -= v1; break;
+	case 77: p->ac_tmp -= v1; break;
 	case 79: g_wizard_eye = 0; break;
 	case 85: g_year -= v1; break;
 	case 94: g_walk_on_water = 0; break;
 	}
 give:
 	switch (m2) {
-	case 3: p->f10 = v2; break;
-	case 4: p->f11 = v2; break;
+	case 3: p->sex = v2; break;
+	case 4: p->race = v2; break;
 	case 5: p->cls = v2; break;
-	case 6: p->f12 = v2; break;
-	case 8: p->f125 += v2; break;
-	case 9: p->f127 += v2; break;
-	case 10: p->f22 += v2; break;
-	case 11: p->f24 += v2; break;
-	case 12: p->f26 += v2; break;
-	case 13: p->f27[v2]++; break;
-	case 15: p->f39[v2]++; break;
-	case 16: p->f12b += v2; break;
+	case 6: p->align = v2; break;
+	case 8: p->hp += v2; break;
+	case 9: p->sp += v2; break;
+	case 10: p->ac_tmp += v2; break;
+	case 11: p->level_tmp += v2; break;
+	case 12: p->age_mod += v2; break;
+	case 13: p->skill[v2]++; break;
+	case 15: p->award[v2]++; break;
+	case 16: p->exp += v2; break;
 	case 17: g_poison_resist += v2; break;
 	case 18:
 		if (v2 == 16)
-			memset(p->f113, 0, 16);
+			memset(p->cond, 0, 16);
 		else if (v2 == 6)
-			p->f113[v2] = 1;
+			p->cond[v2] = 1;
 		else
-			p->f113[v2]++;
-		if (v2 >= 13 && v2 <= 15 && p->f125 > 0)
-			p->f125 = 0;
+			p->cond[v2]++;
+		if (v2 >= 13 && v2 <= 15 && p->hp > 0)
+			p->hp = 0;
 		break;
 	case 19:
 		switch (p->cls) {
@@ -409,17 +409,17 @@ give:
 		}
 		for (j = 0; j < 0x24; j++)
 			if (g_class_spells[g_mouse_x][j] == v2) {
-				p->spl[j] = 1;
+				p->spells[j] = 1;
 				break;
 			}
 		break;
 	case 20:
-		fn_1523_0238(g_game_flags, v2, 1);
+		set_bit(g_game_flags, v2, 1);
 		break;
 	case 21:
 		for (j = idx; j < g_party_count; j++)
-			if (!p->fed) {
-				p->fed = v2;
+			if (!p->item_id_last) {
+				p->item_id_last = v2;
 				compact_backpack(p);
 				goto ok;
 			}
@@ -432,37 +432,37 @@ give:
 		break;
 	case 34: g_party_gold += v2; break;
 	case 35: g_party_gems += v2; break;
-	case 37: if (p->f15 + v2 > 0xff) p->f15 = 0xff; else p->f15 += v2; break;
-	case 38: if (p->f17 + v2 > 0xff) p->f17 = 0xff; else p->f17 += v2; break;
-	case 39: if (p->f19 + v2 > 0xff) p->f19 = 0xff; else p->f19 += v2; break;
-	case 40: if (p->f1b + v2 > 0xff) p->f1b = 0xff; else p->f1b += v2; break;
-	case 41: if (p->f1d + v2 > 0xff) p->f1d = 0xff; else p->f1d += v2; break;
-	case 42: if (p->f1f + v2 > 0xff) p->f1f = 0xff; else p->f1f += v2; break;
-	case 43: if (p->f21 + v2 > 0xff) p->f21 = 0xff; else p->f21 += v2; break;
-	case 45: if (p->f14 + v2 > 0xff) p->f14 = 0xff; else p->f14 += v2; break;
-	case 46: if (p->f16 + v2 > 0xff) p->f16 = 0xff; else p->f16 += v2; break;
-	case 47: if (p->f18 + v2 > 0xff) p->f18 = 0xff; else p->f18 += v2; break;
-	case 48: if (p->f1a + v2 > 0xff) p->f1a = 0xff; else p->f1a += v2; break;
-	case 49: if (p->f1c + v2 > 0xff) p->f1c = 0xff; else p->f1c += v2; break;
-	case 50: if (p->f1e + v2 > 0xff) p->f1e = 0xff; else p->f1e += v2; break;
-	case 51: if (p->f20 + v2 > 0xff) p->f20 = 0xff; else p->f20 += v2; break;
-	case 52: p->f107 += v2; break;
-	case 53: p->f10b += v2; break;
-	case 54: p->f109 += v2; break;
-	case 55: p->f10d += v2; break;
-	case 56: p->f10f += v2; break;
-	case 57: p->f111 += v2; break;
-	case 58: p->f108 += v2; break;
-	case 59: p->f10c += v2; break;
-	case 60: p->f10a += v2; break;
-	case 61: p->f10e += v2; break;
-	case 62: p->f110 += v2; break;
-	case 63: p->f112 += v2; break;
-	case 64: p->f23 += v2; break;
+	case 37: if (p->might_tmp + v2 > 0xff) p->might_tmp = 0xff; else p->might_tmp += v2; break;
+	case 38: if (p->intel_tmp + v2 > 0xff) p->intel_tmp = 0xff; else p->intel_tmp += v2; break;
+	case 39: if (p->pers_tmp + v2 > 0xff) p->pers_tmp = 0xff; else p->pers_tmp += v2; break;
+	case 40: if (p->endur_tmp + v2 > 0xff) p->endur_tmp = 0xff; else p->endur_tmp += v2; break;
+	case 41: if (p->speed_tmp + v2 > 0xff) p->speed_tmp = 0xff; else p->speed_tmp += v2; break;
+	case 42: if (p->acc_tmp + v2 > 0xff) p->acc_tmp = 0xff; else p->acc_tmp += v2; break;
+	case 43: if (p->luck_tmp + v2 > 0xff) p->luck_tmp = 0xff; else p->luck_tmp += v2; break;
+	case 45: if (p->might + v2 > 0xff) p->might = 0xff; else p->might += v2; break;
+	case 46: if (p->intel + v2 > 0xff) p->intel = 0xff; else p->intel += v2; break;
+	case 47: if (p->pers + v2 > 0xff) p->pers = 0xff; else p->pers += v2; break;
+	case 48: if (p->endur + v2 > 0xff) p->endur = 0xff; else p->endur += v2; break;
+	case 49: if (p->speed + v2 > 0xff) p->speed = 0xff; else p->speed += v2; break;
+	case 50: if (p->acc + v2 > 0xff) p->acc = 0xff; else p->acc += v2; break;
+	case 51: if (p->luck + v2 > 0xff) p->luck = 0xff; else p->luck += v2; break;
+	case 52: p->fire_res += v2; break;
+	case 53: p->elec_res += v2; break;
+	case 54: p->cold_res += v2; break;
+	case 55: p->poison_res += v2; break;
+	case 56: p->energy_res += v2; break;
+	case 57: p->magic_res += v2; break;
+	case 58: p->fire_res_tmp += v2; break;
+	case 59: p->elec_res_tmp += v2; break;
+	case 60: p->cold_res_tmp += v2; break;
+	case 61: p->poison_res_tmp += v2; break;
+	case 62: p->energy_res_tmp += v2; break;
+	case 63: p->magic_res_tmp += v2; break;
+	case 64: p->level += v2; break;
 	case 65: g_food += v2; break;
 	case 66:
 		for (j = idx; j < g_party_count; j++)
-			if (!p->fed) {
+			if (!p->item_id_last) {
 				generate_random_item(v2, p, 0x11);
 				compact_backpack(p);
 				goto ok;
@@ -489,7 +489,7 @@ give:
 	case 76:
 		advance_clock(v2 * 1440);
 		break;
-	case 77: p->f22 += v2; break;
+	case 77: p->ac_tmp += v2; break;
 	case 79: g_wizard_eye = 1; break;
 	case 82:
 		damage_party(v2, g_event_dmg_type, idx);
@@ -564,57 +564,57 @@ void far event_set_value(int mode, unsigned long v, int idx)
 
 	p = &g_party[idx];
 	switch (mode) {
-	case 3: p->f10 = v; break;
-	case 4: p->f11 = v; break;
+	case 3: p->sex = v; break;
+	case 4: p->race = v; break;
 	case 5: p->cls = v; break;
-	case 6: p->f12 = v; break;
-	case 8: p->f125 = v; break;
-	case 9: p->f127 = v; break;
-	case 10: p->f22 = v; break;
-	case 11: p->f24 = v; break;
-	case 12: p->f26 = v; break;
-	case 16: p->f12b = v; break;
+	case 6: p->align = v; break;
+	case 8: p->hp = v; break;
+	case 9: p->sp = v; break;
+	case 10: p->ac_tmp = v; break;
+	case 11: p->level_tmp = v; break;
+	case 12: p->age_mod = v; break;
+	case 16: p->exp = v; break;
 	case 17: g_poison_resist = v; break;
 	case 18:
 		if (v == 16)
-			memset(p->f113, 0, 16);
+			memset(p->cond, 0, 16);
 		else if (v == 6)
-			p->f113[v] = 1;
+			p->cond[v] = 1;
 		else
-			p->f113[v]++;
-		if (v >= 13 && v <= 15 && p->f125 > 0)
-			p->f125 = 0;
+			p->cond[v]++;
+		if (v >= 13 && v <= 15 && p->hp > 0)
+			p->hp = 0;
 		break;
 	case 25: g_minutes = v; break;
 	case 34: g_party_gold = v; break;
 	case 35: g_party_gems = v; break;
-	case 37: p->f15 = v; break;
-	case 38: p->f17 = v; break;
-	case 39: p->f19 = v; break;
-	case 40: p->f1b = v; break;
-	case 41: p->f1d = v; break;
-	case 42: p->f1f = v; break;
-	case 43: p->f21 = v; break;
-	case 45: p->f14 = v; break;
-	case 46: p->f16 = v; break;
-	case 47: p->f18 = v; break;
-	case 48: p->f1a = v; break;
-	case 49: p->f1c = v; break;
-	case 50: p->f1e = v; break;
-	case 51: p->f20 = v; break;
-	case 52: p->f107 = v; break;
-	case 53: p->f10b = v; break;
-	case 54: p->f109 = v; break;
-	case 55: p->f10d = v; break;
-	case 56: p->f10f = v; break;
-	case 57: p->f111 = v; break;
-	case 58: p->f108 = v; break;
-	case 59: p->f10c = v; break;
-	case 60: p->f10a = v; break;
-	case 61: p->f10e = v; break;
-	case 62: p->f110 = v; break;
-	case 63: p->f112 = v; break;
-	case 64: p->f23 = v; break;
+	case 37: p->might_tmp = v; break;
+	case 38: p->intel_tmp = v; break;
+	case 39: p->pers_tmp = v; break;
+	case 40: p->endur_tmp = v; break;
+	case 41: p->speed_tmp = v; break;
+	case 42: p->acc_tmp = v; break;
+	case 43: p->luck_tmp = v; break;
+	case 45: p->might = v; break;
+	case 46: p->intel = v; break;
+	case 47: p->pers = v; break;
+	case 48: p->endur = v; break;
+	case 49: p->speed = v; break;
+	case 50: p->acc = v; break;
+	case 51: p->luck = v; break;
+	case 52: p->fire_res = v; break;
+	case 53: p->elec_res = v; break;
+	case 54: p->cold_res = v; break;
+	case 55: p->poison_res = v; break;
+	case 56: p->energy_res = v; break;
+	case 57: p->magic_res = v; break;
+	case 58: p->fire_res_tmp = v; break;
+	case 59: p->elec_res_tmp = v; break;
+	case 60: p->cold_res_tmp = v; break;
+	case 61: p->poison_res_tmp = v; break;
+	case 62: p->energy_res_tmp = v; break;
+	case 63: p->magic_res_tmp = v; break;
+	case 64: p->level = v; break;
 	case 65: g_food = v; break;
 	case 69: g_levitate = v; break;
 	case 70: g_light_count = v; break;
@@ -623,7 +623,7 @@ void far event_set_value(int mode, unsigned long v, int idx)
 	case 73: g_cold_resist = v; break;
 	case 74: g_levitate = g_light_count = g_fire_resist = g_elec_resist = g_cold_resist = g_wizard_eye = g_poison_resist = g_walk_on_water = v; break;
 	case 76: g_day = v; break;
-	case 77: p->f22 = v; break;
+	case 77: p->ac_tmp = v; break;
 	case 79: g_wizard_eye = 1; break;
 	case 83: g_event_dmg_type = v; break;
 	case 84:
@@ -637,7 +637,7 @@ void far event_set_value(int mode, unsigned long v, int idx)
 }
 
 /* 16fe: compare (what) of party member idx with val; mode 0 >=, 1 ==, 2 <= */
-int far ovr_1800_0034(int what, unsigned long val, int mode, int idx)
+int far event_compare_value(int what, unsigned long val, int mode, int idx)
 {
 	unsigned long v;
 	register struct pc *p;
@@ -645,27 +645,27 @@ int far ovr_1800_0034(int what, unsigned long val, int mode, int idx)
 
 	p = &g_party[idx];
 	switch (what) {
-	case 3: v = p->f10; break;
-	case 4: v = p->f11; break;
+	case 3: v = p->sex; break;
+	case 4: v = p->race; break;
 	case 5: v = p->cls; break;
-	case 6: v = p->f12; break;
-	case 8: v = p->f125; break;
-	case 9: v = p->f127; break;
+	case 6: v = p->align; break;
+	case 8: v = p->hp; break;
+	case 9: v = p->sp; break;
 	case 10: v = calc_armor_class(p, 0); break;
-	case 11: v = p->f24; break;
+	case 11: v = p->level_tmp; break;
 	case 12: v = get_char_age(p, 0); break;
 	case 13:
-		if (p->f27[val])
+		if (p->skill[val])
 			v = val;
 		break;
 	case 15:
-		if (p->f39[val])
+		if (p->award[val])
 			v = val;
 		break;
-	case 16: v = p->f12b; break;
+	case 16: v = p->exp; break;
 	case 17: v = g_poison_resist; break;
 	case 18:
-		if (p->f113[val] || val == 16)
+		if (p->cond[val] || val == 16)
 			v = val;
 		break;
 	case 19:
@@ -682,7 +682,7 @@ int far ovr_1800_0034(int what, unsigned long val, int mode, int idx)
 		}
 		for (j = 0; j < 0x24; j++)
 			if (g_class_spells[g_mouse_x][j] == val) {
-				if (p->spl[j])
+				if (p->spells[j])
 					v = val;
 				break;
 			}
@@ -699,7 +699,7 @@ int far ovr_1800_0034(int what, unsigned long val, int mode, int idx)
 			v = val;
 		else
 			for (j = 0; j < 0x12; j++)
-				if (p->fdc[j] == val)
+				if (p->item_id[j] == val)
 					v = val;
 		break;
 	case 23:
@@ -709,13 +709,13 @@ int far ovr_1800_0034(int what, unsigned long val, int mode, int idx)
 	case 25: v = (unsigned)g_minutes; break;
 	case 34: v = g_party_gold; break;
 	case 35: v = g_party_gems; break;
-	case 37: v = p->f15; break;
-	case 38: v = p->f17; break;
-	case 39: v = p->f19; break;
-	case 40: v = p->f1b; break;
-	case 41: v = p->f1d; break;
-	case 42: v = p->f1f; break;
-	case 43: v = p->f21; break;
+	case 37: v = p->might_tmp; break;
+	case 38: v = p->intel_tmp; break;
+	case 39: v = p->pers_tmp; break;
+	case 40: v = p->endur_tmp; break;
+	case 41: v = p->speed_tmp; break;
+	case 42: v = p->acc_tmp; break;
+	case 43: v = p->luck_tmp; break;
 	case 44:
 		v = confirm_yes_no(val);
 		if (!val && v || val)
@@ -723,26 +723,26 @@ int far ovr_1800_0034(int what, unsigned long val, int mode, int idx)
 		else
 			v = 2;
 		break;
-	case 45: v = p->f14; break;
-	case 46: v = p->f16; break;
-	case 47: v = p->f18; break;
-	case 48: v = p->f1a; break;
-	case 49: v = p->f1c; break;
-	case 50: v = p->f1e; break;
-	case 51: v = p->f20; break;
-	case 52: v = p->f107; break;
-	case 53: v = p->f10b; break;
-	case 54: v = p->f109; break;
-	case 55: v = p->f10d; break;
-	case 56: v = p->f10f; break;
-	case 57: v = p->f111; break;
-	case 58: v = p->f108; break;
-	case 59: v = p->f10c; break;
-	case 60: v = p->f10a; break;
-	case 61: v = p->f10e; break;
-	case 62: v = p->f110; break;
-	case 63: v = p->f112; break;
-	case 64: v = p->f23; break;
+	case 45: v = p->might; break;
+	case 46: v = p->intel; break;
+	case 47: v = p->pers; break;
+	case 48: v = p->endur; break;
+	case 49: v = p->speed; break;
+	case 50: v = p->acc; break;
+	case 51: v = p->luck; break;
+	case 52: v = p->fire_res; break;
+	case 53: v = p->elec_res; break;
+	case 54: v = p->cold_res; break;
+	case 55: v = p->poison_res; break;
+	case 56: v = p->energy_res; break;
+	case 57: v = p->magic_res; break;
+	case 58: v = p->fire_res_tmp; break;
+	case 59: v = p->elec_res_tmp; break;
+	case 60: v = p->cold_res_tmp; break;
+	case 61: v = p->poison_res_tmp; break;
+	case 62: v = p->energy_res_tmp; break;
+	case 63: v = p->magic_res_tmp; break;
+	case 64: v = p->level; break;
 	case 65: v = g_food; break;
 	case 69: v = g_levitate; break;
 	case 70: v = g_light_count; break;
@@ -750,10 +750,10 @@ int far ovr_1800_0034(int what, unsigned long val, int mode, int idx)
 	case 72: v = g_elec_resist; break;
 	case 73: v = g_cold_resist; break;
 	case 76: v = g_day; break;
-	case 77: v = p->f22; break;
-	case 78: v = calc_max_hp(p) < p->f125 ? 1 : 0; break;
+	case 77: v = p->ac_tmp; break;
+	case 78: v = calc_max_hp(p) < p->hp ? 1 : 0; break;
 	case 79: v = g_wizard_eye; break;
-	case 81: v = calc_max_sp(p) < p->f127 ? 1 : 0; break;
+	case 81: v = calc_max_sp(p) < p->sp ? 1 : 0; break;
 	case 84: v = g_party_dir; break;
 	case 85: v = g_year; break;
 	case 86: case 87: case 88: case 89: case 90: case 91: case 92:
@@ -761,10 +761,10 @@ int far ovr_1800_0034(int what, unsigned long val, int mode, int idx)
 		break;
 	case 93: v = g_day % 10; break;
 	case 94: v = g_walk_on_water; break;
-	case 95: v = p->f4b; break;
-	case 96: v = p->f40; break;
-	case 97: v = p->f42; break;
-	case 98: v = p->f41; break;
+	case 95: v = p->award18; break;
+	case 96: v = p->award7; break;
+	case 97: v = p->award9; break;
+	case 98: v = p->award8; break;
 	case 99:
 		if (party_has_skill(val))
 			v = val;
@@ -829,7 +829,7 @@ int far event_give_multi(int m1, unsigned long v1, int m2, unsigned long v2, int
 
 	snd = again = 0;
 	if (g_obj_d0c && !g_event_obj_opened) {
-		switch (g_objects_1based[g_obj_d0c].w2) {
+		switch (g_objects_1based[g_obj_d0c].type) {
 		case 4:
 			snd = 0x14;
 			break;
@@ -858,8 +858,8 @@ int far event_give_multi(int m1, unsigned long v1, int m2, unsigned long v2, int
 			goto give;
 		}
 		g_event_obj_opened++;
-		g_objects_1based[g_obj_d0c].w0 = 1;
-		if (g_objects_1based[g_obj_d0c].w2 == 0x14)
+		g_objects_1based[g_obj_d0c].frame = 1;
+		if (g_objects_1based[g_obj_d0c].type == 0x14)
 			goto give;
 top:
 		{
@@ -869,9 +869,9 @@ fail:
 				return 1;
 			}
 			if (random_range(1, 4) == 1)
-				damage_party(g_maps[g_map_quadrant].b[0x31e], random_range(0, 6), who);
-			if (get_thievery(&g_party[who]) + random_range(1, 20) >= g_maps[g_map_quadrant].b[0x312]) {
-				g_party[who].f12b += get_char_level(&g_party[who]) * g_maps[g_map_quadrant].b[0x312] * 10;
+				damage_party(g_maps[g_map_quadrant].raw[0x31e], random_range(0, 6), who);
+			if (get_thievery(&g_party[who]) + random_range(1, 20) >= g_maps[g_map_quadrant].raw[0x312]) {
+				g_party[who].exp += get_char_level(&g_party[who]) * g_maps[g_map_quadrant].raw[0x312] * 10;
 				g_game_mode = 7;
 				sprintf(g_text_buf2, "\x03""c\x0b""010%s picks the lock!\n\nPress any key.", &g_party[who]);
 				play_sfx(snd);
@@ -905,14 +905,14 @@ give:
 		case 0x42:
 			if (++g_loot_count > 10)
 				g_loot_count = 10;
-			c = &g_c34e;
+			c = &g_scratch_char;
 			generate_random_item(SEL(v1, v2, v3), c, 0);
-			g_loot_flags[g_loot_count - 1] = c->f90[0];
-			g_loot_element[g_loot_count - 1] = c->fa3[0];
-			g_loot_material[g_loot_count - 1] = c->fb6[0];
-			g_loot_attrib[g_loot_count - 1] = c->fc9[0];
-			g_loot_ids[g_loot_count - 1] = c->fdc[0];
-			g_loot_charges[g_loot_count - 1] = c->fef[0];
+			g_loot_flags[g_loot_count - 1] = c->item_flags[0];
+			g_loot_element[g_loot_count - 1] = c->item_elem[0];
+			g_loot_material[g_loot_count - 1] = c->item_mat[0];
+			g_loot_attrib[g_loot_count - 1] = c->item_attr[0];
+			g_loot_ids[g_loot_count - 1] = c->item_id[0];
+			g_loot_charges[g_loot_count - 1] = c->item_power[0];
 			break;
 		case 0x43:
 			flag = 1;

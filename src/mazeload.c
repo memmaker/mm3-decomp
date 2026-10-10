@@ -21,8 +21,8 @@ void far save_maze_state(void)
 		}
 		i += 6;
 		for (j = 0; j < g_obj_count; j++) {
-			p[i++] = g_map_objects[j].f2;
-			p[i++] = g_map_objects[j].f0;
+			p[i++] = g_map_objects[j].x;
+			p[i++] = g_map_objects[j].y;
 			i++;
 		}
 		cur_write_file(g_tmp_text, p);
@@ -85,29 +85,29 @@ void far load_maze(int n)
 		quit_to_dos();
 	}
 	while (k < g_maze_evt_size) {
-		g_map_objects[i].f2 = g_maze_script[k];
+		g_map_objects[i].x = g_maze_script[k];
 		k++;
-		g_map_objects[i].f0 = g_maze_script[k];
+		g_map_objects[i].y = g_maze_script[k];
 		k++;
-		g_map_objects[i].f4 = g_maze_script[k];
+		g_map_objects[i].sprite = g_maze_script[k];
 		k++;
-		g_map_objects[i].f8 = g_text_buf2[g_map_objects[i].f4];
-		g_map_objects[i].f6 = random_range(0, g_obj_frame_counts[g_map_objects[i].f8]);
+		g_map_objects[i].id = g_text_buf2[g_map_objects[i].sprite];
+		g_map_objects[i].frame = random_range(0, g_obj_frame_counts[g_map_objects[i].id]);
 		i++;
-		g_map_objects[i].fa = 0;
+		g_map_objects[i].attr = 0;
 		g_obj_count++;
 	}
 	free_and_null(&g_maze_script);
 	if (test_bit(g_game_flags, 0x6e) && n == 0x2d) {
-		g_a820 = 5;
-		g_a81e = 2;
+		g_map_obj12_x = 5;
+		g_map_obj12_y = 2;
 	}
 	sprintf(g_tmp_text, "maze%02u.evt", ++n);
 	g_maze_script = load_cc_file(g_tmp_text);
 	g_maze_evt_size = g_file_size;
 	sprintf(g_tmp_text, "text%02u.maz", n);
 	g_map_text = load_cc_file(g_tmp_text);
-	g_abbc = g_file_size;
+	g_map_text_size = g_file_size;
 	index_event_script();
 	for (j = 0; j < 5; j++)
 		if (g_text_buf2[j] != -1) {
@@ -170,10 +170,10 @@ again:
 			} while (dmg);
 		play_sfx(b);
 		draw_icon(g_charpow_sprites, a, who * 0x26 + 0xb, 0x95, 0);
-		if (c->f103) dmg -= c->f103;
+		if (c->shield) dmg -= c->shield;
 		if (dmg < 0) dmg = 0;
 		if (type == 7) {
-			dmg = c->f125;
+			dmg = c->hp;
 			c->cond[0xd] = 1;
 		}
 		char_take_damage(c, dmg);
@@ -198,7 +198,7 @@ int far party_has_holo_cards(void)
 	for (i = n = 0; i < g_party_count; i++)
 		for (j = 0; j < 0x12; j++)
 			for (k = 0; k < 6; k++)
-				if (g_party[i].id[j] == g_holo_card_ids[k]) n++;
+				if (g_party[i].item_id[j] == g_holo_card_ids[k]) n++;
 	return n > 5;
 }
 
@@ -209,7 +209,7 @@ int far packs_all_undroppable(void)
 
 	for (i = 0; i < g_party_count; i++)
 		for (j = 0; j < 0x12; j++)
-			if (!(g_party[i].f90[j] & 0x40) && !is_quest_item(g_party[i].id[j])) return 0;
+			if (!(g_party[i].item_flags[j] & 0x40) && !is_quest_item(g_party[i].item_id[j])) return 0;
 	return 1;
 }
 
@@ -219,7 +219,7 @@ int far party_packs_full(void)
 	int i, n;
 
 	for (i = n = 0; i < g_party_count; i++)
-		n += g_party[i].id[0x11] ? 1 : 0;
+		n += g_party[i].item_id[0x11] ? 1 : 0;
 	return g_party_count == n;
 }
 
@@ -268,7 +268,7 @@ void far award_found_loot(void)
 			g_game_mode = save;
 		}
 		do {
-			if (!g_party[k].id[0x11])
+			if (!g_party[k].item_id[0x11])
 				switch (get_worst_condition(&g_party[k])) {
 				case 8: case 11: case 12: case 13: case 14: case 15:
 					break;
@@ -277,21 +277,21 @@ void far award_found_loot(void)
 				}
 		} while (++k < g_party_count);
 		for (k = 0; k < g_party_count; k++)
-			if (!g_party[k].id[0x11]) goto found;
+			if (!g_party[k].item_id[0x11]) goto found;
 		k = 0;
 found:
 		play_sfx(0x24);
 		c = &g_party[k];
-		c->f90[0x11] = g_loot_flags[i];
-		c->fa3[0x11] = g_loot_element[i];
-		c->fb6[0x11] = g_loot_material[i];
-		c->fc9[0x11] = g_loot_attrib[i];
-		c->id[0x11] = g_loot_ids[i];
-		c->fef[0x11] = g_loot_charges[i];
+		c->item_flags[0x11] = g_loot_flags[i];
+		c->item_elem[0x11] = g_loot_element[i];
+		c->item_mat[0x11] = g_loot_material[i];
+		c->item_attr[0x11] = g_loot_attrib[i];
+		c->item_id[0x11] = g_loot_ids[i];
+		c->item_power[0x11] = g_loot_charges[i];
 		sprintf(g_text_buf, "\x03l\x0b""060\t000\x04""077\n\x04""077\n\x04""077\n\x04""077\n\x04""077\n\x04""077");
 		print_window_text(g_text_buf);
 		wait_ticks_or_key(2);
-		strcpy(g_text_buf2, g_item_names[c->id[0x11]]);
+		strcpy(g_text_buf2, g_item_names[c->item_id[0x11]]);
 		sprintf(g_text_buf, "\x0b""060\t000\x03""c%s found: %s", c->name, g_text_buf2);
 		print_window_text(g_text_buf);
 		compact_backpack(c);
@@ -307,9 +307,9 @@ done:
 	g_party_gems += g_loot_gems;
 	g_loot_count = g_loot_gold = g_loot_gems = 0;
 	if (g_game_mode == 9 && g_obj_d0c) {
-		switch (g_map_objects[g_obj_d0c - 1].f8) {
+		switch (g_map_objects[g_obj_d0c - 1].id) {
 		case 4: case 0xc: case 0x12: case 0x14: case 0x17: case 0x21: case 0x26: case 0x28:
-			g_map_objects[g_obj_d0c - 1].f0 = g_map_objects[g_obj_d0c - 1].f2 = 0x80;
+			g_map_objects[g_obj_d0c - 1].y = g_map_objects[g_obj_d0c - 1].x = 0x80;
 			scan_view_objects();
 			refresh_view();
 		}
@@ -362,7 +362,7 @@ void far generate_random_item(u8 lvl, struct chr far *c, register int slot)
 		else if (r2 <= 0x50) item = random_range(0x3a, 0x3c);
 		else item = random_range(0x3d, 0x45);
 	}
-	c->id[slot] = item;
+	c->item_id[slot] = item;
 	if (lvl == 6) {
 		n = 1;
 		t[0] = random_range(1, 4);
@@ -405,8 +405,8 @@ again:
 			else if (k <= 0x4b) k = 3;
 			else if (k <= 0x5f) k = 4;
 			else k = 5;
-			c->fa3[slot] = random_range(g_item_elem_ranges[k][u[j]][0], g_item_elem_ranges[k][u[j]][1]);
-			c->fa3[slot] += g_item_elem_bases[k];
+			c->item_elem[slot] = random_range(g_item_elem_ranges[k][u[j]][0], g_item_elem_ranges[k][u[j]][1]);
+			c->item_elem[slot] += g_item_elem_bases[k];
 			break;
 		case 2:
 			k = random_range(1, 100);
@@ -420,20 +420,20 @@ again:
 			else if (k <= 0x5a) k = 7;
 			else if (k <= 0x5f) k = 8;
 			else k = 9;
-			c->fc9[slot] = random_range(g_item_attr_ranges[k][u[j]][0], g_item_attr_ranges[k][u[j]][1]);
-			c->fc9[slot] += g_item_attr_bases[k];
+			c->item_attr[slot] = random_range(g_item_attr_ranges[k][u[j]][0], g_item_attr_ranges[k][u[j]][1]);
+			c->item_attr[slot] += g_item_attr_bases[k];
 			break;
 		case 3:
 			k = random_range(1, 100);
 			if (lvl == 6) k = 1;
 			else if (k <= 0x46) k = 0;
 			else k = 1;
-			c->fb6[slot] = random_range(g_item_mat_ranges[k][u[j]][0], g_item_mat_ranges[k][u[j]][1]);
-			c->fb6[slot] += g_item_mat_bases[k];
+			c->item_mat[slot] = random_range(g_item_mat_ranges[k][u[j]][0], g_item_mat_ranges[k][u[j]][1]);
+			c->item_mat[slot] += g_item_mat_bases[k];
 			break;
 		case 4:
-			c->fef[slot] = random_range(g_item_power_min[lvl], g_item_power_max[lvl]);
-			c->f90[slot] = random_range(1, 10) + 5;
+			c->item_power[slot] = random_range(g_item_power_min[lvl], g_item_power_max[lvl]);
+			c->item_flags[slot] = random_range(1, 10) + 5;
 			break;
 		}
 }
@@ -441,13 +441,13 @@ again:
 /* 12a3: "<verb> whom?" prompt */
 void far begin_whom_prompt(int *s1, int *s2, int verb)
 {
-	struct box b;
+	struct spr1 b;
 
 	push_buttons();
 	push_icons("esc.icn");
 	memset(&b, 0, sizeof b);
-	b.f0 = b.fe = -1;
-	b.f6 = 0xb1;
+	b.flag = b.end = -1;
+	b.x = 0xb1;
 	b.img = g_cur_icons;
 	g_party_btn_x_esc = 0xeb;
 	g_party_btn_y_esc = 0x78;
@@ -522,7 +522,7 @@ void far dismiss_party_member(void)
 	register int key;
 	register int i;
 
-	if (!g_c863[g_map_quadrant][0]) {
+	if (!g_maps_can_dismiss[g_map_quadrant][0]) {
 		show_message("Too dangerous to dismiss here!");
 		return;
 	}

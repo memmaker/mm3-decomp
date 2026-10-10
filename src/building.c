@@ -272,7 +272,7 @@ void far visit_bank(void)
 	} else {
 		play_music("bank.m", 0xc0);
 		play_sfx(0x97);
-		_fstrncpy(g_text_buf, g_map_text + g_a6c2, 300);
+		_fstrncpy(g_text_buf, g_map_text + g_bank_text_offs, 300);
 		if (building_entry_dialog(g_text_buf, g_anim_bank, 10, 6)) {
 			push_buttons();
 			push_icons("bank.icn");
@@ -344,7 +344,7 @@ void far visit_guild(void)
 	} else {
 		play_music("guild.m", 0xc0);
 		play_sfx(0x98);
-		_fstrncpy(g_text_buf, g_map_text + g_a6c0, 300);
+		_fstrncpy(g_text_buf, g_map_text + g_guild_text_offs, 300);
 		if (building_entry_dialog(g_text_buf, g_anim_guild, 0x19, 5)) {
 			load_text_table("spldesc.bin");
 			draw_icon(g_global_icons, 0, 0xe8, 0x4d, 0);
@@ -408,14 +408,14 @@ int far visit_inn(void)
 
 	play_music("towninn.m", 0xc0);
 	play_sfx(0x99);
-	_fstrncpy(g_text_buf, g_map_text + g_a6be, 300);
+	_fstrncpy(g_text_buf, g_map_text + g_inn_text_offs, 300);
 	if (building_entry_dialog(g_text_buf, g_anim_inn, 0xd, 4)) {
 		g_party_x = g_inn_positions[g_map_num][0];
 		g_party_y = g_inn_positions[g_map_num][1];
 		g_party_dir ^= 1;
 		g_inn_map = g_map_num;
 		for (i = 0; i < g_party_count; i++)
-			g_party[i].f123 = g_map_num;
+			g_party[i].inn = g_map_num;
 		g_map_num = 0;
 		advance_clock(0x5a0);
 		save_game(1);
@@ -449,7 +449,7 @@ void far visit_tavern(void)
 	} else {
 		play_music("honky.m", 0xc0);
 		play_sfx(0x9a);
-		_fstrncpy(g_text_buf, g_map_text + g_a6bc, 300);
+		_fstrncpy(g_text_buf, g_map_text + g_tavern_text_offs, 300);
 		if (building_entry_dialog(g_text_buf, g_anim_tavern, 0xd, 3)) {
 			mode = g_game_mode;
 			g_game_mode = 0xb;
@@ -496,7 +496,7 @@ void far visit_tavern(void)
 					building_wait_input();
 					goto redraw;
 				case 2: case 'F':
-					_fstrncpy(g_text_buf2, g_text_table + g_8ee0[g_map_num], 300);
+					_fstrncpy(g_text_buf2, g_text_table + g_tavern_food_text_offs[g_map_num], 300);
 					close_windows(1);
 					shown = 0;
 					open_text_window(0, 0x8f, 0x140, 0x38, 0, 0x96, 4, 6, g_text_buf2);
@@ -524,9 +524,9 @@ void far visit_tavern(void)
 						}
 						if (!pay_cost(0, 1L, 0))
 							goto redraw;
-						_fstrncpy(g_tmp_text, g_text_table + g_text_offsets[g_maps[g_map_quadrant].b[0x310] + g_tavern_tip_base[g_map_num - 1]], 0xc7);
-						if (++g_maps[g_map_quadrant].b[0x310] + g_tavern_tip_base[g_map_num - 1] > g_tavern_tip_base[g_map_num] - 1)
-							g_maps[g_map_quadrant].b[0x310]--;
+						_fstrncpy(g_tmp_text, g_text_table + g_text_offsets[g_maps[g_map_quadrant].raw[0x310] + g_tavern_tip_base[g_map_num - 1]], 0xc7);
+						if (++g_maps[g_map_quadrant].raw[0x310] + g_tavern_tip_base[g_map_num - 1] > g_tavern_tip_base[g_map_num] - 1)
+							g_maps[g_map_quadrant].raw[0x310]--;
 					tip:
 						sprintf(g_text_buf, "\x03""c\x0b""012%s", g_tmp_text);
 						open_text_window(0, 0x8f, 0x140, 0x38, 0, 0x96, 4, 6, g_text_buf);
@@ -587,7 +587,7 @@ void far visit_temple(void)
 	play_music("temples.m", 0xc0);
 	play_sfx(0x9b);
 	t = shown = cnt = 0;
-	_fstrncpy(g_text_buf, g_map_text + g_a6ba, 300);
+	_fstrncpy(g_text_buf, g_map_text + g_temple_text_offs, 300);
 	if (building_entry_dialog(g_text_buf, g_anim_temple, 0xb, 2)) {
 		push_buttons();
 		push_icons("esc.icn");
@@ -613,7 +613,7 @@ void far visit_temple(void)
 		if (c->cond[15])
 			y = lvl * 1000 + c->cond[15] * 500 + g_temple_erad_cost[g_cur_town - 1];
 		for (k = 0; k < 0x12; k++)
-			unc |= c->item[k] & 0x40;
+			unc |= c->item_flags[k] & 0x40;
 		if (unc || c->cond[0])
 			unc = lvl * 20 + g_temple_uncurse_cost[g_cur_town - 1];
 		don = g_temple_donation[g_cur_town - 1];
@@ -635,8 +635,8 @@ void far visit_temple(void)
 					break;
 				if (!pay_cost(0, heal, 0))
 					break;
-				c->f15 = c->f17 = c->f19 = c->f1b = c->f1d = c->f1f = c->f21 = c->f24 = c->f22 =
-					c->f108 = c->f10a = c->f10c = c->f10e = c->f110 = c->f112 = 0;
+				c->might_tmp = c->intel_tmp = c->pers_tmp = c->endur_tmp = c->speed_tmp = c->acc_tmp = c->luck_tmp = c->level_tmp = c->ac_tmp =
+					c->fire_res_tmp = c->cold_res_tmp = c->elec_res_tmp = c->poison_res_tmp = c->energy_res_tmp = c->magic_res_tmp = 0;
 				c->hp = calc_max_hp(c);
 				tmp = c->cond[0];
 				memset(c->cond, 0, 0x10);
@@ -650,13 +650,13 @@ void far visit_temple(void)
 				if (!pay_cost(0, don, 0))
 					break;
 				for (k = 0; k < g_party_count; k++) {
-					fn_1523_0238(g_party[k].f106, g_cur_town - 1, 1);
+					set_bit(g_party[k].f106, g_cur_town - 1, 1);
 					if ((g_party[k].f106[0] & 0xf8) == 0xf8)
-						g_party[k].f3f = 1;
+						g_party[k].award6 = 1;
 				}
 				cnt = ++cnt % 10;
 				if (g_day % 10 == cnt) {
-					c->f102 = c->f103 = c->f104 = c->f105 = cnt == 0 ? 10 : cnt;
+					c->bless = c->shield = c->holy = c->hero = cnt == 0 ? 10 : cnt;
 					draw_party_portraits();
 				}
 				wait_mouse_release();
@@ -668,8 +668,8 @@ void far visit_temple(void)
 					break;
 				c->cond[0] = 0;
 				for (k = 0; k < 0x12; k++)
-					if (c->item[k] & 0x40)
-						c->item[k] ^= 0x40;
+					if (c->item_flags[k] & 0x40)
+						c->item_flags[k] ^= 0x40;
 				t += 0x5a0;
 				draw_party_portraits();
 				goto redraw;
@@ -700,14 +700,14 @@ long far format_training_status(struct chr *c)
 	long need;
 
 	need = get_exp_to_next_level(c);
-	if (need && c->lvl < g_train_max_level[g_map_num - 1])
-		sprintf(g_text_buf2, "%s needs %lu experience for level %u.", c, need, c->lvl + 1);
-	else if (c->lvl >= g_train_max_level[g_map_num - 1]) {
+	if (need && c->level < g_train_max_level[g_map_num - 1])
+		sprintf(g_text_buf2, "%s needs %lu experience for level %u.", c, need, c->level + 1);
+	else if (c->level >= g_train_max_level[g_map_num - 1]) {
 		sprintf(g_text_buf2, "%s has learned all we can teach!", c);
 		need = 1;
 	} else
-		sprintf(g_text_buf2, "%s is eligible for level %d.\x03l\n\x0b""081Cost\x03r\t077%lu", c, c->lvl + 1,
-			(unsigned long)c->lvl * c->lvl * 10);
+		sprintf(g_text_buf2, "%s is eligible for level %d.\x03l\n\x0b""081Cost\x03r\t077%lu", c, c->level + 1,
+			(unsigned long)c->level * c->level * 10);
 	return need;
 }
 
@@ -770,17 +770,17 @@ void far visit_training(void)
 						break;
 					if (char_cannot_act(c))
 						break;
-					if (!pay_cost(0, (unsigned long)c->lvl * c->lvl * 10, 0))
+					if (!pay_cost(0, (unsigned long)c->level * c->level * 10, 0))
 						break;
 					c->exp -= get_next_level_exp(c) - (get_total_exp(c) - c->exp);
-					c->lvl++;
+					c->level++;
 					if (!done[idx]) {
 						advance_clock(0x5a0);
 						done[idx] = 1;
 					}
 					clear_temp_effects(1);
 					c->hp = calc_max_hp(c);
-					c->f127 = calc_max_sp(c);
+					c->sp = calc_max_sp(c);
 					goto redraw;
 				case 0xc9: case 0xca: case 0xcb: case 0xcc: case 0xcd: case 0xce: case 0xcf: case 0xd0:
 					k -= 0xc9;
@@ -837,7 +837,7 @@ void far visit_smithy(void)
 		play_sfx(0x9d);
 		for (k = 0; k < 12; k++)
 			seq[k] = k;
-		_fstrncpy(g_text_buf, g_map_text + g_a6b8, 300);
+		_fstrncpy(g_text_buf, g_map_text + g_smithy_text_offs, 300);
 		if (building_entry_dialog(g_text_buf, seq, 12, 1)) {
 			push_buttons();
 			push_icons("esc.icn");

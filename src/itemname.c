@@ -28,7 +28,7 @@ void far draw_maze_view(void)
 	g_draw_list[5] = g_view_bg_flip;
 	g_draw_list[12] = g_view_flip;
 	*(long *)&g_draw_list[1] = g_sky_gfx;
-	*(long *)&g_draw_list[8] = g_c4b6;
+	*(long *)&g_draw_list[8] = g_wall_gfx_4;
 	if (!g_wall_d0c && !g_wall_d1l1 && !g_wall_d1c_lside && !g_wall_d2l1 && !g_wall_d3l1_lside && !g_wall_d3l2_lside) {
 		if (g_wall_d4l3_lside) {
 			*++o = 32;
@@ -602,7 +602,7 @@ void far draw_maze_view(void)
 		}
 	}
 	*++o = -1;
-	*(long *)++o = g_c4b2;
+	*(long *)++o = g_wall_gfx_3;
 	o++;
 	if (!g_wall_d0l1 && !g_wall_d0c_lside && !g_wall_d1l1 && !g_wall_d2l1_lside) {
 		if (g_wall_d2l2_locked) {

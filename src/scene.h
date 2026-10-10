@@ -2,12 +2,12 @@
 typedef unsigned char u8;
 typedef unsigned int u16;
 
-struct map { u16 cell[16][16]; u8 b200[16][16]; u8 b300[8]; u8 b308, b309; u8 b30a[3]; u8 b30d; u8 b30e[5]; u8 b313; u8 b314[12]; u8 b320[0x20]; };
+struct map { u16 cell[16][16]; u8 cell_flags[16][16]; u8 surface[8]; u8 north, east; u8 b30a[3]; u8 lit; u8 b30e[5]; u8 start_pos; u8 b314[12]; u8 visited[0x20]; };
 extern struct map g_maps[];                     /* 0x340-byte map records */
 extern char map_size_check[sizeof(struct map) == 0x340 ? 1 : -1];
 
 extern u8 g_outdoors, g_view_drawn, g_mon_d0c_1, g_mon_d0c_2, g_mon_d0c_3, g_game_mode, g_mon_missile_active, g_light_changed, g_events_deferred;
-extern int g_acd4[];
+extern int g_border_sprites_m1[];
 extern long g_global_icons, g_gargoyle_gfx, g_grabber_gfx, g_bat_gfx, g_prot_gems_gfx;
 extern u8 g_party_dir, g_party_x, g_party_y, g_levitate, g_danger_gem_frame, g_spotdoor_gem_frame, g_levitate_gem_frame, g_monsters_moved, g_secret_door_ahead;
 extern int g_fire_resist, g_elec_resist, g_cold_resist, g_poison_resist;
@@ -19,7 +19,7 @@ void far draw_maze_view(void);
 void far run_combat(void);
 void far run_event_script(void);
 int far party_has_skill(int);
-void far fn_1523_0238(u8 *p, u16 bit, int set);
+void far set_bit(u8 *p, u16 bit, int set);
 int far test_bit(u8 *p, u16 bit);
 
 void far scan_view_walls(void);
@@ -38,7 +38,7 @@ extern u8 g_view_flip, g_torch_frame, g_wall_d0c, g_wall_d0l1, g_wall_d0c_lside,
 extern u8 g_sidewall_d1_frames[], g_sidewall_d0_frames[], g_sidewall_d0_t7_frames[], g_sidewall_d1_t7_frames[], g_missile_d1_x[], g_missile_d1_y[], g_missile_d0_x[], g_missile_d0_y[];
 extern int g_missile_layers[];
 extern u8 g_missile_pos[], g_missile_steps[];
-extern long g_c4ae, g_outdoor_obj_gfx, g_pow_icon;
+extern long g_wall_gfx_2, g_outdoor_obj_gfx, g_pow_icon;
 int *far add_view_sprites_d1(int *o);
 int *far add_view_sprites_d0(int *o);
 void far play_sfx(int);

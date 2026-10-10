@@ -5,19 +5,19 @@
 #include <mem.h>
 typedef unsigned char u8;
 
-struct spr { int flag; char far *img; int x, y, f6, frame; };
+struct spr { int flag; char far *img; int x, y, attr, frame; };
 struct chr {
 	char name[0x90];
-	u8 f90[0x13], fa3[0x13], fb6[0x13], fc9[0x13], id[0x13], fef[0x13];	/* 0x90: backpack fields */
-	u8 f102, f103;
+	u8 item_flags[0x13], item_elem[0x13], item_mat[0x13], item_attr[0x13], item_id[0x13], item_power[0x13];	/* 0x90: backpack fields */
+	u8 bless, shield;
 	u8 f104[0xf];
 	u8 cond[0x10];	/* 0x113 */
-	u8 f123[2];
-	int f125;
+	u8 inn[2];
+	int hp;
 	u8 f127[8];
 };
-struct obj { int f0, f2, f4, f6, f8, fa; };
-struct box { int f0; char far *img; int f6, f8, fa, fc, fe, f10, f12; };
+struct mobj { int y, x, sprite, frame, id, attr; };
+struct spr1 { int flag; char far *img; int x, y, attr, frame, end, end_img_off, end_img_seg; };
 
 /* own initialized data (mazeld.inc) */
 extern u8 g_holo_card_ids[], g_item_elem_ranges[][6][2], g_item_elem_bases[], g_item_attr_ranges[][6][2], g_item_attr_bases[], g_item_mat_ranges[][6][2], g_item_mat_bases[], g_item_power_min[], g_item_power_max[];
@@ -25,24 +25,24 @@ extern struct spr g_options_spr[];
 extern int g_options_btn_x[], g_options_btn_y[], g_options_btn_w[], g_options_btn_h[];
 
 extern struct chr g_party[];
-extern struct obj g_map_objects[];
+extern struct mobj g_map_objects[];
 extern struct spr g_scroll_cast_sprites, g_scroll_spr;
 extern char far *g_maze_script, far *g_map_text, far *g_pow_icon, far *g_cur_icons, far *g_text_table, far *g_roster, far *g_obj_sprites[], far *g_mon_sprites[], far *g_party_faces[];
 extern char far *g_charpow_sprites;
 extern int far *g_mon_max_hp;
 extern u8 g_cur_town, g_mon_count, g_obj_count, g_party_count, g_event_char, g_game_mode, g_portrait_click_on, g_archive_open, g_cfg_video, g_mouse_buttons, g_day;
-extern u8 g_maze_mon_ids_1[], g_maze_mon_ids[], g_mon_frame_counts[], g_obj_frame_counts[], g_game_flags[], g_party_ids[], g_c863[][0x340];
+extern u8 g_maze_mon_ids_1[], g_maze_mon_ids[], g_mon_frame_counts[], g_obj_frame_counts[], g_game_flags[], g_party_ids[], g_maps_can_dismiss[][0x340];
 extern u8 g_mon_d0c_1[], g_mon_d2c_1[], g_mon_d2l1_1[], g_mon_d2r1_1[], g_obj_d0c, g_missile_pos[], g_spell_anim_active;
 extern u8 g_loot_ids[], g_loot_flags[], g_loot_element[], g_loot_material[], g_loot_attrib[], g_loot_charges[];
 extern char g_text_buf2[], g_tmp_text[], g_text_buf[], g_save_files[][13], g_save_name[], g_loot_count, g_map_quadrant, g_save_count, g_save_slot;
 extern char g_party_btn_y_esc, g_party_btn_w_esc, g_party_btn_h_esc;
 extern char *g_pic_file_names[], *g_mon_file_names[], *g_item_names[], *g_whom_verbs[], *g_msg_copyright;
 extern int g_mon_x[], g_mon_y[], g_mon_sprite_bank[], g_mon_frames[], g_mon_status[], g_mon_visible[], g_mon_hp[], g_mon_type[], g_text_offsets[];
-extern int g_a820, g_a81e, g_open_windows, g_fire_resist, g_elec_resist, g_cold_resist, g_poison_resist, g_party_btn_x_esc, g_roster_slot_btn_x, g_year;
+extern int g_map_obj12_x, g_map_obj12_y, g_open_windows, g_fire_resist, g_elec_resist, g_cold_resist, g_poison_resist, g_party_btn_x_esc, g_roster_slot_btn_x, g_year;
 extern int *g_btn_xs, *g_btn_ys, *g_btn_ws, *g_btn_hs;
 extern int g_party_btn_x[], g_party_btn_y[], g_party_btn_w[], g_party_btn_h[], g_scroll_btn_x[], g_scroll_btn_y[], g_scroll_btn_w[], g_scroll_btn_h[];
 extern int g_mouse_x[], g_mouse_y[];
-extern unsigned g_maze_evt_size, g_abbc, g_file_size;
+extern unsigned g_maze_evt_size, g_map_text_size, g_file_size;
 extern long g_mouse_cursor, g_loot_gold, g_loot_gems, g_party_gold, g_party_gems;
 
 void far cur_write_file(char far *, void far *);

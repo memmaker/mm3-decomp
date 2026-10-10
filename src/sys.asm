@@ -5,7 +5,7 @@
 DGROUP	group	_DATA
 _DATA	segment byte public 'DATA'	; byte aligned: starts at odd DS 174f right after stattext's data
 	extrn	_g_file_size:byte
-	include	sysd.inc	; DGROUP 174f-1e2e (ASM=1 tools/mkdata.py src/sys.asm 174f 1e2e)
+	include	sysd.inc	; DGROUP 174f-1e2e (extracted with tools/mkdata.py)
 _DATA	ends
 
 	extrn	_snd_shutdown:far

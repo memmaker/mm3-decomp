@@ -1,6 +1,5 @@
 ; DGROUP 174f-1e2e: sys.asm initialized data (extracted with tools/mkdata.py)
-	public	_g_174f
-_g_174f	db	000h
+	db	000h
 	public	_g_missile_icons
 _g_missile_icons	db	00ch,00eh,000h,004h,008h,00ah,00dh
 	public	_g_missile_sounds

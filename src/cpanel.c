@@ -6,7 +6,7 @@ long far get_next_level_exp(struct chr *c)
 	int sh;
 	register int k, lvl;
 
-	if ((lvl = c->lvl) < 12) {
+	if ((lvl = c->level) < 12) {
 		k = 0;
 		sh = lvl - 1;
 	} else {
@@ -33,7 +33,7 @@ long far get_total_exp(struct chr *c)
 	long t;
 	register int i, k;
 
-	if ((i = c->lvl - 1) < 12) {
+	if ((i = c->level - 1) < 12) {
 		if (i == 0) return c->exp;
 		k = 0;
 		sh = i - 1;
@@ -100,7 +100,7 @@ void far rest_party(void)
 				return;
 			}
 rest:
-	for (i = 0; i < g_party_count; i++) g_party[i].f11b = 1;
+	for (i = 0; i < g_party_count; i++) g_party[i].asleep = 1;
 	draw_party_portraits();
 	old = g_game_mode;
 	g_game_mode = 5;
@@ -119,14 +119,14 @@ rest:
 	clear_temp_effects(0);
 	for (i = n = starve = 0; i < g_party_count; i++) {
 		p = &g_party[i];
-		p->f11b = 0;
+		p->asleep = 0;
 		if (g_food) {
 			if ((cls = get_worst_condition(p)) < 13 || cls > 15) {
 				g_food--;
 				n++;
-				p->f11f = p->f102 = p->f103 = p->f104 = p->f105 = 0;
-				p->f125 = calc_max_hp(p);
-				p->f127 = calc_max_sp(p);
+				p->unconscious = p->bless = p->shield = p->holy = p->hero = 0;
+				p->hp = calc_max_hp(p);
+				p->sp = calc_max_sp(p);
 			}
 		} else
 			starve = 1;
@@ -149,8 +149,8 @@ void far clear_temp_effects(int keep)
 
 	for (i = 0; i < g_party_count; i++) {
 		p = &g_party[i];
-		p->f15 = p->f17 = p->f19 = p->f1b = p->f1d = p->f1f = p->f21 = p->f24 = p->f22 = p->f102 = p->f103 =
-			p->f104 = p->f105 = p->f108 = p->f10a = p->f10c = p->f10e = p->f110 = p->f112 = 0;
+		p->might_tmp = p->intel_tmp = p->pers_tmp = p->endur_tmp = p->speed_tmp = p->acc_tmp = p->luck_tmp = p->level_tmp = p->ac_tmp = p->bless = p->shield =
+			p->holy = p->hero = p->fire_res_tmp = p->cold_res_tmp = p->elec_res_tmp = p->poison_res_tmp = p->energy_res_tmp = p->magic_res_tmp = 0;
 	}
 	if (g_wizeye_shown && !keep) {
 		close_windows(1);
@@ -316,7 +316,7 @@ void far save_game(int quiet)
 	_fmemcpy(&g_party_count, tmp, 0x396);
 	for (i = 0; i < g_party_count_saved; i++) {
 		if (g_party_count <= i) {
-			g_party[i].f123 = g_inn_map;
+			g_party[i].inn = g_inn_map;
 			g_roster[g_party_ids[i]] = g_party[i];
 			g_party_ids[i] = 0xff;
 		} else
@@ -372,7 +372,7 @@ int far control_panel(void)
 {
 	int o1, o2, t, old, ret;
 	char far *img;
-	struct sl lst;
+	struct spr1 lst;
 	register int c, g;
 
 	set_mouse_cursor(0, g_mouse_cursor);
@@ -386,7 +386,7 @@ int far control_panel(void)
 	memset(&lst, 0, 0x14);
 	img = load_graphic("cpanel.icn");
 	g_cpanel_sprites_img = lst.img = img;
-	lst.mark = lst.end = -1;
+	lst.flag = lst.end = -1;
 	lst.x = 0x2f;
 	lst.y = 0x3a;
 	lst.frame = 1;
@@ -462,7 +462,7 @@ top:
 				set_party_map_start();
 				update_outdoor_quadrant();
 				for (c = 0; c < g_party_count; c++)
-					if (g_party[c].lvl > 1) g_party[c].lvl--;
+					if (g_party[c].level > 1) g_party[c].level--;
 				draw_wizard_eye(1);
 				goto out;
 			}
@@ -592,7 +592,7 @@ void far show_automap(void)
 		party_has_skill(6) ? g_direction_names[g_party_dir] : "");
 	memset(g_draw_list, 0, 4000);
 	g_draw_list[0] = -1;
-	g_d670 = g_tileset_gfx;
+	g_draw_list_img = g_tileset_gfx;
 	n = 3;
 	memset(seen, 0, 0x100);
 	if (g_outdoors) {
@@ -613,7 +613,7 @@ void far show_automap(void)
 				g_draw_list[n++] = i * 10;
 				g_draw_list[n] = j * 8 + 10;
 				n += 2;
-				g_draw_list[n++] = v ? g_maps[m].obj[v] : 0;
+				g_draw_list[n++] = v ? g_maps[m].surface_m1[v] : 0;
 			}
 		}
 		y = oy;
@@ -633,7 +633,7 @@ void far show_automap(void)
 				g_draw_list[n++] = i * 10;
 				g_draw_list[n] = j * 8 + 10;
 				n += 2;
-				g_draw_list[n++] = g_maps[m].obj[v];
+				g_draw_list[n++] = g_maps[m].surface_m1[v];
 			}
 		}
 		y = oy;
@@ -767,7 +767,7 @@ void far load_faces(int n)
 		if (hire) g_roster_faces[i] = load_graphic(buf);
 		else g_party_faces[i] = load_graphic(buf);
 	}
-	if (!hire) g_c52e = load_graphic("dse.fac");
+	if (!hire) g_dse_face_gfx = load_graphic("dse.fac");
 }
 
 /* 1ab0 */
@@ -830,8 +830,8 @@ void far load_maze_gfx(int n)
 		}
 	} else {
 		for (i = 0; i < 7; i++)
-			if (g_maps[g_map_quadrant].obj[i + 1]) {
-				sprintf(buf, "%s.vga", g_outdoor_obj_files[g_maps[g_map_quadrant].obj[i + 1]]);
+			if (g_maps[g_map_quadrant].surface_m1[i + 1]) {
+				sprintf(buf, "%s.vga", g_outdoor_obj_files[g_maps[g_map_quadrant].surface_m1[i + 1]]);
 				update_free_mem_kb();
 				g_outdoor_obj_gfx[i] = load_graphic(buf);
 				update_free_mem_kb();
@@ -876,7 +876,7 @@ void far load_maze_data(int n)
 			p = load_cc_file(buf);
 			_fmemcpy(&g_maps[j], p, 0x340);
 			free_and_null(&p);
-			if (g_maps[j].f313 && g_start_map_idx == 0xff) g_start_map_idx = j;
+			if (g_maps[j].start_pos && g_start_map_idx == 0xff) g_start_map_idx = j;
 		} else
 			n = 0;
 		g_quadrant_maps[j] = n ? n : 0xff;
@@ -884,9 +884,9 @@ void far load_maze_data(int n)
 	if (test_bit(g_game_flags, 0x6e))
 		for (j = 0; j < 4; j++) {
 			if (g_quadrant_maps[j] == 0x2e) {
-				for (i = 0; i < 12; i++) g_maps[j].map[g_maze_patch_y_46[i]][g_maze_patch_x[i]] = 0x50;
+				for (i = 0; i < 12; i++) g_maps[j].cell[g_maze_patch_y_46[i]][g_maze_patch_x[i]] = 0x50;
 			} else if (g_quadrant_maps[j] == 0x2f) {
-				for (i = 0; i < 12; i++) g_maps[j].map[g_maze_patch_y_47[i]][g_maze_patch_x[i]] = 0x50;
+				for (i = 0; i < 12; i++) g_maps[j].cell[g_maze_patch_y_47[i]][g_maze_patch_x[i]] = 0x50;
 			}
 		}
 }

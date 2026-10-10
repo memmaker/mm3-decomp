@@ -184,7 +184,7 @@ struct chr *far item_screen(struct chr *c, int mode)
 	unsigned long cost;
 	char name[20];
 	u8 mark[40];
-	struct hot hot[18];
+	struct spr1 hot[18];
 	register int top, k;
 
 	orig = c;
@@ -201,7 +201,7 @@ struct chr *far item_screen(struct chr *c, int mode)
 	set_mouse_cursor(0, g_mouse_cursor);
 	icon = load_graphic("equip.icn");
 	memset(hot, 0, sizeof hot);
-	for (k = 0; k < 18; k++) hot[k].flag = hot[k].fe = -1;
+	for (k = 0; k < 18; k++) hot[k].flag = hot[k].end = -1;
 	sprintf(name, "%s.icn", g_itemscr_icon_names[mode]);
 	push_icons(name);
 	g_itemscr_buttons[0].img = g_cur_icons;
@@ -211,21 +211,21 @@ struct chr *far item_screen(struct chr *c, int mode)
 	g_btn_hs = g_itemscr_hot_h;
 	if (mode == 1) {
 		g_cur_char = c;
-		c = &g_c34e;
+		c = &g_scratch_char;
 		load_shop_stock(oldcat = 0);
 	}
-	if (!c->id[9]) g_itemscr_down_frame = 13;
+	if (!c->item_id[9]) g_itemscr_down_frame = 13;
 	else g_itemscr_down_frame = 12;
 again:
 	memset(mark, 0, 40);
 list:
 	for (g_mouse_x = top; g_mouse_x < 18; g_mouse_x++) {
-		if (c->id[g_mouse_x]) {
-			if (mode == 1) c->cat[g_mouse_x] = get_item_equip_cat(g_cur_char, c->id[g_mouse_x]);
+		if (c->item_id[g_mouse_x]) {
+			if (mode == 1) c->item_eq[g_mouse_x] = get_item_equip_cat(g_cur_char, c->item_id[g_mouse_x]);
 			hot[g_mouse_x].img = icon;
 			hot[g_mouse_x].y = (g_mouse_x - top) * 9 + 10;
-			hot[g_mouse_x].mirror = c->cat[g_mouse_x] == 2;
-			hot[g_mouse_x].frame = c->cat[g_mouse_x] > 0 && c->cat[g_mouse_x] < 3 ? 1 : c->cat[g_mouse_x] == 13 ? 2 : c->cat[g_mouse_x];
+			hot[g_mouse_x].mirror = c->item_eq[g_mouse_x] == 2;
+			hot[g_mouse_x].frame = c->item_eq[g_mouse_x] > 0 && c->item_eq[g_mouse_x] < 3 ? 1 : c->item_eq[g_mouse_x] == 13 ? 2 : c->item_eq[g_mouse_x];
 			cost = get_item_price(c, g_mouse_x, mode, (mode == 1 ? 0 : !c->skill[8]) | (mode == 2 ? 0x80 : 0));
 			if (mode != 0 && mode != 8) ultoa(cost, name, 10);
 			else strcpy(name, "");
@@ -328,7 +328,7 @@ list:
 			if (mode == 4) goto out;
 			if (mode == 5) goto out;
 			if (mode == 6) goto out;
-			if (!c->id[9]) top = 0;
+			if (!c->item_id[9]) top = 0;
 		reset:
 			memset(mark, 0, 40);
 			sel = -1;
@@ -338,7 +338,7 @@ list:
 			top -= 9;
 			goto list;
 		case 6: case 0xf3:
-			if (c->id[9] == 0) break;
+			if (c->item_id[9] == 0) break;
 			if (top >= 9) break;
 			top += 9;
 			goto list;
@@ -347,7 +347,7 @@ list:
 		case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
 			if (mode == 3) break;
 			if ((tmp = k + top - 7) == sel) goto reset;
-			if (c->id[tmp] == 0) goto list;
+			if (c->item_id[tmp] == 0) goto list;
 			sel = tmp;
 			memset(mark, 0, 40);
 			mark[sel] = 0x12;
@@ -374,22 +374,22 @@ list:
 				goto again;
 			}
 			tmp = k;
-			if (c->flg[sel] & 0x40) {
+			if (c->item_flags[sel] & 0x40) {
 				show_message("\003cYou cannot remove a cursed item!");
 				goto again;
 			}
-			if (g_party[tmp].id[17]) {
+			if (g_party[tmp].item_id[17]) {
 				sprintf(g_tmp_text, "\003c%s's backpack is full.", &g_party[tmp]);
 				show_message(g_tmp_text);
 				goto reset;
 			}
-			g_party[tmp].flg[17] = c->flg[sel];
-			g_party[tmp].fa3[17] = c->fa3[sel];
-			g_party[tmp].fb6[17] = c->fb6[sel];
-			g_party[tmp].fc9[17] = c->fc9[sel];
-			g_party[tmp].id[17] = c->id[sel];
-			g_party[tmp].fef[17] = c->fef[sel];
-			g_party[tmp].cat[17] = c->id[sel] = 0;
+			g_party[tmp].item_flags[17] = c->item_flags[sel];
+			g_party[tmp].item_elem[17] = c->item_elem[sel];
+			g_party[tmp].item_mat[17] = c->item_mat[sel];
+			g_party[tmp].item_attr[17] = c->item_attr[sel];
+			g_party[tmp].item_id[17] = c->item_id[sel];
+			g_party[tmp].item_power[17] = c->item_power[sel];
+			g_party[tmp].item_eq[17] = c->item_id[sel] = 0;
 			compact_backpack(c);
 			compact_backpack(&g_party[tmp]);
 			goto reset;
@@ -462,7 +462,7 @@ int far calc_max_sp(struct chr far *c)
 	u8 k, sk;
 	u8 twice = 0;
 
-	if (c->f7a) {
+	if (c->caster) {
 		if (c->cls == 4 || c->cls == 2) {
 			k = 1;
 			sk = 13;
@@ -473,7 +473,7 @@ int far calc_max_sp(struct chr far *c)
 		if (c->cls == 8 || c->cls == 9) sk = 2;
 again:
 		v = stat_bonus(get_char_stat(c, k, 0)) + 3;
-		v += g_race_sp_bonus[c->f11][k - 1];
+		v += g_race_sp_bonus[c->race][k - 1];
 		if (c->skill[sk]) v += 2;
 		if (v < 1) v = 1;
 		v *= get_char_level(c);
@@ -500,7 +500,7 @@ int far calc_max_hp(struct chr far *c)
 	long v = g_class_hp_per_level[c->cls];
 
 	v += stat_bonus(get_char_stat(c, 3, 0));
-	v += g_race_hp_bonus[c->f11];
+	v += g_race_hp_bonus[c->race];
 	if (c->skill[3]) v += 1;
 	if (v < 1) v = 1;
 	v *= get_char_level(c);
@@ -517,8 +517,8 @@ int far calc_armor_class(register struct chr *c, int base)
 	n = stat_bonus(get_char_stat(c, 4, 0));
 	n = n + get_item_stat_bonus(c, 9);
 	if (!base) {
-		n += c->res[0];
-		n += c->f22;
+		n += c->bless_res[0];
+		n += c->ac_tmp;
 	}
 	return n < 1 ? 0 : n;
 }
@@ -532,28 +532,28 @@ void far format_char_sheet(register struct chr *c, char *buf, int n)
 	cond = get_worst_condition(c);
 	days = g_food / g_party_count / 3;
 	sprintf(buf, "\v041\t196\004080%s\t000\v002\004275%s : %s %s %s %s\003r\t047\v028\004022\014%02u%u\014d\t099\004022\014%02u%u\014d\003l\t131\004037\014%02u%d\014d\t196\004076\01418%lu\014d\003r\t047\v051\004022\014%02u%u\014d\t099\004022\014%02u%u\014d\003l\t131\004037\014%02u%u\014d\t196\004076\01418%lu\014d\003r\t047\v074\004022\014%02u%u\014d\t099\004022\014%02u%u\014d\003l\t131\004037\01418%u\014d\t196\004076\01418%lu\014d\003r\t047\v097\004022\014%02u%u\014d\t099\004022\014%02u%u\014d\003l\t131\004037\01418%u\014d\t196\004076\01418%u day%c\014d\003r\t047\v120\004022\014%02u%u\014d\t099\004022\014%02u%u\014d\003l\t131\004037\01418%u\014d\t196\004080\014%02u%s\014d\t230%s%s%s%s\014d",
-		g_str_cost_party_gold[g_party_ids[n] < 0x14], c->name, g_sex_names[c->f10], g_align_names[c->f12], g_race_names[c->f11], g_class_names[c->cls],
+		g_str_cost_party_gold[g_party_ids[n] < 0x14], c->name, g_sex_names[c->sex], g_align_names[c->align], g_race_names[c->race], g_class_names[c->cls],
 		stat_color(get_char_stat(c, 0, 0), get_char_stat(c, 0, 1)), get_char_stat(c, 0, 0),
 		stat_color(get_char_stat(c, 5, 0), get_char_stat(c, 5, 1)), get_char_stat(c, 5, 0),
-		stat_color(c->f125, calc_max_hp(c)), c->f125, get_total_exp(c),
+		stat_color(c->hp, calc_max_hp(c)), c->hp, get_total_exp(c),
 		stat_color(get_char_stat(c, 1, 0), get_char_stat(c, 1, 1)), get_char_stat(c, 1, 0),
 		stat_color(get_char_stat(c, 6, 0), get_char_stat(c, 6, 1)), get_char_stat(c, 6, 0),
-		stat_color(c->f127, calc_max_sp(c)), c->f127,
-		g_party_ids[n] < 0x14 ? g_party_gold : (long)(c->f23 * c->f23) * 20,
+		stat_color(c->sp, calc_max_sp(c)), c->sp,
+		g_party_ids[n] < 0x14 ? g_party_gold : (long)(c->level * c->level) * 20,
 		stat_color(get_char_stat(c, 2, 0), get_char_stat(c, 2, 1)), get_char_stat(c, 2, 0),
 		stat_color(get_char_age(c, 0), get_char_age(c, 1)), get_char_age(c, 0),
-		c->res[5] + get_item_stat_bonus(c, 0xb) + c->res[6] + c->res[7] + get_item_stat_bonus(c, 0xd) + c->res[8] + c->res[9] +
-			get_item_stat_bonus(c, 0xc) + c->res[10] + c->res[11] + get_item_stat_bonus(c, 0xe) + c->res[12] + c->res[13] +
-			get_item_stat_bonus(c, 0xf) + c->res[14] + c->res[15] + get_item_stat_bonus(c, 0x10) + c->res[16],
+		c->bless_res[5] + get_item_stat_bonus(c, 0xb) + c->bless_res[6] + c->bless_res[7] + get_item_stat_bonus(c, 0xd) + c->bless_res[8] + c->bless_res[9] +
+			get_item_stat_bonus(c, 0xc) + c->bless_res[10] + c->bless_res[11] + get_item_stat_bonus(c, 0xe) + c->bless_res[12] + c->bless_res[13] +
+			get_item_stat_bonus(c, 0xf) + c->bless_res[14] + c->bless_res[15] + get_item_stat_bonus(c, 0x10) + c->bless_res[16],
 		g_party_gems,
 		stat_color(get_char_stat(c, 3, 0), get_char_stat(c, 3, 1)), get_char_stat(c, 3, 0),
-		stat_color(get_char_level(c), c->f23), get_char_level(c),
+		stat_color(get_char_level(c), c->level), get_char_level(c),
 		count_skills(c), days, days == 1 ? ' ' : 's',
 		stat_color(get_char_stat(c, 4, 0), get_char_stat(c, 4, 1)), get_char_stat(c, 4, 0),
 		stat_color(calc_armor_class(c, 0), calc_armor_class(c, 1)), calc_armor_class(c, 0),
 		count_awards(c), g_condition_colors[cond], g_condition_names[cond],
-		cond == 16 && c->res[0] ? "\01417+" : "", cond == 16 && c->res[1] ? "\01417+" : "",
-		cond == 16 && c->res[2] ? "\01417+" : "", cond == 16 && c->res[3] ? "\01417+" : "");
+		cond == 16 && c->bless_res[0] ? "\01417+" : "", cond == 16 && c->bless_res[1] ? "\01417+" : "",
+		cond == 16 && c->bless_res[2] ? "\01417+" : "", cond == 16 && c->bless_res[3] ? "\01417+" : "");
 }
 
 /* 1a48: colour for cur/max */
@@ -581,9 +581,9 @@ void far show_quick_ref(void)
 		cond = get_worst_condition(c = &g_party[g_mouse_x]);
 		sprintf(lines[g_mouse_x], "\v%3d\t007%u)\t027%s\t110%c%c%c\003r\t160\014%02u%u\014d\003l\t176\014%02u%d\014d\t212\014%02u%u\014d\t241\014%02u%u\014d\t270\014%02u%c%c%c%c\014d",
 			g_mouse_x * 10 + 0x18, g_mouse_x + 1, c, g_class_names[c->cls][0], g_class_names[c->cls][1], g_class_names[c->cls][2],
-			stat_color(get_char_level(c), c->f23), get_char_level(c),
-			stat_color(c->f125, calc_max_hp(c)), c->f125,
-			stat_color(c->f127, calc_max_sp(c)), c->f127,
+			stat_color(get_char_level(c), c->level), get_char_level(c),
+			stat_color(c->hp, calc_max_hp(c)), c->hp,
+			stat_color(c->sp, calc_max_sp(c)), c->sp,
 			stat_color(calc_armor_class(c, 0), calc_armor_class(c, 1)), calc_armor_class(c, 0),
 			g_condition_colors[cond], g_condition_names[cond][0], g_condition_names[cond][1], g_condition_names[cond][2], g_condition_names[cond][3]);
 	}
@@ -631,7 +631,7 @@ long far fix_identify_prompt(register struct chr *c, register int slot, int mode
 	long cost;
 
 	cost = get_item_price(c, slot, mode, flags);
-	if (c->id[slot] > 0x49) cost = 1;
+	if (c->item_id[slot] > 0x49) cost = 1;
 	sprintf(g_text_buf, "%s %s for %lu gold?", ident ? "Identify" : "Fix", format_item_name(c, slot, g_tmp_text, 0), cost);
 	return cost;
 }
@@ -643,7 +643,7 @@ void far draw_item_page_arrows(register struct chr *c, register int top)
 
 	if (!top) up = 11;
 	else up = 10;
-	if (!c->id[9] || top) down = 13;
+	if (!c->item_id[9] || top) down = 13;
 	else down = 12;
 	draw_icon(g_cur_icons, up, 0xf, 0x6d, 0);
 	draw_icon(g_cur_icons, down, 0x35, 0x6d, 0);
@@ -656,30 +656,30 @@ long far get_item_price(register struct chr *c, register int slot, int mode, int
 	long res;
 	int ff;
 
-	if (c->id[slot] > 0x49 && c->id[slot] != 0x4b && c->id[slot] != 0x52) return 0;
+	if (c->item_id[slot] > 0x49 && c->item_id[slot] != 0x4b && c->item_id[slot] != 0x52) return 0;
 	if (flags > 0x80 && mode == 2) ff = 1;
 	else ff = flags & 0x80;
 	flags &= 0x7f;
-	if (c->id[slot] == 0x4b) base = 2000;
-	else if (c->id[slot] == 0x52) base = 1000;
-	else base = g_item_base_prices[c->id[slot]];
-	switch (c->fb6[slot]) {
+	if (c->item_id[slot] == 0x4b) base = 2000;
+	else if (c->item_id[slot] == 0x52) base = 1000;
+	else base = g_item_base_prices[c->item_id[slot]];
+	switch (c->item_mat[slot]) {
 	case 1: base /= 10; break;
 	case 2: base >>= 2; break;
 	case 3: base >>= 1; break;
 	case 4: base -= base >> 2; break;
-	default: base *= g_material_price_mult[c->fb6[slot]]; break;
+	default: base *= g_material_price_mult[c->item_mat[slot]]; break;
 	}
-	m2 = g_elem_dmg_bonus[c->fa3[slot]] * 100;
-	m3 = g_attrib_bonus_values[c->fc9[slot]] * 100;
-	m4 = g_power_prices[c->fef[slot]];
+	m2 = g_elem_dmg_bonus[c->item_elem[slot]] * 100;
+	m3 = g_attrib_bonus_values[c->item_attr[slot]] * 100;
+	m4 = g_power_prices[c->item_power[slot]];
 	switch (mode) {
 	case 1: case 2:
-		if ((c->flg[slot] & 0xc0) && ff) base = m2 = m3 = m4 = 0;
+		if ((c->item_flags[slot] & 0xc0) && ff) base = m2 = m3 = m4 = 0;
 		res = (base + m2 + m3 + m4) / g_price_divisors[flags];
 		break;
 	case 3: case 4: case 5: case 6:
-		res = c->flg[slot] & 0x3f;
+		res = c->item_flags[slot] & 0x3f;
 		break;
 	}
 	return mode ? res : 0;
@@ -690,12 +690,12 @@ char *far format_item_name(register struct chr *c, int slot, register char *buf,
 {
 	int broken;
 
-	broken = c->flg[slot] & 0xc0;
+	broken = c->item_flags[slot] & 0xc0;
 	sprintf(buf, "%s%s%s%s%s\014%02u%s%s%s%s",
-		broken ? "" : g_elem_prefix_names[c->fa3[slot]], broken ? "" : g_material_names[c->fb6[slot]], broken ? "" : g_attrib_prefix_names[c->fc9[slot]],
-		c->flg[slot] & 0x80 ? "\01407broken " : "", c->flg[slot] & 0x40 ? "\01412cursed " : "",
-		n, g_item_names[c->id[slot]], broken || !c->fef[slot] ? "" : "of ", broken ? "" : g_power_names[c->fef[slot]],
-		broken || !c->fef[slot] ? "\b " : "");
+		broken ? "" : g_elem_prefix_names[c->item_elem[slot]], broken ? "" : g_material_names[c->item_mat[slot]], broken ? "" : g_attrib_prefix_names[c->item_attr[slot]],
+		c->item_flags[slot] & 0x80 ? "\01407broken " : "", c->item_flags[slot] & 0x40 ? "\01412cursed " : "",
+		n, g_item_names[c->item_id[slot]], broken || !c->item_power[slot] ? "" : "of ", broken ? "" : g_power_names[c->item_power[slot]],
+		broken || !c->item_power[slot] ? "\b " : "");
 	if (*buf == '\014') buf[3] = toupper(buf[3]);
 	else *buf = toupper(*buf);
 	return buf;

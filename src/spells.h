@@ -4,17 +4,17 @@
 typedef unsigned char u8;
 
 struct chr {
-	u8 f00[0x1a], f1a, f1b[0xb], f26, f27[0x50], f77, f78, f79, f7a[3];
-	u8 eq[0x13], f90[0x4c], id[0x13], fef[0x13];
-	u8 f102, f103, f104, f105, f106[0xd];
-	u8 cond[0x10], f123[2];
+	u8 f00[0x1a], endur, f1b[0xb], age_mod, f27[0x50], beacon_map, beacon_x, beacon_y, f7a[3];
+	u8 item_eq[0x13], f90[0x4c], item_id[0x13], item_power[0x13];
+	u8 bless, shield, holy, hero, f106[0xd];
+	u8 cond[0x10], inn[2];
 	int hp, sp;
 	u8 f129[6];
 };
 extern struct chr g_party[], *g_cur_char;
 
 extern int g_attack_damage, g_attack_type, g_attack_scope, g_light_count, g_fire_resist, g_elec_resist, g_cold_resist, g_poison_resist, g_food;
-extern int g_spell_gem_costs[], g_spell_sp_costs[], g_dir_block_bits[], g_mon_type[], g_mon_hp[], g_draw_list[], g_mon_x[], g_mon_y[], g_d674, g_d676;
+extern int g_spell_gem_costs[], g_spell_sp_costs[], g_dir_block_bits[], g_mon_type[], g_mon_hp[], g_draw_list[], g_mon_x[], g_mon_y[], g_draw_list_x, g_draw_list_y;
 extern unsigned long g_party_gems;
 extern u8 g_game_mode, g_portrait_click_on, g_party_count, g_monster_scan_delay, g_view_dirty, g_spell_moved_party, g_rope_created, g_light_changed, g_levitate, g_wizard_eye, g_walk_on_water;
 extern u8 g_party_dir, g_party_x, g_party_y, g_map_num, g_cur_town, g_day, g_mon_count, g_mon_d0c_1, g_mon_d0c_2, g_mon_d0c_3;
@@ -25,8 +25,8 @@ extern char *g_msg_spell_failed, *g_spell_names[], *g_cost_names[], *g_monster_s
 extern char *g_btn_xs, *g_btn_ys, *g_btn_ws, *g_btn_hs;
 extern char g_element_btn_xs[], g_element_btn_ys[], g_element_btn_ws[], g_element_btn_hs[], g_element_dlg_sprites[], g_train_btn_xs[], g_train_btn_ys[], g_train_btn_ws[], g_train_btn_hs[], g_train_sprites[];
 extern char g_text_buf[];
-extern char far *g_cur_icons, far *g_element_dlg_icn, far *g_train_sprites_img, far *g_d670;
-extern u8 far *g_mon_special, far *g_f056, far *g_f07e;
+extern char far *g_cur_icons, far *g_element_dlg_icn, far *g_train_sprites_img, far *g_draw_list_img;
+extern u8 far *g_mon_special, far *g_mon_num_attacks, far *g_mon_ac;
 extern u8 g_natgate_maps[], g_natgate_xs[], g_natgate_ys[], g_element_sounds[], g_element_pow_anims[];
 
 void far show_message(char *);

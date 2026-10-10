@@ -29,7 +29,7 @@ int far char_can_shoot(struct chr *p)
 	register int i;
 
 	for (i = 0; i < 0x12; i++)
-		if (p->id[i] >= 0x1e && p->id[i] <= 0x21 && p->eq[i])
+		if (p->item_id[i] >= 0x1e && p->item_id[i] <= 0x21 && p->item_eq[i])
 			switch (get_worst_condition(p)) {
 			case 8: case 11: case 12: case 13: case 14: case 15:
 				return 0;
@@ -500,7 +500,7 @@ void far spell_blessed(void)
 	if ((k = spell_pick_party_member(0x15)) != -1) {
 		play_sfx(0x34);
 		spell_heal_char(&g_party[k], 0);
-		g_party[k].f102 = get_char_level(g_cur_char);
+		g_party[k].bless = get_char_level(g_cur_char);
 		draw_party_portraits();
 	}
 }
@@ -550,7 +550,7 @@ void far spell_identify_monster(void)
 		}
 		m = g_mon_type[k];
 		sprintf(s[i], "\x03l\n%s\x03" "c\t100%u\t140%u\t180%u\x03r\t250%s",
-			g_monster_names[m], g_mon_hp[k], g_f07e[m], g_f056[m], g_monster_special_names[g_mon_special[m]]);
+			g_monster_names[m], g_mon_hp[k], g_mon_ac[m], g_mon_num_attacks[m], g_monster_special_names[g_mon_special[m]]);
 	}
 	play_sfx(0x14);
 	sprintf(g_text_buf, "Name\x03" "c\t100HP\t140AC\t177#Atks\x03r\t250Special%s%s%s", s[0], s[1], s[2]);
@@ -568,7 +568,7 @@ void far spell_holy_bonus(void)
 	if ((k = spell_pick_party_member(0x19)) != -1) {
 		play_sfx(0x34);
 		spell_heal_char(&g_party[k], 0);
-		g_party[k].f104 = get_char_level(g_cur_char);
+		g_party[k].holy = get_char_level(g_cur_char);
 		draw_party_portraits();
 	}
 }
@@ -633,7 +633,7 @@ void far spell_heroism(void)
 	if ((k = spell_pick_party_member(0x1e)) != -1) {
 		play_sfx(0x34);
 		spell_heal_char(&g_party[k], 0);
-		g_party[k].f105 = get_char_level(g_cur_char);
+		g_party[k].hero = get_char_level(g_cur_char);
 		draw_party_portraits();
 	}
 }
@@ -671,13 +671,13 @@ void far spell_lloyds_beacon(void)
 	g_btn_ys = g_train_btn_ys;
 	g_btn_ws = g_train_btn_ws;
 	g_btn_hs = g_train_btn_hs;
-	if (!g_cur_char->f77) {
-		g_cur_char->f77 = 1;
-		g_cur_char->f78 = 2;
-		g_cur_char->f79 = 5;
+	if (!g_cur_char->beacon_map) {
+		g_cur_char->beacon_map = 1;
+		g_cur_char->beacon_x = 2;
+		g_cur_char->beacon_y = 5;
 	}
 	sprintf(g_text_buf, "\x05%p\x03" "cLloyd's Beacon\n\nLast Location\n\n%s\x03l\nx = %d\x03r\t077y = %d\x03" "c\x02\x0b" "122\t021\x0c" "27S\x0c" "det\t060\x0c" "27R\x0c" "deturn\x01",
-		g_train_sprites, g_map_names[g_cur_char->f77], g_cur_char->f78, g_cur_char->f79);
+		g_train_sprites, g_map_names[g_cur_char->beacon_map], g_cur_char->beacon_x, g_cur_char->beacon_y);
 	open_text_window(0xe2, 0, 0x5d, 0x92, 0, 0x96, 4, 6, g_text_buf);
 	for (;;) {
 		k = get_input();
@@ -686,18 +686,18 @@ void far spell_lloyds_beacon(void)
 			play_sfx(0x33);
 			pop_icons();
 			pop_icons();
-			if (g_cur_char->f77 != g_map_num) enter_maze(g_cur_char->f77);
+			if (g_cur_char->beacon_map != g_map_num) enter_maze(g_cur_char->beacon_map);
 			push_icons("cast.icn");
 			push_icons("lloyds.icn");
-			g_party_x = g_cur_char->f78;
-			g_party_y = g_cur_char->f79;
+			g_party_x = g_cur_char->beacon_x;
+			g_party_y = g_cur_char->beacon_y;
 			update_outdoor_quadrant();
 			break;
 		case 1: case 'S':
 			play_sfx(0x14);
-			g_cur_char->f77 = g_cur_town;
-			g_cur_char->f78 = g_party_x;
-			g_cur_char->f79 = g_party_y;
+			g_cur_char->beacon_map = g_cur_town;
+			g_cur_char->beacon_x = g_party_x;
+			g_cur_char->beacon_y = g_party_y;
 			break;
 		case 0x1b:
 			break;
@@ -720,7 +720,7 @@ void far spell_power_shield(void)
 	if ((k = spell_pick_party_member(0x22)) != -1) {
 		play_sfx(0x14);
 		spell_heal_char(&g_party[k], 0);
-		g_party[k].f103 = get_char_level(g_cur_char);
+		g_party[k].shield = get_char_level(g_cur_char);
 		draw_party_portraits();
 	}
 }
@@ -762,9 +762,9 @@ void far spell_detect_monster(void)
 	memset(cnt, 0, 0x31);
 	memset(g_draw_list, 0, 0xfa0);
 	g_draw_list[0] = -1;
-	g_d670 = img;
-	g_d674 = 4;
-	g_d676 = 0x18;
+	g_draw_list_img = img;
+	g_draw_list_x = 4;
+	g_draw_list_y = 0x18;
 	n = 7;
 	dy = 4;
 	for (r = 0; r < 7; r++) {
@@ -1112,7 +1112,7 @@ void far spell_raise_dead(void)
 		p->hp = 0;
 		play_sfx(0x34);
 		spell_heal_char(p, 1);
-		if ((int)(p->f1a -= 1) < 1) p->f1a = 1;
+		if ((int)(p->endur -= 1) < 1) p->endur = 1;
 		draw_party_portraits();
 	}
 }
@@ -1267,10 +1267,10 @@ void far spell_resurrect(void)
 		play_sfx(0x34);
 		spell_heal_char(p, 0);
 		p->cond[15] = 0;
-		p->f1a -= 1;
-		if ((int)p->f1a < 1) p->f1a = 1;
-		if (p->f26 + 5 > 0xfa) p->f26 = 0xfa;
-		else p->f26 += 5;
+		p->endur -= 1;
+		if ((int)p->endur < 1) p->endur = 1;
+		if (p->age_mod + 5 > 0xfa) p->age_mod = 0xfa;
+		else p->age_mod += 5;
 		draw_party_portraits();
 	}
 }
@@ -1332,8 +1332,8 @@ void far spell_divine_intervention(void)
 	register struct chr *p;
 	register int i;
 
-	if (g_cur_char->f26 + 5 > 0xfa) g_cur_char->f26 = 0xfa;
-	else g_cur_char->f26 += 5;
+	if (g_cur_char->age_mod + 5 > 0xfa) g_cur_char->age_mod = 0xfa;
+	else g_cur_char->age_mod += 5;
 	for (i = 0; i < g_party_count; i++) {
 		p = &g_party[i];
 		v = p->cond[15];

@@ -1,24 +1,24 @@
 #include "events.h"
 
-void far char_take_damage(register struct mon *p, int dmg)
+void far char_take_damage(register struct chr *p, int dmg)
 {
 	int flag;
 	register int d;
 
-	p->w125 -= dmg;
-	flag = p->w125 <= -10;
-	if (p->w125 < 1) {
-		d = p->w125 + calc_max_hp(p);
+	p->hp -= dmg;
+	flag = p->hp <= -10;
+	if (p->hp < 1) {
+		d = p->hp + calc_max_hp(p);
 		if (d < 1) {
 			flag = p->cond[0xd] = 1;
-			if (p->w125 > 0)
-				p->w125 = 0;
+			if (p->hp > 0)
+				p->hp = 0;
 		} else
 			p->cond[0xc] = 1;
 		if (flag)
 			for (d = 0; d < 0x12; d++)
-				if (p->bdc[d] > 0x21 && p->bdc[d] < 0x2a && p->b7d[d]) {
-					p->b90[d] |= 0x80;
+				if (p->item_id[d] > 0x21 && p->item_id[d] < 0x2a && p->item_eq[d]) {
+					p->item_flags[d] |= 0x80;
 					break;
 				}
 	}
@@ -59,7 +59,7 @@ void far hit_whole_party(void)
 	spell_attack_monsters(0xb);
 }
 
-int far get_condition_stat_mod(struct mon far *p, int stat)
+int far get_condition_stat_mod(struct chr far *p, int stat)
 {
 	register int might, intel, pers, endur, speed, acc, luck;
 
@@ -152,7 +152,7 @@ void far update_outdoor_quadrant(void)
 				g_cur_town = g_map_num = g_quadrant_maps[g_map_quadrant];
 			}
 		} else if ((char)g_party_x > 7 && g_map_quadrant & 1) {
-			load_maze_data(g_cbb3 - 1);
+			load_maze_data(g_maps_1_base_map - 1);
 			g_map_quadrant ^= 1;
 			g_cur_town = g_map_num = g_quadrant_maps[g_map_quadrant];
 		}
@@ -163,33 +163,33 @@ void far update_outdoor_quadrant(void)
 				g_cur_town = g_map_num = g_quadrant_maps[g_map_quadrant];
 			}
 		} else if ((char)g_party_y > 7 && g_map_quadrant > 1) {
-			load_maze_data(g_cef3 - 1);
+			load_maze_data(g_maps_2_base_map - 1);
 			g_map_quadrant -= 2;
 			g_cur_town = g_map_num = g_quadrant_maps[g_map_quadrant];
 		}
 		if ((char)g_party_x < 0) {
-			if (g_maps[g_map_quadrant].b30b) {
+			if (g_maps[g_map_quadrant].west) {
 				g_map_quadrant--;
 				g_party_x &= 0xf;
 			} else
 				g_party_x = 0;
 			g_map_num = g_quadrant_maps[g_map_quadrant];
 		} else if ((char)g_party_x > 0xf) {
-			if (g_maps[g_map_quadrant].b309) {
+			if (g_maps[g_map_quadrant].east) {
 				g_map_quadrant++;
 				g_party_x &= 0xf;
 			} else
 				g_party_x = 0xf;
 			g_map_num = g_quadrant_maps[g_map_quadrant];
 		} else if ((char)g_party_y < 0) {
-			if (g_maps[g_map_quadrant].b30a) {
+			if (g_maps[g_map_quadrant].south) {
 				g_map_quadrant -= 2;
 				g_party_y &= 0xf;
 			} else
 				g_party_y = 0;
 			g_map_num = g_quadrant_maps[g_map_quadrant];
 		} else if ((char)g_party_y > 0xf) {
-			if (g_maps[g_map_quadrant].b308) {
+			if (g_maps[g_map_quadrant].north) {
 				g_map_quadrant += 2;
 				g_party_y &= 0xf;
 			} else
@@ -202,7 +202,7 @@ void far update_outdoor_quadrant(void)
 			for (i = 0; i < 4; i++)
 				if (g_quadrant_maps[i] == old)
 					for (j = 0; j < 7; j++)
-						if (g_maps[g_map_quadrant].b300[j] != g_maps[i].b300[j]) {
+						if (g_maps[g_map_quadrant].surface[j] != g_maps[i].surface[j]) {
 							save = g_cur_town;
 							load_maze_gfx(g_map_num - 1);
 							g_cur_town = save;
@@ -304,7 +304,7 @@ next:
 					}
 					break;
 				case 1:	/* OP_DoorTextSml */
-					g_door_icon_img = g_c4b6;
+					g_door_icon_img = g_wall_gfx_4;
 					sprintf(g_view_caption, g_fmt_door_text_sml, g_door_icon_sprite, g_text_buf2);
 					break;
 				case 2:	/* OP_DoorTextLrg */
@@ -402,19 +402,19 @@ next:
 					if (who == 0 && g_maze_script[ip + 6] != 0x2c) {
 						i = r = 0;
 						for (; i < g_party_count; i++)
-							r |= ovr_1800_0034(g_maze_script[ip + 6], v1, g_maze_script[ip + 5] - 8, i);
+							r |= event_compare_value(g_maze_script[ip + 6], v1, g_maze_script[ip + 5] - 8, i);
 						if (!r)
 							break;
 						line = tmp2 - 1;
 						break;
 					}
-					if (!ovr_1800_0034(g_maze_script[ip + 6], v1, g_maze_script[ip + 5] - 8, who - 1))
+					if (!event_compare_value(g_maze_script[ip + 6], v1, g_maze_script[ip + 5] - 8, who - 1))
 						break;
 					line = tmp2 - 1;
 					break;
 				case 10:	/* OP_MoveObj */
 					if (g_map_objects[g_maze_script[ip + 6]].y == g_maze_script[ip + 8] && g_map_objects[g_maze_script[ip + 6]].x == g_maze_script[ip + 7])
-						g_map_objects[g_maze_script[ip + 6]].w10 ^= 1;
+						g_map_objects[g_maze_script[ip + 6]].attr ^= 1;
 					else {
 						g_map_objects[g_maze_script[ip + 6]].y = g_maze_script[ip + 8];
 						g_map_objects[g_maze_script[ip + 6]].x = g_maze_script[ip + 7];
@@ -488,16 +488,16 @@ next:
 					if (g_maze_script[ip + 5] == 0x1d) {
 						if (who == 0) {
 							for (i = 0; i < g_party_count; i++) {
-								if (ovr_1800_0034(g_maze_script[ip + 6], v1, 1, i) && ovr_1800_0034(op2, v2, 1, i)) {
+								if (event_compare_value(g_maze_script[ip + 6], v1, 1, i) && event_compare_value(op2, v2, 1, i)) {
 									event_take_give(0, 0L, op3, v3, i);
 									if (op3 == 0x52)
 										break;
 								}
 							}
 						} else {
-							if (!ovr_1800_0034(g_maze_script[ip + 6], v1, 1, who - 1))
+							if (!event_compare_value(g_maze_script[ip + 6], v1, 1, who - 1))
 								break;
-							if (!ovr_1800_0034(op2, v2, 1, who - 1))
+							if (!event_compare_value(op2, v2, 1, who - 1))
 								break;
 							event_take_give(0, 0L, op3, v3, who - 1);
 						}
@@ -506,14 +506,14 @@ next:
 					if (g_maze_script[ip + 5] == 0x1c || g_maze_script[ip + 5] == 0x21) {
 						if (who == 0) {
 							for (i = 0; i < g_party_count; i++) {
-								if (ovr_1800_0034(g_maze_script[ip + 6], v1, g_maze_script[ip + 5] == 0x21 ? 2 : 1, i)) {
+								if (event_compare_value(g_maze_script[ip + 6], v1, g_maze_script[ip + 5] == 0x21 ? 2 : 1, i)) {
 									event_take_give(0, 0L, op2, v2, i);
 									if (op2 == 0x52)
 										break;
 								}
 							}
 						} else {
-							if (!ovr_1800_0034(g_maze_script[ip + 6], v1, g_maze_script[ip + 5] == 0x21 ? 2 : 1, who - 1))
+							if (!event_compare_value(g_maze_script[ip + 6], v1, g_maze_script[ip + 5] == 0x21 ? 2 : 1, who - 1))
 								break;
 							event_take_give(0, 0L, op2, v2, who - 1);
 						}
@@ -974,7 +974,7 @@ void far move_monsters(void)
 				yy = py + dy;
 				for (j = 0; j < g_mon_count; j++) {
 					if (g_mon_y[j] == yy && g_mon_x[j] == xx && (g_mon_visible[j] || g_game_mode == 5) && !g_monster_moved[j]) {
-						if ((g_party_x == xx || g_party_y == yy) && g_f03a[g_mon_type[j]] && !g_monster_queued[j]
+						if ((g_party_x == xx || g_party_y == yy) && g_mon_ranged[g_mon_type[j]] && !g_monster_queued[j]
 						    && j + 1 != g_mon_d0c_1 && j + 1 != g_mon_d0c_2 && j + 1 != g_mon_d0c_3 && !g_mon_status[j]) {
 							queue_ranged_attack(g_mon_type[j], xx, yy);
 							g_monster_queued[j] = 1;

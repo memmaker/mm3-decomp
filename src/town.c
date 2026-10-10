@@ -9,7 +9,7 @@ void far charge_hirelings(void)
 	unsigned long cost;
 	char buf[7][0x32];
 	register int i;
-	register struct mon *c;
+	register struct chr *c;
 
 	push_buttons();
 	set_anykey_buttons();
@@ -26,9 +26,9 @@ void far charge_hirelings(void)
 		default:
 			flag = 0;
 		}
-		cost = (long)(c->lvl * c->lvl) * 20;
+		cost = (long)(c->level * c->level) * 20;
 		paid = flag ? flag : g_party_gold >= cost;
-		sprintf(buf[n - 1], "%s\x03r\t080%u\x03l\t101%lu\x03" "c\t180%s\x03l\n", c, c->lvl, !flag ? cost : 0L,
+		sprintf(buf[n - 1], "%s\x03r\t080%u\x03l\t101%lu\x03" "c\t180%s\x03l\n", c, c->level, !flag ? cost : 0L,
 			flag ? "UnAble" : paid ? "Paid" : "Left");
 		if (paid) {
 			if (!flag) g_party_gold -= cost;
@@ -129,10 +129,10 @@ void far run_arena(void)
 			}
 		_fstrncpy(g_text_buf, g_map_text + g_maze_text_offs[3], 0x12c);
 		for (i = 0; i < g_party_count; i++) {
-			g_party[i].b4e++;
-			g_party[i].gold += g_party[i].b4e * 1000;
+			g_party[i].arena_wins++;
+			g_party[i].exp += g_party[i].arena_wins * 1000;
 		}
-		sprintf(g_text_buf2, g_text_buf, g_party[0].b4e, (unsigned long)g_party[0].b4e * 1000);
+		sprintf(g_text_buf2, g_text_buf, g_party[0].arena_wins, (unsigned long)g_party[0].arena_wins * 1000);
 		face_yes_no_dialog(8, "The Arena", g_text_buf2, 1, 0);
 		g_map_num = 1;
 		g_mon_count = 0;
@@ -172,7 +172,7 @@ done:
 		g_party_x = g_party_y = 7;
 		g_party_dir = 0;
 		g_mouse_x = g_mon_count = 0;
-		i = g_party[0].b4e + 5;
+		i = g_party[0].arena_wins + 5;
 		if (i > 0x50) i = 0x50;
 		g_mon_x[g_mouse_x] = random_range(1, 6) + 6;
 		g_mon_y[g_mouse_x] = random_range(1, 6) + 6;
@@ -256,20 +256,20 @@ void far free_maze_resources(int all)
 	free_and_null(&g_map_text);
 	if (all) {
 		free_and_null(&g_mon_max_hp);
-		free_and_null(&g_f07e);
+		free_and_null(&g_mon_ac);
 		free_and_null(&g_mon_speed);
-		free_and_null(&g_f06a);
-		free_and_null(&g_f076);
-		free_and_null(&g_f056);
-		free_and_null(&g_f06e);
+		free_and_null(&g_mon_dmg_dice);
+		free_and_null(&g_mon_dmg_sides);
+		free_and_null(&g_mon_num_attacks);
+		free_and_null(&g_mon_exp);
 		free_and_null(&g_mon_dmg_type);
 		free_and_null(&g_mon_attack_pref);
 		free_and_null(&g_mon_special);
-		free_and_null(&g_f03a);
+		free_and_null(&g_mon_ranged);
 		free_and_null(&g_mon_hit_bonus);
 		free_and_null(&g_mon_treasure);
-		free_and_null(&g_f032);
-		free_and_null(&g_f036);
+		free_and_null(&g_mon_gold);
+		free_and_null(&g_mon_gems);
 		free_and_null(&g_mon_res_magic);
 		free_and_null(&g_mon_res_fire);
 		free_and_null(&g_mon_res_elec);
@@ -286,7 +286,7 @@ void far init_game_flags(void)
 	register int i;
 
 	memset(g_game_flags, 0, 0x20);
-	for (i = 0x10; i < 0x18; i++) fn_1523_0238(g_game_flags, i, 1);
+	for (i = 0x10; i < 0x18; i++) set_bit(g_game_flags, i, 1);
 }
 
 /* 0bc2: arena monster slots */
@@ -314,8 +314,8 @@ int far game_main_loop(void)
 	r = 1;
 	memset(g_quadrant_maps, 0xff, 4);
 	clear_party_attack_flags();
-	g_death_spr.y = 0xc6;
-	g_death_spr.x = -0xb4;
+	g_death_spr.bot_y = 0xc6;
+	g_death_spr.top_y = -0xb4;
 	load_faces(g_party_count);
 	enter_maze(g_map_num);
 	update_outdoor_quadrant();
@@ -353,7 +353,7 @@ turn:
 		case 0xf2:
 			if (!get_cell_walls_region(g_party_x, g_party_y, g_dir_block_bits[g_party_dir])) {
 fwd:
-				if (g_c873 == 0x16) {
+				if (g_maps_0_base_map == 0x16) {
 					if (g_party_y < 8 && !g_force_zone1_entered) {
 						for (k = 0x1d; k < 0x38; k++)
 							if (((g_mon_y[k] | g_mon_x[k]) & 0xff) != 0x80) {
@@ -420,7 +420,7 @@ turned:
 				if (random_range(1, 4) == 1)
 					damage_party(g_maps[g_map_quadrant][0x31e], random_range(0, 6), k);
 				if (get_thievery(&g_party[k]) + random_range(1, 0x14) < g_maps[g_map_quadrant][0x311]) break;
-				g_party[k].gold += get_char_level(&g_party[k]) * g_maps[g_map_quadrant][0x311] * 10;
+				g_party[k].exp += get_char_level(&g_party[k]) * g_maps[g_map_quadrant][0x311] * 10;
 				set_cell_wall(g_party_x, g_party_y, g_party_dir, 6);
 				g_mouse_x = g_party_x;
 				g_mouse_y = g_party_y;
@@ -580,14 +580,14 @@ out:
 			k = 0;
 			do {
 				draw_sprites(&g_death_spr);
-				g_death_spr.x += 8;
-				g_death_spr.y -= 4;
+				g_death_spr.top_y += 8;
+				g_death_spr.bot_y -= 4;
 				if (++k == 1) play_sfx(0x22);
 				if (g_snd_dev_0 && k % 9 == 0) play_sfx(0x23);
-			} while (g_death_spr.x < 0 && !bioskey(1) && !g_user_break);
+			} while (g_death_spr.top_y < 0 && !bioskey(1) && !g_user_break);
 			play_sfx(0x21);
-			g_death_spr.x = 0;
-			g_death_spr.y = 0x6c;
+			g_death_spr.top_y = 0;
+			g_death_spr.bot_y = 0x6c;
 			draw_sprites(&g_death_spr);
 			set_anykey_buttons();
 			idle_frames_or_key(0x1e);

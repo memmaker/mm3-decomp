@@ -11,8 +11,8 @@
 #include <mem.h>
 typedef unsigned char u8;
 
-struct spr { int flag; char far *img; int x, y, f6, frame; };
-struct chr { u8 f00[0x13]; u8 cls; u8 f14[0x25]; u8 st[0x44]; u8 eq[0x13], f90[0x13], fa3[0x13], fb6[0x13], fc9[0x13], id[0x13], fef[0x13], f102[0x2d]; };
+struct spr { int flag; char far *img; int x, y, attr, frame; };
+struct chr { u8 f00[0x13]; u8 cls; u8 f14[0x25]; u8 award[0x44]; u8 item_eq[0x13], item_flags[0x13], item_elem[0x13], item_mat[0x13], item_attr[0x13], item_id[0x13], item_power[0x13], f102[0x2d]; };
 extern struct spr g_anim_sprites[];
 
 extern int g_video_mode, g_user_break, g_talk_frame_pos, g_cine_voice_sizes[];
@@ -20,12 +20,12 @@ extern unsigned g_free_mem_kb, g_intro_talk_times[][0x21];
 extern unsigned long g_anim_ticks;
 extern char g_boss_key_busy, g_music_enabled, g_music_on, g_music_load_pending, g_snd_dev_0, g_highlighted_char;
 extern u8 g_mon_scan_pending, g_mon_missile_active, g_game_mode, g_party_count, g_combat_party_n, g_map_num, g_party_x, g_party_y, g_party_dir, g_cfg_video;
-extern u8 g_ranged_attackers[], g_combat_order[], g_missile_pos[], g_c516[], g_shop_stock_flags_t1[][3][9], g_e988[][3][9], g_shop_stock_mats_t1[][3][9], g_ea96[][3][9],
-	g_shop_stock_ids_t1[][3][9], g_shop_stock_powers_t1[][3][9], g_shop_inv_materials, g_shop_inv_powers, g_shop_inv_elems, g_shop_inv_attribs, g_shop_inv_flags, g_c34e, g_party[][0x12f];
+extern u8 g_ranged_attackers[], g_combat_order[], g_missile_pos[], g_missile_attackers[], g_shop_stock_flags_t1[][3][9], g_shop_stock_elems_t1[][3][9], g_shop_stock_mats_t1[][3][9], g_shop_stock_attribs_t1[][3][9],
+	g_shop_stock_ids_t1[][3][9], g_shop_stock_powers_t1[][3][9], g_shop_inv_materials, g_shop_inv_powers, g_shop_inv_elems, g_shop_inv_attribs, g_shop_inv_flags, g_scratch_char, g_party[][0x12f];
 extern u8 far *g_mon_dmg_type;
 extern u8 g_missile_icons[], g_missile_sounds[], g_building_exit_xy[][5][2], g_align_quest_bits[], g_ranged_dist_delays[], g_shop_item_levels[], g_shop_cat_min_ids[], g_shop_cat_max_ids[], g_intro_talk_frames[][0x21],
 	g_fixed_stock_ids[][3][9], g_fixed_stock_materials[][3][9], g_fixed_misc_charges[][9], g_fixed_misc_powers[][9];
-extern int g_8dfa[], g_text_offsets[], g_intro_talk_end_tick;
+extern int g_guild_msg_text_offs[], g_text_offsets[], g_intro_talk_end_tick;
 extern char *g_boss_file_name, *g_config_file_names[], *g_alignment_names[], *g_item_names[];
 extern char g_text_buf2[], g_tmp_text[], g_text_buf[], g_prev_music[], g_cur_music[], g_game_flags[], g_cine_name_buf[];
 extern char far *g_pow_icon, far *g_cur_icons, far *g_global_icons, far *g_cpanel_frame_img, far *g_cpanel_buttons_img, far *g_combat_menu_img, far *g_text_table, far *g_music_buf,
