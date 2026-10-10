@@ -9,3 +9,10 @@ run/build/*
 !run/build/BUILD.BAT
 tools/__pycache__/
 .DS_Store
+run/exp*/
+run/w_*/*
+!run/w_asm/gen.py
+!run/w_asm/verify.py
+run/link/*
+!run/link/LINK.BAT
+!run/link/LINK.RSP

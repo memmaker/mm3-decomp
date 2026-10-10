@@ -1,8 +1,9 @@
 #!/bin/bash
-# asmdiff.sh SEG_ROOT_OFF OBJ_FN_START OBJ_FN_LEN ORIG_SEG_OFF [LINES]: disassemble one function from the last cmpobj dump vs orig and diff
-S=/tmp/claude-501/-Users-felix-Projects-decomp-might-magic/42c217d5-cca5-456c-8b3f-48fb9422ef46/scratchpad
+# asmdiff.sh SEG_ROOT_OFF OBJ_FN_START OBJ_FN_LEN ORIG_SEG_OFF [LINES] [OBJ.bin]: disassemble one function from a cmpobj
+# dump (default: the newest run/build dump) vs orig and diff. Leaves $OBJBIN.orig / $OBJBIN.fn for inspection.
+B=${6:-run/build/INIT.OBJ.bin}
 cd "$(dirname "$0")/.." && python3 -I -c "
 d=open('orig/MM3.EXE','rb').read()[3584:]
-open('$S/orig.bin','wb').write(d[0x$1+0x$4:0x$1+0x$4+0x$3])
-open('$S/objfn.bin','wb').write(open('$S/obj.bin','rb').read()[0x$2:0x$2+0x$3])"
-diff <(ndisasm -b16 $S/orig.bin | cut -c29-) <(ndisasm -b16 $S/objfn.bin | cut -c29-) | head -${5:-40}
+open('$B.orig','wb').write(d[0x$1+0x$4:0x$1+0x$4+0x$3])
+open('$B.fn','wb').write(open('$B','rb').read()[0x$2:0x$2+0x$3])"
+diff <(ndisasm -b16 -o0x$4 $B.orig | cut -c1-9,29-) <(ndisasm -b16 -o0x$4 $B.fn | cut -c1-9,29-) | head -${5:-40}

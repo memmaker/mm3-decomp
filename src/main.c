@@ -9,10 +9,12 @@ typedef unsigned char u8;
 
 extern char g_e610[], g_d256[], g_ece8[];
 extern char far *g_a76a, far *g_a78a, far *g_e8c2, far *g_eca8, far *g_abec;
-extern int g_c51e, g_8b6f;
+extern int g_c51e;
 extern u8 g_acbd, g_acbe, g_acbf, g_acc0;
 extern char g_c4ca, g_abb5, g_ec90, g_c49c;
 extern char g_0152, g_0153, g_0154, g_0155, g_0156, g_0157, g_0158, g_0159, g_e8f8, g_e8f9;
+
+#include "mdata.inc"
 
 void far ovr_17f2_0066(void);
 void far ovr_17f2_007f(void);
@@ -99,7 +101,7 @@ l53:
 		}
 	}
 	if (argc != 1) {
-		g_8b6f = 0;
+		directvideo = 0;
 		cputs("\r\nMight and Magic ]I[ - Version 1.0\n\n");
 		exit(1);
 	}

@@ -22,12 +22,12 @@ extern char mon_size_check[sizeof(struct mon) == 0x12f ? 1 : -1];       /* monst
 void far fn_1523_0238(u8 *p, u16 bit, int set);
 void far fn_1523_1ec7(void);
 u8 far fn_1523_1c1a(struct mon *m);
-int far fn_1839_0084(int);
+int far ovr_1839_0084(int);
 /* overlays */
-void far ovr_17f2_0cfd(void);
-void far ovr_1806_0000(void);
-void far ovr_1806_0259(void);
-void far ovr_1816_03f3(int);
+void far ovr_17f2_0034(void);
+void far ovr_1806_0048(void);
+void far ovr_1806_0020(void);
+void far ovr_1816_0089(int);
 extern char g_b9fd[];            /* monster condition flags, 303 bytes per monster */
 extern u8 g_015b, g_017e, g_a75d, g_c52b;
 extern char g_e8c1;
@@ -54,7 +54,7 @@ extern char g_12ca[][46], g_1382[][46];       /* per-facing x / y offsets */
 extern u8 g_ece0;                              /* object count */
 extern u8 g_00b6, g_ec96, g_e8ba, g_ac23, g_ac22, g_ac21, g_ac16, g_ac15, g_ac14, g_ac02, g_ac01, g_c4c7, g_c4c6;
 extern u8 g_ac26, g_ece5, g_acc5, g_c4d7, g_ece6, g_ad4e, g_c52a, g_c49d, g_abbe, g_eca2, g_abbf, g_ecd6, g_e8c0, g_b98e, g_a76e, g_c53c, g_b98f, g_abb3, g_c53d;
-void far fn_0903_213b(int);
+void far fn_1903_213b(int);
 /* fn_1523_0f7d */
 extern int g_ad70[], g_aec4[], g_b2c0[];       /* monster y, x, visible flag */
 extern u8 g_c4a2, g_c4a3, g_c4a4, g_c4a5, g_c4a6, g_c4a7, g_c4a8, g_c4a9;
@@ -72,10 +72,10 @@ extern u16 g_0f60[], g_0ffa[];
 extern char g_0f90[], g_0acd[], g_0a9f[];
 extern u8 g_0a27[], g_0c87[];
 extern int g_0fd2[][10];
-void far fn_0903_2328(void);
-int far fn_0903_0129(int);
-int far fn_0903_010e(int);
-int far fn_0903_015f(struct mon far *, int);
+void far fn_1903_2328(void);
+int far fn_1903_0129(int);
+int far fn_1903_010e(int);
+int far fn_1903_015f(struct mon far *, int);
 int far fn_1523_1be4(struct mon far *, int);
 int far fn_1523_1c3b(struct mon far *, int);
 /* fn_1523_1ec7 */

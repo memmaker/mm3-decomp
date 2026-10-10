@@ -41,10 +41,10 @@ extern u8 g_b9bb[], g_ab52[];
 extern long g_c4ae, g_c4aa, g_a742;
 int *far fn_1523_33fa(int *o);
 int *far fn_1523_39c1(int *o);
-void far fn_0903_213b(int);
+void far fn_1903_213b(int);
 /* 0b35 */
 extern u8 g_017f, g_c52c;
 void far fn_1523_0920(void);
 void far fn_1523_0f7d(void);
-void far fn_0903_2328(void);
+void far fn_1903_2328(void);
 extern u8 ;

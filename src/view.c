@@ -4,7 +4,7 @@ void far fn_1523_0005(void)
 {
 	int i;
 	for (i = 0; i < g_ed72; i++)
-		if (g_b810[i] && fn_1839_0084(g_b6bc[i]))
+		if (g_b810[i] && ovr_1839_0084(g_b6bc[i]))
 			g_b810[i] = 0;
 }
 
@@ -43,15 +43,15 @@ void far fn_1523_00ef(int ticks)
 		}
 	}
 	if ((g_ec35 % 10 == 1 || ticks > 1440) && g_ec35 != prev) {
-		ovr_17f2_0cfd();
-		ovr_1806_0259();
+		ovr_17f2_0034();
+		ovr_1806_0020();
 	}
 	if (g_ec35 != prev)
 		g_00ae = 1;
 	if (g_00ae && g_ec42 >= 300) {
 		if (g_c520 != 9) {
-			ovr_1806_0000();
-			ovr_1816_03f3(1);
+			ovr_1806_0048();
+			ovr_1816_0089(1);
 			if (g_ecb4 == 0)
 				fn_1523_1ec7();
 		}
@@ -65,15 +65,15 @@ int far fn_1523_01ba(int cond)
 	for (i = n = 0; i < g_e8ea; i++) {
 		if (g_b9fd[i * 303 + cond]) {
 			n++;
-			switch (cond) {
+			switch (_AX = cond)   /* selector through ax: mov ax,cx; mov bx,ax */ {
 			case 0: case 1: case 2: case 3: case 4: case 6: case 7: case 8:
 			case 12: case 13: case 15: case 16: case 17:
 				return 1;
-			case 5: case 14:
+			case 9: case 10: case 11:
 				if (n == 2)
 					return 1;
 				break;
-			case 9: case 10: case 11:
+			case 5: case 14:
 				if (g_e8ea == n)
 					return 1;
 				break;
@@ -298,10 +298,10 @@ void far fn_1523_0920(void)
 			g_c4c6 = i + 1;
 			if (g_017e) {
 				if (g_a78e[i].id == 0x15 || g_a78e[i].id == 0x38) {
-					fn_0903_213b(0x2e);
+					fn_1903_213b(0x2e);
 					g_00b6 = 1;
 				} else if (g_00b6) {
-					fn_0903_213b(0);
+					fn_1903_213b(0);
 					g_00b6 = 0;
 				}
 			}
@@ -551,7 +551,7 @@ void far fn_1523_1b90(void)
 			t = 1;
 		fn_1523_1743(t);
 		if (g_017f)
-			fn_0903_2328();
+			fn_1903_2328();
 		g_017f = 3;
 	}
 }
@@ -591,14 +591,14 @@ int far fn_1523_1c3b(struct mon far *m, int kind)
 	for (i = sum = 0; i < 18; i++) {
 		if (m->b7d[i] && !(m->b90[i] & 0xc0)) {
 			if (kind < 11 && kind != 3 && m->bc9[i]) {
-				v = fn_0903_0129(m->bc9[i]);
+				v = fn_1903_0129(m->bc9[i]);
 				if (v > 2)
 					v++;
 				if (v == kind)
 					sum += g_0acd[m->bc9[i]];
 			}
 			if (kind > 10 && m->ba3[i]) {
-				v = fn_0903_010e(m->ba3[i]) + 11;
+				v = fn_1903_010e(m->ba3[i]) + 11;
 				if (v == kind)
 					sum += g_0a27[m->ba3[i]];
 			}
@@ -633,7 +633,7 @@ unsigned far fn_1523_1d81(struct mon far *m, int kind, int flag)
 	int a, j, t;
 	register int v, w;
 	t = 0;
-	switch (kind) {
+	switch (_AX = kind) {   /* mov ax,[kind]; mov bx,ax */
 	case 0: v = m->b14; w = m->b15; break;
 	case 1: v = m->b16; w = m->b17; t = 1; break;
 	case 2: v = m->b18; w = m->b19; t = 1; break;
@@ -650,7 +650,7 @@ unsigned far fn_1523_1d81(struct mon far *m, int kind, int flag)
 	}
 	v = v + fn_1523_1c3b(m, kind);
 	if (flag == 0) {
-		v = v + fn_0903_015f(m, kind);
+		v = v + fn_1903_015f(m, kind);
 		v += w;
 	}
 	if (v < 1)

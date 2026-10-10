@@ -1,6 +1,7 @@
 /* CODE_8 of MM3.EXE (seg 1511): clock strings, key/mouse input, roster + save-slot file I/O.
    Build: bcc -c -mm -O -Z mazeio.c */
 #include "mazeio.h"
+#include "mzdata.inc"
 
 /* 12-hour clock string "hh:mm a/p" in g_e610+11 */
 char *far fn_1511_0007(long t)
@@ -12,7 +13,7 @@ char *far fn_1511_0007(long t)
 	g_e610[13] = 0;
 	h = atol(g_e610 + 11);
 	if (h < 12) {
-		strcpy(g_e610 + 19, "a");
+		strcpy(g_e610 + 19, "a\0");
 		if (h == 0)
 			strcpy(g_e610 + 11, "12");
 	} else {
@@ -20,7 +21,7 @@ char *far fn_1511_0007(long t)
 			strcpy(g_e610 + 11, "12");
 		else
 			sprintf(g_e610 + 11, "%02d", h);
-		strcpy(g_e610 + 19, "p");
+		strcpy(g_e610 + 19, "p\0");
 	}
 	g_e610[13] = ':';
 	if (g_e610[11] == '0')
@@ -131,7 +132,7 @@ int far fn_1511_02c3(void)
 			k += 0x8e;
 		else {
 			g_05ff++;
-			k = g_851d[k];
+			k = g_8564[k - 0x47];   /* keypad scan codes 0x47.. */
 		}
 	}
 	k &= 0xff;
@@ -174,7 +175,7 @@ int far fn_1511_03aa(void)
 			fn_1b66_0009();
 			if (!g_00aa && g_00ab) {
 				g_00ab = 0;
-				fn_0903_2328();
+				fn_1903_2328();
 			}
 			g_017e = 0;
 		} else if (g_c520 == 4)
@@ -234,7 +235,7 @@ int far fn_1511_03aa(void)
 					g_ecc2 = 1;
 					return 0;
 				}
-				fn_0903_213b(0x14);
+				fn_1903_213b(0x14);
 				flag = 1;
 				do {
 					i = fn_1511_0b42();
@@ -312,7 +313,7 @@ int far fn_1511_03aa(void)
 		if (g_b964) {
 			if (g_c520 == 0x56 || g_c520 == 4)
 				return 0x56;
-			fn_0903_213b(0x15);
+			fn_1903_213b(0x15);
 			while (fn_124f_2a9d(&g_a776, &g_accc))
 				;
 		}

@@ -944,7 +944,7 @@ void far fn_1b66_0b35(void)
 	fn_1523_0920();
 	if (g_017f && (g_c520 == 1 || g_c520 == 2) && !g_00ac && !g_c52b) {
 		if (!(g_017f -= 1))
-			fn_0903_2328();
+			fn_1903_2328();
 	}
 	fn_1523_0f7d();
 }
@@ -1103,7 +1103,7 @@ void far fn_1b66_24dd(register int *o)
 			r = g_ab52[i] % 3;
 			if ((g_c49d || g_c507) && r == 2 && !g_00ac) {
 				g_b9bb[i] = 0;
-				fn_0903_213b(9);
+				fn_1903_213b(9);
 			} else {
 				*++o = -1;
 				*(long *)++o = g_a742;
@@ -1212,7 +1212,7 @@ void far fn_1b66_24dd(register int *o)
 			r = g_ab52[i] % 3;
 			if ((g_ac26 || g_c508) && r == 2 && !g_00ac) {
 				g_b9bb[i] = 0;
-				fn_0903_213b(9);
+				fn_1903_213b(9);
 			} else {
 				*++o = -1;
 				*(long *)++o = g_a742;

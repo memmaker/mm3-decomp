@@ -180,5 +180,114 @@
 ## VROOMM overlays (learned on OVR_17f2 = init.c)
 - `tools/ovr.py` parses the FBOV header (file 165568) + exeinfo seg table (img 0x18ba0): `overlays()`, `segtable()`, `stub_to_code(stubseg, stuboff)`. Entry names are `ovr_SSSS_<stuboff>` (stub off = 0x20+5k); cmpobj/fndiff map them to code offsets automatically.
 - Overlay fixup seg words hold a table key = index*8 (0x38→CODE_7 124f, 0x40→CODE_8 1511, 0xd0→stub 180c, 0→RTL). The memory-dump table mixes relocated/unrelocated segs: seg<0x1000 → +0x1000. Ghidra mis-resolves these as FUN_1000_xxxx → use `tools/ovrasm.py SSSS [START END]` for call targets.
-- TLINK rewrites intra-overlay far calls `9A off seg` → `0E E8 rel 90` (push cs; call near; nop). BCC emits its own `push cs; call near` (no nop) for earlier-defined same-file functions → file order must follow address order. cmpobj accepts both.
+- Three spellings of a same-segment far call: BCC's own `0E E8 rel` (callee defined earlier in the file); TLINK's rewrite of a
+  `9A` far call (callee later in the file, plain BCC) = `90 0E E8 rel` (nop first); TASM's single-pass rewrite (BCC -B) =
+  `0E E8 rel 90` (nop last). init.c has 40 of the TASM form → it was built with `-B` (also short forward jumps = `EB xx 90`).
+  TLINK still reserves reloc-table space for every call it rewrites: that is the zero padding after some overlays' reloc
+  tables (180c +4 calls, 1816 +6, 1839 +13, 1867 +22 → +16/+16/+32/+32 bytes). cmpobj accepts all three forms.
 - Compare an overlay OBJ against its code image: `python3 -I tools/cmpobj.py run/build/INIT.OBJ orig/MM3.EXE 278d0 0` (img off from ovr.py, slack 0).
+
+## Full relink (tools/relink.sh) — the byte-exact EXE
+- `tools/relink.sh [C.OBJ ...]`: tools/mkblob.py writes a blob OBJ (original bytes + symbolic fixups) for every game module
+  without a C OBJ, copies the C OBJs, TLINKs run/link/LINK.RSP in DOSBox-X, applies tools/postlink.py, then
+  tools/cmpexe.py compares with orig/MM3.EXE. Current: `tools/relink.sh run/build/MAIN.OBJ run/build/SCENE.OBJ
+  run/build/MAZEIO.OBJ run/build/INIT.OBJ` → MATCH. Only the relink sees swapped DS fixups (cmpobj masks fixup bytes):
+  `g_00ac = g_00ab = 0` vs `g_00ab = g_00ac = 0` passed cmpobj and failed the relink.
+- Link order = tools/layout.py ROOT/OVR (C0M main view events scene itemname stattext sys /o overlays /o- mazeio empty9
+  snddrv, OVERLAY.LIB, CM.LIB). C OBJ basename must be the module name (8.3).
+- DGROUP `_DATA` per module = initialized globals (definition order) then the module's pooled string literals; each module
+  word-aligned. Owners: main 0xaa–0xf1b (all shared game tables, `_stklen`=0xc00 @e7f, `_ovrbuffer`=0x260 @e81, strings),
+  view..sys 0xf1c–0x1e2e, init 0x1e2e–0x201b, ending..shop 0x201c–0x8564, mazeio 0x8564–0x8724, RTL from 0x8724.
+  Game BSS 0x8d60–0xf088 is still a blob in view. `tools/mkdata.py SRC.c START END [name=addr]` generates the initialized
+  globals (src/mdata.inc, src/mzdata.inc), split at every g_XXXX the sources use, typed from SRC.c's own externs.
+  A g_ in RTL data is an RTL variable (g_8b6f = directvideo): use the RTL name.
+- Blobs publish whatever the C OBJs import (`_g_` in their DATA/BSS, `_fn_SSSS_OOOO` frame-relative, `_ovr_` stub
+  entries); blob base fixups to a C module use one of its code publics instead of `__seg_<mod>`.
+- TLINK stub table = reverse PUBDEF order of the overlay's publics. BCC's PUBDEF order is an internal symbol-hash order
+  (not definition order; 2-letter names group by last char mod 4, longer names roughly descending — no formula found),
+  so mkblob's pubsort() reorders the `_ovr_` PUBDEF records of C overlay OBJs by descending stub offset.
+- Reloc order inside an overlay = FIXUPP order: BCC emits LEDATA chunks ≤ 0x400 bytes (no fixup split across), fixups
+  descending inside a chunk; TASM ascending. omfw cuts chunks so the emitted order replays the original reloc order.
+- Blobs undo TLINK's `90 0E E8` rewrite (back to `9A` + segment-relative ptr fixup) so TLINK re-reserves the padding.
+- TLINK writes the EXE name and the link date into OVRMAN data (img 0x17f10: "mm3.exe", then day, month, year word):
+  original = 1991-10-01. LINK.BAT sets it with `date /F` + `date 10/01/1991` (plain `date` is overridden by host sync).
+- OVRDETEC opens the EXE with `mov ax,3d00h` in stock OVERLAY.LIB, `3d40h` (deny-none) in the game; no fixup there, so it
+  is a patched library or patched EXE → tools/postlink.py patches the byte.
+- Header minalloc: orig/MM3.EXE's 0x8f3 comes from the EXEPACK header (the unpacker copies it); TLINK writes 0. Ignored.
+- `-d` (merge duplicate strings) is part of the flags: `bcc -c -mm -O -Z -d` (+`-B` for main.c and init.c).
+
+## BCC 2.0 codegen, learned on init.c
+- `for (i = n = 0; ...)` gives `xor ax,ax; mov [n],ax; mov si,ax`; `n = 0; for (i = 0;` gives `mov word [n],0; xor si,si`.
+- Zeroing a far pointer: `p = 0` stores the high word as an immediate (`mov word [hi],0`); the original's `xor ax,ax;
+  mov [hi],ax; mov [lo],ax` is `FP_OFF(p) = FP_SEG(p) = 0` (dos.h lvalue macros), and chains with int stores
+  (`a = b = FP_OFF(p) = FP_SEG(p) = 0`). Chains store right to left.
+- `return c ? v : 1;` leaves a dead `jmp RET` after the merged `mov ax,1` trampoline (`jmp X; jmp RET`); `if (c) return v;
+  return 1;` does not. A function full of `jmp A; jmp B` pairs after returns → ternary returns.
+- `if (n != 2) break; ...` vs `if (n == 2) { ... } break;` decide whether the case's tail merges with the next case.
+- `while (a[i][++k] < x);` (increment inside the index, after the row multiply) vs `do k++; while (a[i][k] < x);`.
+- `f && ((g() > 0xb4) & (i == 1))`: short-circuit test of f, then both 0/1 values computed, `push/pop dx; test ax,dx`.
+- An early-exit block shared by several loops (`jz skip; jmp <block in loop 1>`) is a `goto` to a label inside the first
+  loop's `if` body, not tail merging.
+
+## Overlays 17fd..1867 + asm modules (parallel pass)
+- Per-module work dirs run/w_<mod>/ (B.BAT, own OBJ); `tools/dosrun.sh DIR BAT` runs DOSBox-X in parallel safely.
+  cmpobj/fndiff/asmdiff write their dumps next to the OBJ (`<OBJ>.bin`). With `DSBASE=hex` cmpobj also compares the
+  module's own `_DATA` bytes against DGROUP (prints `_DATA a-b: OK`). cmpobj accepts TLINK's `90 0E E8` rewrite too.
+- All overlays after init are plain `bcc -c -mm -O -Z -d` (no `-B`).
+- DATA ownership (exact, link order; odd ends get a 1-byte pad from word alignment): ending 201c, misc1 2600, town 2744,
+  charinfo 29bc, cpanel 308c, mazeload 3692, guild 3be6, building 42e6, combat 4b24, spells 4bd8, items 4e78, shop 52d2
+  (to 8564; shop holds big string-pointer tables `char *g_X[] = {"lit", ...}` whose literals pool before code literals).
+  tools/layout.py OVR_DATA lists the starts; an unpinned module's data rides in the previous module's blob, so a C
+  overlay needs the NEXT module's start pinned too.
+- Cross-module `g_` references split other modules' data: when mkblob says "_g_XXXX owned by C module M but not defined
+  there", regenerate M's .inc with tools/mkdata.py (the header line records the exact command; main needs
+  `_stklen=e7f _ovrbuffer=e81`, otherwise TLINK pulls OVRBUFF/STKLEN from CM.LIB and DGROUP grows). mkdata reads externs
+  from SRC.c and SRC.h, knows unsigned long and multi-dim arrays; struct initializers are hand-written.
+- Odd-address g_ names in another table are often base-minus-K references (`tbl[k - 1]` folds into `[bx+tbl-1]`):
+  mazeio's `g_851d[k]` is `g_8564[k - 0x47]` (keypad scan codes). Name such refs by the real table.
+- g_ names must have 4 hex digits (`g_03f0`, not `g_3f0`): mkblob only resolves `_g_XXXX`.
+- itemname (CODE_5) and stattext (CODE_6) are BCC-compiled C (one big function each, BCC prologue, switch tables), not
+  hand asm; for now they are TASM sources generated from the EXE (run/w_asm/gen.py + verify.py): src/*.asm.
+  TASM quirks: backward `jmp near` shortened to EB (use `db 0E9h`/`dw L-($+2)`); SMART turns same-segment far calls into
+  `push cs; call near` (use `db 9Ah`/`dd L`); `xor word [m],1` always 83 (BCC used 81: `db`); DS=CS code needs
+  `assume ds:<seg>_TEXT` or TLINK reports "Fixup overflow" (only a relink shows it).
+
+### BCC 2.0 codegen (overlay pass)
+- `k = f(); switch (k)` -> `mov si,ax; mov [tmp],si`; `switch (k = f())` -> `mov [tmp],ax`.
+- `k = f(); if (k)` tests the variable (`or si,si`, `cmp word [k],0`, `or ax,[hi]` for long);
+  `if ((k = f()) != 0)` tests ax (`or ax,ax`, `or ax,dx`).
+- `if ((i -= K) < u8g)` -> `sub [i],K; mov ax,[i]; mov dl,[g]; mov dh,0; cmp ax,dx`; two statements swap the operands.
+- u8 tests: plain `if (g)` / `g == 0` -> `cmp byte`; `!g` (esp. as a later && operand) -> `mov al; mov ah,0; or ax,ax`;
+  `!(u8 & K)` -> `mov al; mov ah,0; test ax,K`; `(int)p->u8 < 1` keeps the word compare; `!char` -> `cbw`.
+- Constant index offsets fold into the displacement (`tbl[g-2]` -> `[bx+tbl-2]`); `tbl[(unsigned)g - 2]` keeps `dec bx`.
+- `f() * (c * -1)` is reassociated to `imul c; mov dx,-1; imul dx`; `f() * (unsigned)(c * -1)` keeps the order.
+- Register allocation: a `register` param gets si, then a plain local gets di; declaring the local `register` too hands
+  it si. An unused `register int i;` still pushes di. Params used >= 2x are cached in cx.
+- Duplicated tails: lone `jmp X` stubs where X is shared code (`mov ax,9; jmp <call>`) are separate source copies of the
+  same statements, tail-merged after jump threading (so never threaded). A single shared label/goto threads directly
+  and loses the stub. The merge keeps the fall-through copy; to keep the FIRST copy, write a goto into it.
+- A jump table entry into another case/switch body = `goto` to a label inside that body.
+- `if (v == K) break; goto out;` vs `!=` flips `jnz out; jmp brk`. `case 'W': if (m == 1) goto c0; break;` keeps the
+  `jz L; jmp brk; L: jmp c0` stub; `if (m != 1) break; goto c0;` gets threaded.
+- Labels reset register tracking: after `if (x == 0) break;` or a label, bx/ax are reloaded.
+- Long arithmetic: `ulong += x` -> `add [m],ax; adc [m+2],dx` (signed long: load/add/store); u8 == ulong zero-extends,
+  u8 + ulong sign-extends; `(unsigned long)u8 * 100` -> `xor cx,cx`, `u8 * 100L` -> `cwd`. Call order of
+  `x -= A() - (B() - x)` depends on x's signedness.
+- `-d` merges duplicates AND suffixes (`""` and `"\x05%p"` reuse tails of earlier literals).
+- Big arrays below the sparse-switch temp: declare them in an inner `{ }` block.
+- `fn((void far *)1L, 0)` shares the zero; `(0x13 - j) / 2` is `idiv`, not a shift; `S[0].img = S[1].img = p` stores
+  S[1] first; `return mode ? res : 0;` keeps an early return's own `xor;xor;jmp`.
+- (Solved: `extern unsigned g_ec36` — was int) misc1 ovr_1800_0034 case 78 (`v = f(p) < p->f125 ? 1 : 0;`) keeps one dead `jmp` the original dropped (3 bytes).
+
+## Full build from source (no blobs)
+- `tools/build.sh`: copies src/ to run/build, BUILD.BAT compiles every module (overlays/view/scene/events/mazeio plain BCC,
+  main/init `-B`, gamedata `-zCSYS_TEXT`, asm with `TASM /mx`), then tools/relink.sh links run/build/*.OBJ → MATCH.
+  mkblob then only copies the OBJs (and sorts overlay _ovr_ PUBDEFs); nothing is taken from orig.
+- cmpobj stops at the first diff per function: the "parked" view switch selector and events 05d8 tail merge were real
+  source errors (swapped case labels, misplaced statements) further down. view: `switch (_AX = x)` gives `mov ax,X; mov bx,ax`.
+- events case 31 `(*(int *)0xecb4)++`: an absolute DS address has no fixup, so BCC's tail merge cannot pair it; same bytes.
+- BCC emits uninitialized globals in hash order (not definition order) → the game BSS is TASM (src/gbss.asm, `BSS=1 mkdata.py`).
+- A data-only C module still emits an empty MOD_TEXT segment, which costs a TLINK segment slot (shifts every segment by 1);
+  `-zCSYS_TEXT` merges it into the preceding SYS_TEXT. Likewise empty9 is TASM because BCC code segments are byte aligned.
+- gamedata holds view..sys data in one range; per-module ownership (scene 12c8-170f, itemname 1710-1724, stattext 1724-174e,
+  sys 174e-1e2e) is a possible refinement, not needed for the match.

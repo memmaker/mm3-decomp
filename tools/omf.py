@@ -15,7 +15,7 @@ def idx(d, p):
     return (b, p + 1) if b < 0x80 else (((b & 0x7f) << 8) | d[p + 1], p + 2)
 
 def parse_module(recs):
-    m = {'name': '', 'lnames': [''], 'segs': [{}], 'pubs': []}
+    m = {'name': '', 'lnames': [''], 'segs': [{}], 'pubs': [], 'exts': []}
     last = None; tthr = {}
     for t, d in recs:
         if t == 0x80:
@@ -31,6 +31,11 @@ def parse_module(recs):
             else: ln = struct.unpack_from('<I', d, p)[0]; p += 4
             ni, p = idx(d, p); ci, p = idx(d, p)
             m['segs'].append({'name': m['lnames'][ni], 'cls': m['lnames'][ci], 'data': bytearray(ln), 'mask': bytearray(ln)})
+        elif t == 0x8c:
+            p = 0
+            while p < len(d):
+                n = d[p]; m['exts'].append(d[p + 1:p + 1 + n].decode('latin1')); p += 1 + n
+                _, p = idx(d, p)
         elif t in (0x90, 0x91):
             p = 0; gi, p = idx(d, p); si, p = idx(d, p)
             if si == 0: p += 2
@@ -80,6 +85,10 @@ def parse_module(recs):
                         struct.pack_into('<H', seg['data'], o, v & 0xffff)
                     else:
                         seg['mask'][o:o + size] = b'\1' * size
+                        if tmeth == 2 and tidx: seg.setdefault('ext', {})[o] = m['exts'][tidx - 1]  # external target name
+                        if loc == 1 and tmeth in (0, 2) and tidx:   # 16-bit offset: remember target for value checks
+                            tn = m['exts'][tidx - 1] if tmeth == 2 else '#' + m['segs'][tidx]['name']
+                            seg.setdefault('off', {})[o] = (tn, disp)
                 else:
                     meth = (b >> 2) & 7; num = b & 3; p += 1
                     ti = None

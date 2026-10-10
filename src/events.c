@@ -1,6 +1,6 @@
 #include "events.h"
 
-void far fn_0903_0008(register struct mon *p, int dmg)
+void far fn_1903_0008(register struct mon *p, int dmg)
 {
 	int flag;
 	register int d;
@@ -24,7 +24,7 @@ void far fn_0903_0008(register struct mon *p, int dmg)
 	}
 }
 
-void far fn_0903_0099(int row)
+void far fn_1903_0099(int row)
 {
 	if (g_015e != row && g_015e != -2) {
 		if (g_015e != -1)
@@ -34,7 +34,7 @@ void far fn_0903_0099(int row)
 	}
 }
 
-int far fn_0903_010e(int v)
+int far fn_1903_010e(int v)
 {
 	register int i;
 
@@ -43,7 +43,7 @@ int far fn_0903_010e(int v)
 			return i;
 }
 
-int far fn_0903_0129(int v)
+int far fn_1903_0129(int v)
 {
 	register int i;
 
@@ -52,14 +52,14 @@ int far fn_0903_0129(int v)
 			return i;
 }
 
-void far fn_0903_0144(void)
+void far fn_1903_0144(void)
 {
 	g_e8bc = 2;
 	g_e60e = 0;
 	ovr_1861_004d(0xb);
 }
 
-int far fn_0903_015f(struct mon far *p, int stat)
+int far fn_1903_015f(struct mon far *p, int stat)
 {
 	register int might, intel, pers, endur, speed, acc, luck;
 
@@ -138,7 +138,7 @@ int far fn_0903_015f(struct mon far *p, int stat)
 	return luck;
 }
 
-void far fn_0903_03ac(void)
+void far fn_1903_03ac(void)
 {
 	int old, save;
 	register int i, j;
@@ -216,7 +216,7 @@ done:
 	}
 }
 
-int far fn_0903_05d8(void)
+int far fn_1903_05d8(void)
 {
 	int line, i, r, ret, who, tmp, tmp2, op2, op3, op1, redraw, ip2, x, y, xs[5], ys[5], ls[5], sp, flag;
 	unsigned long v1;
@@ -226,7 +226,7 @@ int far fn_0903_05d8(void)
 	char mode;
 	register int ip, k;
 
-	fn_0903_03ac();
+	fn_1903_03ac();
 	redraw = 0;
 	fn_1523_0f7d();
 	mode = g_c520;
@@ -253,8 +253,8 @@ restart:
 	g_ef84 = who = 1;
 	g_92f4 = 0;
 	sp = -1;
-next:
 	fn_1523_0506(0);
+next:
 	if (g_c4a2)
 		g_c500 = 1;
 	else {
@@ -285,7 +285,7 @@ next:
 						fn_124f_2ac5(g_d256);
 					else {
 						fn_124f_2ab1(0, 0x8f, 0x140, 0x38, 0, 0x96, 4, 6, g_d256);
-						g_ecb4++;
+						(*(int *)0xecb4)++;	/* = g_ecb4++; absolute address (no fixup) keeps BCC from tail-merging this tail into case 0 */
 					}
 					break;
 				case 0:	/* OP_Display0x01 */
@@ -321,14 +321,14 @@ next:
 						g_ecb4 = 0;
 					}
 					_fstrncpy(g_e73c, g_a78a + g_a6b6[g_a76a[ip + 7]], 0xfa);
-					if (fn_1831_0070(g_a76a[ip + 8], g_e610, g_e73c, g_a76a[ip + 9], g_ecb4))
+					if (ovr_1831_0070(g_a76a[ip + 8], g_e610, g_e73c, g_a76a[ip + 9], g_ecb4))
 						line = g_a76a[ip + 0xa] - 1;
 					if (g_ecb4)
 						break;
 					g_abe3 = ++g_ecb4;
 					break;
 				case 5:	/* OP_PlayFX */
-					fn_0903_213b(g_a76a[ip + 6]);
+					fn_1903_213b(g_a76a[ip + 6]);
 					break;
 				case 6:	/* OP_TeleportAndExit */
 				case 30:	/* OP_TeleportAndContinue */
@@ -342,10 +342,10 @@ next:
 						i = g_2614[tmp];
 						r = g_2621[tmp];
 						tmp = g_2607[tmp];
+						if (i == 0 && r == 0)
+							i = -1;
+						fn_1903_213b(0x33);
 					}
-					if (i == 0 && r == 0)
-						i = -1;
-					fn_0903_213b(0x33);
 					ip = g_a76a[ip + 5];
 					if (g_c52d != tmp) {
 						sprintf(g_e73c, g_11e0, (tmp < 0x29 || tmp == 0x6a) ? g_11ed : g_11f6,
@@ -354,22 +354,22 @@ next:
 						g_ecb4++;
 						switch (g_a78e[g_c4c6 - 1].id) {
 						case 0x2f:
-							fn_0903_213b(0x2d);
+							fn_1903_213b(0x2d);
 							break;
 						case 0x30:
-							fn_0903_213b(0x2c);
+							fn_1903_213b(0x2c);
 							break;
 						}
 						ovr_1816_0052(tmp);
 					} else
-						fn_0903_213b(0x33);
+						fn_1903_213b(0x33);
 					if (i == -1)
 						fn_1b66_02c5();
 					else {
 						g_e8f5 = i;
 						g_e8f6 = r;
 					}
-					fn_0903_03ac();
+					fn_1903_03ac();
 					if (ip == 0x1f)
 						g_c52b = 0;
 					fn_124f_2abb(g_ecb4);
@@ -402,13 +402,13 @@ next:
 					if (who == 0 && g_a76a[ip + 6] != 0x2c) {
 						i = r = 0;
 						for (; i < g_e8ea; i++)
-							r |= fn_1800_0034(g_a76a[ip + 6], v1, g_a76a[ip + 5] - 8, i);
+							r |= ovr_1800_0034(g_a76a[ip + 6], v1, g_a76a[ip + 5] - 8, i);
 						if (!r)
 							break;
 						line = tmp2 - 1;
 						break;
 					}
-					if (!fn_1800_0034(g_a76a[ip + 6], v1, g_a76a[ip + 5] - 8, who - 1))
+					if (!ovr_1800_0034(g_a76a[ip + 6], v1, g_a76a[ip + 5] - 8, who - 1))
 						break;
 					line = tmp2 - 1;
 					break;
@@ -488,41 +488,41 @@ next:
 					if (g_a76a[ip + 5] == 0x1d) {
 						if (who == 0) {
 							for (i = 0; i < g_e8ea; i++) {
-								if (fn_1800_0034(g_a76a[ip + 6], v1, 1, i) && fn_1800_0034(op2, v2, 1, i)) {
-									fn_1800_0048(0, 0L, op3, v3, i);
+								if (ovr_1800_0034(g_a76a[ip + 6], v1, 1, i) && ovr_1800_0034(op2, v2, 1, i)) {
+									ovr_1800_0048(0, 0L, op3, v3, i);
 									if (op3 == 0x52)
 										break;
 								}
 							}
 						} else {
-							if (!fn_1800_0034(g_a76a[ip + 6], v1, 1, who - 1))
+							if (!ovr_1800_0034(g_a76a[ip + 6], v1, 1, who - 1))
 								break;
-							if (!fn_1800_0034(op2, v2, 1, who - 1))
+							if (!ovr_1800_0034(op2, v2, 1, who - 1))
 								break;
-							fn_1800_0048(0, 0L, op3, v3, who - 1);
+							ovr_1800_0048(0, 0L, op3, v3, who - 1);
 						}
 						break;
 					}
 					if (g_a76a[ip + 5] == 0x1c || g_a76a[ip + 5] == 0x21) {
 						if (who == 0) {
 							for (i = 0; i < g_e8ea; i++) {
-								if (fn_1800_0034(g_a76a[ip + 6], v1, g_a76a[ip + 5] == 0x21 ? 2 : 1, i)) {
-									fn_1800_0048(0, 0L, op2, v2, i);
+								if (ovr_1800_0034(g_a76a[ip + 6], v1, g_a76a[ip + 5] == 0x21 ? 2 : 1, i)) {
+									ovr_1800_0048(0, 0L, op2, v2, i);
 									if (op2 == 0x52)
 										break;
 								}
 							}
 						} else {
-							if (!fn_1800_0034(g_a76a[ip + 6], v1, g_a76a[ip + 5] == 0x21 ? 2 : 1, who - 1))
+							if (!ovr_1800_0034(g_a76a[ip + 6], v1, g_a76a[ip + 5] == 0x21 ? 2 : 1, who - 1))
 								break;
-							fn_1800_0048(0, 0L, op2, v2, who - 1);
+							ovr_1800_0048(0, 0L, op2, v2, who - 1);
 						}
 						break;
 					}
 					if (who == 0) {
 						op1 = g_a76a[ip + 6];
 						for (i = 0; i < g_e8ea; i++) {
-							r = fn_1800_0048(op1, v1, op2, v2, i);
+							r = ovr_1800_0048(op1, v1, op2, v2, i);
 							switch (op1) {
 							case 8:
 								op1 = 0;
@@ -552,7 +552,7 @@ next:
 						}
 						break;
 					}
-					if (fn_1800_0048(g_a76a[ip + 6], v1, op2, v2, who - 1))
+					if (ovr_1800_0048(g_a76a[ip + 6], v1, op2, v2, who - 1))
 						goto done;
 					if (op2 != 0x4f)
 						break;
@@ -581,9 +581,9 @@ clear:
 						g_ecb4 = 0;
 						fn_1523_0506(1);
 						fn_1b66_0009();
-						g_ec93 = 0;
 						break;
 					}
+					g_ec93 = 0;
 					break;
 				case 14:	/* OP_SetChar */
 					if (g_a76a[ip + 6] > 8) {
@@ -591,7 +591,7 @@ clear:
 							fn_124f_2abb(g_ecb4);
 							g_ecb4 = 0;
 						}
-						if (!(who = fn_1800_003e() + 1))
+						if (!(who = ovr_1800_003e() + 1))
 							goto done;
 						g_ef84 = 1;
 					} else {
@@ -610,20 +610,20 @@ clear:
 					break;
 				case 16:	/* OP_DoTownEvent */
 					switch (g_a76a[ip + 6]) {
-					case 0: fn_1831_003e(); break;
-					case 1: fn_1831_0066(); break;
-					case 2: fn_1831_0048(); break;
+					case 0: ovr_1831_003e(); break;
+					case 1: ovr_1831_0066(); break;
+					case 2: ovr_1831_0048(); break;
 					case 3:
-						if (fn_1831_002f()) {
+						if (ovr_1831_002f()) {
 							ret = 2;
 							goto done;
 						}
 						break;
-					case 4: fn_1831_005c(); break;
-					case 5: fn_1831_0057(); break;
-					case 6: fn_1831_0061(); break;
-					case 7: fn_1806_0034(); break;
-					case 8: fn_1806_002f(); goto done;
+					case 4: ovr_1831_005c(); break;
+					case 5: ovr_1831_0057(); break;
+					case 6: ovr_1831_0061(); break;
+					case 7: ovr_1806_0034(); break;
+					case 8: ovr_1806_002f(); goto done;
 					}
 					g_017e = 1;
 					ret = 1;
@@ -699,7 +699,7 @@ clear:
 						fn_124f_2abb(g_ecb4);
 						g_ecb4 = 0;
 					}
-					if (fn_1800_0039(g_a76a[ip + 6], v1, op2, v2, op3, v3, who ? who - 1 : who)) {
+					if (ovr_1800_0039(g_a76a[ip + 6], v1, op2, v2, op3, v3, who ? who - 1 : who)) {
 						if (g_ec93 == 0xff) {
 							g_ec93 = 0;
 							goto done;
@@ -732,7 +732,7 @@ clear:
 							_fstrncpy(buf, g_a78a + g_a6b6[g_a76a[ip + 9]], sizeof buf);
 						else
 							strcpy(buf, g_1208);
-						if (!(tmp = fn_1800_0025(g_a76a[ip + 6], g_e73c, buf)))
+						if (!(tmp = ovr_1800_0025(g_a76a[ip + 6], g_e73c, buf)))
 							break;
 						if (tmp == 7)
 							goto pay;
@@ -792,15 +792,15 @@ clear:
 					}
 					if (who == 0) {
 						for (i = 0; i < g_e8ea; i++)
-							fn_1800_0043(g_a76a[ip + 6], v1, i);
+							ovr_1800_0043(g_a76a[ip + 6], v1, i);
 					} else
-						fn_1800_0043(g_a76a[ip + 6], v1, who - 1);
+						ovr_1800_0043(g_a76a[ip + 6], v1, who - 1);
 					break;
 				case 29:	/* OP_CutsceneEndClouds */
-					if (fn_1821_0048()) {
+					if (ovr_1821_0048()) {
 pay:
 						ovr_1816_007f(1);
-						fn_1806_0043(1);
+						ovr_1806_0043(1);
 						fn_168b_00b5(0L);
 						g_e8f9 = g_e8f8 = 1;
 						v1 = 0;
@@ -814,11 +814,11 @@ pay:
 						r = v3 / 3600;
 						v2 = r * 100 + i / 60;
 						v1 += v2;
-						fn_17fd_0025(v1);
+						ovr_17fd_0025(v1);
 						ret = 3;
 						goto done;
 					} else {
-						fn_180c_006b(g_121d);
+						ovr_180c_006b(g_121d);
 						goto done;
 					}
 				}
@@ -836,8 +836,8 @@ done:
 		g_ecb4 = 0;
 		fn_1523_0506(1);
 		fn_1523_1ec7();
-		fn_1523_0041();
 	}
+	fn_1523_0041();
 	if (g_c4c6 && g_ec93)
 		switch (g_a78e[g_c4c6 - 1].id) {
 		case 4:
@@ -853,7 +853,7 @@ done:
 		}
 	g_00ad = 0;
 	if (g_effa | g_f008 | g_f020)
-		fn_1821_0020();
+		ovr_1821_0020();
 	g_c520 = mode;
 	fn_1511_1575(&tm);
 	fn_124f_2abb(g_ecb4);
@@ -877,7 +877,7 @@ done:
 	return ret;
 }
 
-void far fn_0903_213b(register int v)
+void far fn_1903_213b(register int v)
 {
 	if (g_e8f8 && v < 0x97)
 		fn_168b_00c8(v);
@@ -885,7 +885,7 @@ void far fn_0903_213b(register int v)
 		fn_168b_00c8(v);
 }
 
-void far fn_0903_2168(int *o)
+void far fn_1903_2168(int *o)
 {
 	int save;
 	register int n, max;
@@ -905,7 +905,7 @@ void far fn_0903_2168(int *o)
 	g_c522 = save;
 }
 
-void far fn_0903_21f3(register int n)
+void far fn_1903_21f3(register int n)
 {
 	int save;
 	register int max;
@@ -924,7 +924,7 @@ void far fn_0903_21f3(register int n)
 	g_c522 = save;
 }
 
-void far fn_0903_2273(int x, int y, int m)
+void far fn_1903_2273(int x, int y, int m)
 {
 	register int ny, nx;
 
@@ -942,7 +942,7 @@ void far fn_0903_2273(int x, int y, int m)
 	}
 }
 
-void far fn_0903_2328(void)
+void far fn_1903_2328(void)
 {
 	int j, pass, yy, dy, dx, px, py, fac;
 	register int k, xx;
@@ -982,22 +982,22 @@ void far fn_0903_2328(void)
 						switch (fac >> 1) {
 						case 0:
 							if (!fn_1b66_05b5(xx, yy, g_0165[g_1144[k]]))
-								fn_0903_2273(g_101e[k], g_1080[k], j);
+								fn_1903_2273(g_101e[k], g_1080[k], j);
 							else if (!fn_1b66_05b5(xx, yy, g_0165[g_1175[k]])) {
 								if (k < 0x15 || k > 0x1b)
-									fn_0903_2273(0, g_10e2[k], j);
+									fn_1903_2273(0, g_10e2[k], j);
 								else
-									fn_0903_2273(g_10e2[k], 0, j);
+									fn_1903_2273(g_10e2[k], 0, j);
 							}
 							break;
 						case 1:
 							if (!fn_1b66_05b5(xx, yy, g_0165[g_1175[k]])) {
 								if (k < 0x15 || k > 0x1b)
-									fn_0903_2273(0, g_10e2[k], j);
+									fn_1903_2273(0, g_10e2[k], j);
 								else
-									fn_0903_2273(g_10e2[k], 0, j);
+									fn_1903_2273(g_10e2[k], 0, j);
 							} else if (!fn_1b66_05b5(xx, yy, g_0165[g_1144[k]]))
-								fn_0903_2273(g_101e[k], g_1080[k], j);
+								fn_1903_2273(g_101e[k], g_1080[k], j);
 							break;
 						}
 					}

@@ -6,7 +6,7 @@ import sys, struct, os
 _exe = None
 def exe():
     global _exe
-    if _exe is None: _exe = open(os.path.join(os.path.dirname(__file__), '..', 'orig', 'MM3.EXE'), 'rb').read()
+    if _exe is None: _exe = open(os.environ.get('MM3EXE') or os.path.join(os.path.dirname(__file__), '..', 'orig', 'MM3.EXE'), 'rb').read()
     return _exe
 H = 3584; LOAD_END = 165568
 def segtable():
